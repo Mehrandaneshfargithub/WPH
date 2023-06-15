@@ -1,0 +1,253 @@
+﻿
+@model WPH.Models.CustomDataModels.Chart.ChartViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+<div class="row">
+
+    <div class="col-sm-12">
+        <div class="box-col">
+            <h4>Export chart</h4>
+            <button class='export-pdf k-button'>Save as PDF</button>
+        </div>
+        <div id="chart"></div>
+
+        <div style="margin-top:2rem">
+
+            @{
+                foreach (var choosenValue in Model.AllClinicSectionChoosenValues)
+                {
+                    <div>
+
+                        @(Html.Kendo().CheckBox()
+                               .Name(choosenValue.VariableNameForView)
+                               .Label(choosenValue.PatientVariableVariableName)
+                               .Checked(true)
+                               .HtmlAttributes(new
+                                       {
+                                           @class = "kendoChartCheckbox",
+                                           style = "font-size:5rem",
+                                           @data_type = "checkbox",
+                                           @data_name = choosenValue.PatientVariableVariableName,
+                                           onchange = "refreshChart()"
+                                       }))
+
+
+                    </div>
+
+                }
+            }
+
+        </div>
+
+    </div>
+
+
+
+
+</div>
+
+
+<script>
+
+
+
+    var Values;
+
+    var category = [];
+
+    function createChart() {
+
+
+
+
+
+
+        $("#chart").kendoChart({
+            //dataSource: {
+            //    data: internetUsers
+            //},
+            pdf: {
+                    fileName: $("#PatientName").text()
+                    //proxyURL: "https://demos.telerik.com/kendo-ui/service/export"
+                },
+            title: {
+                text: $("#PatientName").text()
+                //text: "Mehran daneshfar"
+            },
+            legend: {
+                visible: true,
+                position: "bottom"
+            },
+            seriesDefaults: {
+                type: "line",
+                //labels: {
+                //    visible: true,
+                //    format: "{0}",
+                //    background: "transparent"
+                //},
+                style: "smooth"
+            },
+            //series: [{
+            //    field: "value",
+            //    categoryField: "year",
+            //    name: "United States"
+            //},{
+            //    field: "value",
+            //    categoryField: "year",
+            //    name: "United States"
+            //}
+
+            //],
+            valueAxis: {
+                labels: {
+                    format: "{0}"
+                },
+                line: {
+                    visible: true
+                }
+            },
+            categoryAxis: {
+                categories: category
+            },
+            tooltip: {
+                visible: true,
+                format: "{0}",
+                //template: "#= category # \n #= value #"
+                template: "#= category #"
+            }
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+    $(document).ready(function () {
+
+
+        //let patientid = $("#ChartModal-body").attr("data-id");
+        //$.ajax({
+
+        //    url: '/Patient/GetAllPatientVariableValues',
+
+        //    type: "Post",
+
+        //    data: { patientId: patientid },
+
+        //    success: function (variableLists) {
+        //        Values = variableLists;
+        //        createChart();
+        //    }
+
+
+        //});
+
+
+
+         Values = @Html.Raw(Json.Serialize(@Model.AllValues));
+         category = @Html.Raw(Json.Serialize(@Model.Category));
+
+
+        createChart();
+        refreshChart();
+    })
+
+
+
+
+    function refreshChart() {
+
+
+
+
+
+
+        var chart = $("#chart").data("kendoChart");
+
+
+        var checkboxes = $(".kendoChartCheckbox:checked");
+        var checkedValues = [];
+
+
+        for (let i = 0; i < checkboxes.length; i++) {
+            checkedValues.push($(checkboxes[i]).attr('data-name'));
+        }
+
+
+        var chartOptions = chart.options;
+
+        chartOptions.series = [];
+        chartOptions.valueAxis = [];
+
+        //chart.setOptions({ categoryAxis: { categories: [0,1,2, 3, 4, 5] } });
+        //chartOptions.categoryAxis({ categories: [2, 3, 4, 5] });
+
+
+        //add series
+        //chartOptions.series.type = "line";
+        for (let i = 0; i < Values.length; i++) {
+
+            if (Values[i].length !== 0) {
+                let na = Values[i][0].Name;
+
+                if (checkedValues.find(e => e === na)) {
+
+                    var chartValue = [];
+
+                    for (let j = 0; j < Values[i].length; j++) {
+
+                        chartValue.push(Values[i][j].Value);
+
+                    }
+
+                    //chartOptions.series.push({name: Values[i][0].Name, type: "line", data: Values[i], field: "Value", categoryField: "Date"});
+                    let randomColor = "#"+ Math.floor(Math.random()*16777215).toString(16);
+                    chartOptions.series.push({ name: Values[i][0].Name, type: "line", data: chartValue, axis: Values[i][0].Name, color: randomColor, labels: { visible: true, template: "#: value #"+Values[i][0].Unit }});
+                    //let color = chartOptions.series[i].color;
+                    chartOptions.valueAxis.push({ name: Values[i][0].Name, min:0, max: Math.max(...chartValue) + 5 , color: randomColor, labels: { format: "{0}"+Values[i][0].Unit} });
+                }
+            }
+
+
+
+            //chartOptions.series[i].field = "Value";
+            //chartOptions.series[i].categoryField = "Year";
+            //chartOptions.series[i].name = Values[i][0].Name;
+
+
+        }
+
+
+
+
+        //chartOptions.series.push({});
+        //....
+
+        //add data to particular series
+        //chartOptions.series[3].data = [//....]
+        //....
+
+        //recreate the chart
+        chart.refresh();
+
+
+    }
+
+
+
+    $(".export-pdf").click(function () {
+            $("#chart").getKendoChart().saveAsPDF();
+        });
+
+
+
+</script>

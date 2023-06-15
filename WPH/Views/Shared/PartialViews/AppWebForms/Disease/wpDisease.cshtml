@@ -1,0 +1,239 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newDiseaseText" class="hidden">@Localizer["New"] @Localizer["Disease"]</h3>
+        <h3 id="editDiseaseText" class="hidden">@Localizer["Edit"] @Localizer["Disease"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newDiseaseText" class="hidden">@Localizer["Disease"] @Localizer["New"]</h3>
+        <h3 id="editDiseaseText" class="hidden">@Localizer["Edit"] @Localizer["Disease"]</h3>
+    }
+
+}
+
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Diseases"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewDisease)
+    {
+        <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddDisease(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+</div><!-- /.page-header -->
+
+<br />
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Disease/dgDiseaseGrid.cshtml")
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+
+<div id="AddDiseaseModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddDiseaseModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddDiseaseModal-header" class="smaller lighter blue no-margin MyFont-Roboto-grid"></h3>
+            </div>
+
+            <div id="AddDiseaseModal-body" class="modal-body" style="width:60rem">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addDisease-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewDisease()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-addDisease-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddDiseaseModal()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<script>
+
+    function AddDisease(element) {
+
+        $('#AddDiseaseModal #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#AddDiseaseModal #ERROR_Data').addClass('hidden');
+        $('#Name-Exist').addClass('hidden');
+
+        var link = "/Disease/AddNewModal";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newDiseaseText").text();
+
+        $('#AddDiseaseModal-header').text(header);
+        $('#AddDiseaseModal').modal('toggle');
+        $('#AddDiseaseModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditDisease(element) {
+
+        $('#AddDiseaseModal #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#AddDiseaseModal #ERROR_Data').addClass('hidden');
+        $('#Name-Exist').addClass('hidden');
+
+        $('#AddDiseaseModal').modal('toggle');
+        let header = $("#editDiseaseText").text();
+        $('#AddDiseaseModal-header').text(header);
+        var link = $("#GridEditLink").attr("data-Value");
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddDiseaseModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+            kendo.ui.progress($("#window"), true);
+        });
+
+    }
+
+    function addNewDisease() {
+
+        $('#AddDiseaseModal #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#AddDiseaseModal #ERROR_Data').addClass('hidden');
+        $('#Name-Exist').addClass('hidden');
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var Medicines = [];
+        var medicinesItemList = $('#allMedsForDisease').data('kendoListBox').dataItems();
+        for (var i = 0; i < medicinesItemList.length; i++) {
+            Medicines.push(medicinesItemList[i]["Guid"]);
+        }
+
+
+        var Symptoms = [];
+        var symptomsItemList = $('#allSymptomsForDisease').data('kendoListBox').dataItems();
+        for (var i = 0; i < symptomsItemList.length; i++) {
+            Symptoms.push(symptomsItemList[i]["Guid"]);
+        }
+
+        var link = "/Disease/AddOrUpdate";
+        //var GridRefreshLink = "/Disease/RefreshGrid"
+        //var data = $("#addNewDiseaseForm").serialize();
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        var data = {
+            __RequestVerificationToken: token.attr('value'),
+            Guid: $("#Guid").val(),
+            Name: $("#Name").val(),
+            NameHolder: $("#NameHolder").val(),
+            Explanation: $("#Explanation").val(),
+            DiseaseTypeId: $("#DiseaseTypeId").val(),
+            AllMedsForDisease: Medicines,
+            AllSymptomsForDisease: Symptoms
+        };
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddDiseaseModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddDiseaseModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddDiseaseModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $(".k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $('#AddDiseaseModal #ERROR_SomeThingWentWrong').removeClass('hidden');
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    }
+
+    function closeAddDiseaseModal() {
+
+        $('#AddDiseaseModal').modal('hide');
+        $('#AddDiseaseModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+</script>

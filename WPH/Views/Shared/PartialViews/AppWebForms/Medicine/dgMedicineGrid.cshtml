@@ -1,0 +1,200 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+
+    string edit_title = Localizer["EditMedicine"];
+    string remove_title = Localizer["RemoveMedicine"];
+    string up_title = Localizer["IncreasePriority"];
+    string down_title = Localizer["DecreasePriority"];
+}
+
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.CustomDataModels.Medicine.MedicineViewModel>()
+    .Name("kendoMedicineGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeleteMedicine)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                     </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditMedicine)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn' onClick='EditMedicine(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn' onClick='GridMedicineUpPriorityFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{up_title}' data-original-title='Up'>
+                    <span class='blue'>
+                        <i class='ace-icon fa fa-arrow-up bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn' onClick='GridMedicineDownPriorityFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{down_title}' data-original-title='Down'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-arrow-down bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound(x => x.MedNum).Title(Localizer["Number"] + " " + Localizer["Medicine"]).Format("{0:N0}").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.MedicineFormName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["MedicineForm"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.MedicineFormId).Hidden();
+            columns.Bound(x => x.ProducerName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Producer"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ProducerId).Hidden();
+            columns.Bound(x => x.Description).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Desc"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ScientificName).Width(250).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["ScientificName"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.JoineryName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(350).Title(Localizer["JoineryName"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Code).Filterable(ftb => ftb.Cell(y => y.ShowOperators(false))).Title(Localizer["Code"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(40);
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(40);
+            columns.Bound(x => x.ClinicSectionid).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.ClinicSectionid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(40);
+            columns.Bound(x => x.Code).Filterable(ftb => ftb.Cell(y => y.ShowOperators(false))).Title(Localizer["Code"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(40);
+            columns.Bound(x => x.JoineryName).Width(350).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["JoineryName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ScientificName).Width(250).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["ScientificName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Description).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Desc"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ProducerId).Hidden();
+            columns.Bound(x => x.ProducerName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Producer"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.MedicineFormId).Hidden();
+            columns.Bound(x => x.MedicineFormName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["MedicineForm"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.MedNum).Title(Localizer["Medicine"] + " " + Localizer["Number"]).Format("{0:N0}").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn' onClick='GridMedicineDownPriorityFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{down_title}' data-original-title='Down'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-arrow-down bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn' onClick='GridMedicineUpPriorityFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{up_title}' data-original-title='Up'>
+                    <span class='blue'>
+                        <i class='ace-icon fa fa-arrow-up bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            if ((bool)ViewBag.AccessEditMedicine)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn' onClick='EditMedicine(this)' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeleteMedicine)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+        }
+
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAll", "Medicine"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;font-size:1.3rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+@{
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        <h3 id="editMedicineText" class="hidden">@Localizer["Edit"] @Localizer["Medicine"]</h3>
+    }
+    else
+    {
+        <h3 id="editMedicineText" class="hidden">@Localizer["Medicine"] @Localizer["Edit"]</h3>
+    }
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#kendoMedicineGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoMedicineGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+
+    function EditMedicine(element) {
+
+
+        $('#AddMedicineModal').modal('toggle');
+        let header = $('#editMedicineText').text();
+        $('#AddMedicineModal-header').text(header);
+        var link = $("#GridEditLink").attr("data-Value");
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddMedicineModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+
+</script>

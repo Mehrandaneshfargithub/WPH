@@ -1,0 +1,151 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        dir = " ";
+        <h3 id="newPurchaseInvoiceText" class="hidden">@Localizer["New"] @Localizer["PurchaseInvoices"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        dir = " direction:rtl; ";
+        <h3 id="newPurchaseInvoiceText" class="hidden">@Localizer["PurchaseInvoices"] @Localizer["New"]</h3>
+    }
+    <h3 id="editPurchaseInvoiceText" class="hidden">@Localizer["Edit"] @Localizer["PurchaseInvoices"]</h3>
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["AnalysisResult"]
+        </h1>
+
+    </div>
+
+</div><!-- /.page-header -->
+
+<h3 id="patientId" class="hidden"></h3>
+
+<div style="overflow:hidden">
+
+    <div class="col-sm-12 MyFont-Roboto-grid" style="@dir">
+
+        <div class="col-sm-3">
+            <label class="block clearfix">
+                <span class="red fa fa-asterisk smaller-60 redStar"></span>
+                <label id="PatientNameLabel" class="@font" style="font-size: 1.5rem" for="form-field-8">@Localizer["PatientName"]</label>
+                <span class="block input-icon input-icon-right">
+
+                    <script>
+
+                        function OnPatientSelectInEmergencyReception(e) {
+
+                            var DataItem = this.dataItem(e.item.index()); 
+                            $("#patientId").text(DataItem.Guid);
+                            $(".k-pager-refresh")[0].click();
+                        }
+
+                        function GetPatientId() {
+
+                            let id = $("#patientId").text();
+                            if (id !== null || id !== "") {
+                                return {
+                                    PatientId: id
+                                }
+                            }
+
+                        }
+
+                    </script>
+
+                    <input id="Name2" style="width:100%;margin:0" data_checkEmpty="Name2-box" class="boldText" />
+
+                </span>
+
+            </label>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Patient/dgPatientAnalysisResult.cshtml")
+</div>
+
+
+<script>
+
+    var patient_list = [];
+
+    $(document).ready(function () {
+
+        GetAllPatients().done(function (data) {
+            patient_list = data;
+        });
+    });
+
+    nameAuto = $("#Name2").kendoAutoComplete({
+        dataTextField: "Name",
+        filter: "contains",
+        clearButton: false,
+        select: OnPatientSelectInEmergencyReception,
+        
+    }).data("kendoAutoComplete");
+
+    //$("#Name2").on('focus', function (e) {
+    //    $("#Name2-box").addClass('hidden');
+    //    let value = nameAuto.value();
+    //    nameAuto.search(value);
+    //});
+
+    function GetAllPatients() {
+        return $.ajax({
+            type: "Get",
+            url: "/Reception/GetAllReceptionClinicSectionPatients",
+        });
+    }
+
+
+    $('#Name2').on('input', function () {
+        var txt = $("#Name2").val();
+
+        var filter_list = FilterPatientLists(patient_list, txt);
+
+        $("#Name2").data("kendoAutoComplete").dataSource.data(filter_list);
+
+    });
+
+    function draw2(imgData) {
+
+        "use strict";
+        var dataUrl = [];
+        for (let index = 0; index < imgData.allb.length; index++) {
+
+            var img = new Image();
+            img.src = "data:image/jpeg;base64," + imgData.allb[index];
+            dataUrl.push(img.src)
+
+
+        }
+        printJS({ printable: dataUrl, type: 'image' });
+
+        //printJS({ printable: imgData.allb[0], type: 'pdf', base64: true });
+
+    }
+
+    
+
+</script>

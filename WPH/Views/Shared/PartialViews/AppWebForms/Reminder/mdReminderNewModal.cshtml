@@ -1,0 +1,86 @@
+﻿@model WPH.Models.Reminder.ReminderViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewReminderForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Explanation"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().TextArea()
+                                    .Name("Explanation")
+                                    .Value(Model.Explanation)
+                                    .Rows(3)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Exp-box" })
+                                    )
+
+                        </span>
+                        <span id="Exp-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["ReminderDate"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DatePicker()
+                                    .Name("TxtReminderDate")
+                                    .Value(Model.ReminderDate ?? DateTime.Now)
+                                    .Format("dd/MM/yyyy")
+                                    .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Date-box" })
+                                    )
+                        </span>
+                        <span id="Date-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+
+                        <span id="Date-valid" class="emptybox hidden" style="color:red;">
+                            @Localizer["DateNotValid"]
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+
+        //setTimeout(function () {
+        //    $("#Name").focus();
+        //}, 200);
+
+    });
+
+
+    //$('#Name').focus(function () {
+    //    $("#Name-Exist").addClass('hidden');
+    //    $("#Name-box").addClass('hidden');
+    //    $("#Name").select();
+    //});
+
+    //$('#Name').on('keypress', function (e) {
+
+    //    if (e.which === 13) {
+    //        $('#ReminderTypeName').data("kendoAutoComplete").focus();
+    //    }
+    //});
+
+
+
+   
+</script>

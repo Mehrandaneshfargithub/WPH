@@ -1,0 +1,55 @@
+﻿@model WPH.Models.CustomDataModels.PatientMedicine.PatientMedicineRecordViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm" autocomplete="off">
+                <fieldset>
+                    @Html.HiddenFor(m => m.Patient.Guid, new { @id = "PatientIdForMedicine" })
+                    <label class="block clearfix">
+                        <span class="red">*</span><label for="form-field-8">@Localizer["PatientName"]: </label>
+                        @(Html.Kendo().TextBox()
+                        .Name("patient.Name")
+                        .Value(Model.Patient.Name)
+                        .Readonly(true)
+                        .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                        )
+
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label style="width:49%;" for="form-field-8">
+                            @Localizer["Age"] :
+                            @(Html.Kendo().TextBox()
+                                .Name("patient.Age")
+                                .Value(Model.Patient.Age.ToString())
+                                .Readonly(true)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </label>
+                        <label style="width:50%;" for="form-field-8">
+                            @Localizer["Gender"] :
+                            @(Html.Kendo().TextBox()
+                                .Name("patient.UserGenderName")
+                                .Value(Model.Patient.UserGenderName)
+                                .Readonly(true)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </label>
+                    </label>
+                    <div id="RefreshPatientMedicines" class="col-xs-12">
+                        @await Html.PartialAsync("/Views/Shared/PartialViews/AppWebForms/Patient/RefreshPatientDualListMedicineRecord.cshtml", Model)
+                    </div>
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+

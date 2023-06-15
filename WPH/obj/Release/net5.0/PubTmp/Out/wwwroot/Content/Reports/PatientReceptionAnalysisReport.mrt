@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="2">
+      <Visit Ref="2" type="Stimulsoft.Report.Dictionary.StiBusinessObject" isKey="true">
+        <Alias>Visit</Alias>
+        <BusinessObjects isList="true" count="0" />
+        <Category />
+        <Columns isList="true" count="2">
+          <value>VisitNum,System.Int32</value>
+          <value>UniqueVisitNum,System.String</value>
+        </Columns>
+        <Dictionary isRef="1" />
+        <Guid>5cd98a5454624852bda11e50c48a5fde</Guid>
+        <Name>Visit</Name>
+      </Visit>
+      <PrescriptionDetail Ref="3" type="Stimulsoft.Report.Dictionary.StiBusinessObject" isKey="true">
+        <Alias>PrescriptionDetail</Alias>
+        <BusinessObjects isList="true" count="0" />
+        <Category />
+        <Columns isList="true" count="2">
+          <value>TestName,System.String</value>
+          <value>Explanation,System.String</value>
+        </Columns>
+        <Dictionary isRef="1" />
+        <Guid>b4e54ec0d0474ba6b29c589c4a18a8c0</Guid>
+        <Name>PrescriptionDetail</Name>
+      </PrescriptionDetail>
+    </BusinessObjects>
+    <Databases isList="true" count="0" />
+    <DataSources isList="true" count="0" />
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Variables isList="true" count="25">
+      <value>,LogoImage,LogoImage,System.String,E:_x005C_Projects_New_Srver_x005C_DMS_x005C_DMS_x005C_bin_x005C_x86_x005C_Debug_x005C_Images_x005C_LogoImage.jpg,False,False,True</value>
+      <value>,vMedicineName,vMedicineName,System.String,اسم_x0020_المادة,False,False,True</value>
+      <value>,vNum,vNum,System.String,الكمية,False,False,True</value>
+      <value>,vToday,vToday,System.String,_x0030_1_x002F_02_x002F_2020_x0020_:التاریخ,False,False,True</value>
+      <value>,vPage,vPage,System.String,صفحة,False,False,True</value>
+      <value>,vFrom,vFrom,System.String,من,False,False,True</value>
+      <value>,vTitle,vTitle,System.String,,False,False,True</value>
+      <value>,vUniqueVisitnum,vUniqueVisitnum,System.String,,False,False,True</value>
+      <value>,vVisitNum,vVisitNum,System.String,,False,False,True</value>
+      <value>,vConsumptionInstruction,vConsumptionInstruction,System.String,,False,False,True</value>
+      <value>,vExplanation,vExplanation,System.String,,False,False,True</value>
+      <value>,VisitDate,VisitDate,System.String,,False,False,True</value>
+      <value>,UniqueVisitNum,UniqueVisitNum,System.String,,False,False,True</value>
+      <value>,vVisitDate,vVisitDate,System.String,,False,False,True</value>
+      <value>,vItem,vItem,System.String,,False,False,True</value>
+      <value>,vPatientName,vPatientName,System.String,,False,False,True</value>
+      <value>,PatientName,PatientName,System.String,,False,False,True</value>
+      <value>,ReceptionDate,ReceptionDate,System.String,,False,False</value>
+      <value>,DoctorName,DoctorName,System.String,,False,False</value>
+      <value>,PhoneNumber,PhoneNumber,System.String,,False,False</value>
+      <value>,Barcode,Barcode,System.String,,False,False</value>
+      <value>,TotalAmount,TotalAmount,System.String,,False,False</value>
+      <value>,Barcode1,Barcode1,System.Drawing.Image,,False,False</value>
+      <value>,InvoiceNum,InvoiceNum,System.String,,False,False</value>
+      <value>,Description,Description,System.String,,False,False</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="4" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="14">
+        <PageHeaderBand1 Ref="5" type="PageHeaderBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,0.4,8,2.6</ClientRectangle>
+          <Components isList="true" count="1">
+            <Image1 Ref="6" type="Image" isKey="true">
+              <Brush>White</Brush>
+              <ClientRectangle>0.4,0.2,7.2,2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <ImageData>{Barcode1}</ImageData>
+              <Name>Image1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+            </Image1>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Guid>9296a1735ff14d5fa79083f87eddffa5</Guid>
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <PrintOn>OnlyFirstPage</PrintOn>
+        </PageHeaderBand1>
+        <Image2 Ref="7" type="Image" isKey="true">
+          <AspectRatio>True</AspectRatio>
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.03,27.82,1.2,0.4</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <GrowToHeight>True</GrowToHeight>
+          <Name>Image2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Stretch>True</Stretch>
+        </Image2>
+        <Text6 Ref="8" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>4,5.4,3.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text6</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{DoctorName}</Text>
+          <TextBrush>Black</TextBrush>
+        </Text6>
+        <Text7 Ref="9" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>0.4,5.4,3.2,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text7</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Doctor Name :</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text7>
+        <Text1 Ref="10" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>4,6.4,3.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vPatientName}</Text>
+          <TextBrush>Black</TextBrush>
+        </Text1>
+        <Text2 Ref="11" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>0.4,6.4,3.2,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Patient Name :</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text2>
+        <Text3 Ref="12" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>4,7.4,3.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text3</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{PhoneNumber}</Text>
+          <TextBrush>Black</TextBrush>
+        </Text3>
+        <Text8 Ref="13" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>0.4,7.4,3.2,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text8</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Phone Number :</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text8>
+        <Text5 Ref="14" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>0.4,4.4,3.2,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text5</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Reception Date:</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text5>
+        <Text4 Ref="15" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>4,4.4,3.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text4</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{ReceptionDate}</Text>
+          <TextBrush>Black</TextBrush>
+        </Text4>
+        <Text9 Ref="16" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>4,3.4,3.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text9</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{InvoiceNum}</Text>
+          <TextBrush>Black</TextBrush>
+        </Text9>
+        <Text10 Ref="17" type="Text" isKey="true">
+          <Brush>White</Brush>
+          <ClientRectangle>0.4,3.4,3.2,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,12</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text10</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>InvoiceNum</Text>
+          <TextBrush>Black</TextBrush>
+        </Text10>
+        <Text11 Ref="18" type="Text" isKey="true">
+          <AutoWidth>True</AutoWidth>
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>0.4,8.4,1.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,11</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text11</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{Description}</Text>
+          <TextBrush>[31:73:125]</TextBrush>
+        </Text11>
+        <HorizontalLinePrimitive1 Ref="19" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0,8.2,8,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="20" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Name>HorizontalLinePrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="21" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive1>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Guid>b840e88d25e14c13ae6beffd7a24f5f9</Guid>
+      <Margins>0,0,0,0</Margins>
+      <Name>Page1</Name>
+      <PageHeight>10</PageHeight>
+      <PageWidth>8</PageWidth>
+      <PaperSize>A5</PaperSize>
+      <Report isRef="0" />
+      <Watermark Ref="22" type="Stimulsoft.Report.Components.StiWatermark" isKey="true">
+        <Font>Arial,100</Font>
+        <TextBrush>[50:0:0:0]</TextBrush>
+      </Watermark>
+    </Page1>
+  </Pages>
+  <PrinterSettings Ref="23" type="Stimulsoft.Report.Print.StiPrinterSettings" isKey="true" />
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>10/19/2021 11:15:55 AM</ReportChanged>
+  <ReportCreated>4/26/2015 1:33:27 PM</ReportCreated>
+  <ReportFile>C:\Users\kurdistan\Source\Workspaces\FPK.CMS\WAS\WAS\Content\Reports\PatientReceptionAnalysisReport.mrt</ReportFile>
+  <ReportGuid>be70a697ae5e411497618050f75c034e</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2013.2.1612</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

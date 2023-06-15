@@ -1,0 +1,146 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+
+    string edit_title = Localizer["EditSymptom"];
+    string remove_title = Localizer["RemoveSymptom"];
+}
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.CustomDataModels.Symptom.SymptomViewModel>()
+    .Name("kendoSymptomGrid")
+    .HtmlAttributes(new { ID = "idGridSymptomList", Class = "k-grid-header" })
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeleteSymptom)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditSymptom)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditSymptom(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound(x => x.Name).Width(1000).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["SymptomName"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(5).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(30);
+            columns.Bound(x => x.ClinicSectionId).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Id).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.ClinicSectionId).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(30);
+            columns.Bound(x => x.Name).Width(1000).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["SymptomName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            if ((bool)ViewBag.AccessEditSymptom)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditSymptom(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeleteSymptom)
+            {
+                columns.Bound("").Title(string.Empty).Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+        }
+
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAll", "Symptom"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+
+
+    )
+</div>
+
+@{
+
+    <h3 id="editSymptomText" class="hidden">@Localizer["Edit"] @Localizer["Symptom"]</h3>
+
+}
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#kendoSymptomGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoSymptomGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+
+    function EditSymptom(element) {
+
+
+        $('#my-modal-edit').modal('toggle');
+        let header = $("#editSymptomText").text();
+        $('#edit-modal-header').text(header);
+        var link = $("#GridEditLink").attr("data-Value");
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#edit-modal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+
+</script>

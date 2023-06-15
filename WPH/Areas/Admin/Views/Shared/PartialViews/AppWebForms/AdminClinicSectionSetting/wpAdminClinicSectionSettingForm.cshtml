@@ -1,0 +1,292 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+    }
+}
+
+@Html.AntiForgeryToken()
+
+<div class="row page-header ">
+    <div class="@pull ">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["ClinicSectionSetting"]
+        </h1>
+
+    </div>
+
+    <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+        <a class="btn btn-danger" onClick="AddAdminClinicSectionSetting(this)" href="#" style="padding:0.2rem">
+            @Localizer["New"]
+            <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+        </a>
+    </div>
+
+</div><!-- /.page-header -->
+
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Areas/Admin/Views/Shared/PartialViews/AppWebForms/AdminClinicSectionSetting/dgAdminClinicSectionSettingGrid.cshtml")
+</div>
+
+
+<div id="AdminClinicSectionSettingModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAdminClinicSectionSettingModal()" aria-hidden="true">&times;</button>
+                <h3 id="AdminClinicSectionSettingModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["ClinicSectionSetting"]
+                </h3>
+            </div>
+            <div id="AdminClinicSectionSettingModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-AdminClinicSectionSettingModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-AdminClinicSectionSettingModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeAdminClinicSectionSettingModal()" })
+                    .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="DeleteAdminClinicSectionSettingModal" class="modal fade MyFont-Roboto-grid" data-backdrop="static" data-keyboard="false" style="">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller MyFont-Roboto-grid'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteAdminClinicSectionSettingModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteAdminClinicSectionSettingModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteAdminClinicSectionSettingModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+
+    function AddAdminClinicSectionSetting(e) {
+        $("#AdminClinicSectionSettingModal #ERROR_Data").addClass("hidden");
+        $("#AdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#Mobile-wrong").addClass('hidden');
+
+        var link = "/Admin/AdminClinicSectionSetting/AddNewModal";
+
+        $(".loader").removeClass("hidden");
+        $('#AdminClinicSectionSettingModal').modal('toggle');
+        $('#AdminClinicSectionSettingModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function EditAdminClinicSectionSetting(element) {
+        $("#AdminClinicSectionSettingModal #ERROR_Data").addClass("hidden");
+        $("#AdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AdminClinicSectionSettingModal').modal('toggle');
+
+        var link = "/Admin/AdminClinicSectionSetting/EditModal/";
+        var Id = $(element).attr('data-id');
+
+        $(".loader").removeClass("hidden");
+        $('#AdminClinicSectionSettingModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function AdminClinicSectionSettingDeleteFunction(element) {
+        $("#DeleteAdminClinicSectionSettingModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteAdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteAdminClinicSectionSettingModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeleteAdminClinicSectionSettingModal-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-DeleteAdminClinicSectionSettingModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteAdminClinicSectionSettingModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteAdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/Admin/AdminClinicSectionSetting/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-DeleteAdminClinicSectionSettingModal-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteAdminClinicSectionSettingModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#adminClinicSectionSettingKendoGrid .k-pager-refresh")[0].click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteAdminClinicSectionSettingModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#DeleteAdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    $('#btn-AdminClinicSectionSettingModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AdminClinicSectionSettingModal #ERROR_Data").addClass("hidden");
+        $("#AdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() !== undefined) {
+                    let text = $('[data-checkEmpty="' + empty + '"]').val().replace(/ /g, '');
+                    if (text === "") {
+                        $(this).removeClass('hidden');
+                        $('#btn-AdminClinicSectionSettingModal-accept').removeAttr("disabled");
+                        isEmmpty = false;
+                        return;
+                    }
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var data = $("#addNewAdminClinicSectionSettingForm").serialize();
+        var link = "/Admin/AdminClinicSectionSetting/AddOrUpdate";
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-AdminClinicSectionSettingModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else if (response === "DataNotValid") {
+
+                        $("#AdminClinicSectionSettingModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AdminClinicSectionSettingModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AdminClinicSectionSettingModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#adminClinicSectionSettingKendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AdminClinicSectionSettingModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAdminClinicSectionSettingModal() {
+        $('#AdminClinicSectionSettingModal').modal('toggle');
+        $('#AdminClinicSectionSettingModal-body').empty();
+    }
+</script>

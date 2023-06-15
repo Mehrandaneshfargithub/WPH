@@ -1,0 +1,89 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.ReturnPurchaseInvoice.ReturnPurchaseInvoiceViewModel>()
+    .Name("payReturnInvoiceKendoGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+
+            columns.Bound(x => x.Description).Filterable(false).Title(Localizer["Description"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.TotalPrice).Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= ReturnPay_Databound(TotalPrice)#");
+
+            columns.Bound(x => x.InvoiceNum).Filterable(false).Title(Localizer["InvoiceNum"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InvoiceDateTxt).Filterable(false).Title(Localizer["InvoiceDate"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PayIds).Hidden();
+            columns.Bound(x => x.Guid).HtmlAttributes(new { @class = "ReturnPayInvoiceGrid", @data_id = "#=Guid#" }).Hidden();
+
+            columns.Select().HtmlAttributes(new { @class = "select_return_payInvoice", @data_price = "#=TotalPrice#", @data_id = "#=Guid#", @data_date = "#=InvoiceDateTxt#", @data_desctiption = "#=Description#", @data_invoice = "#=InvoiceNum#", @data_payids = "#=PayIds#" });
+
+        }
+        else
+        {
+
+            columns.Select().HtmlAttributes(new { @class = "select_return_payInvoice", @data_price = "#=TotalPrice#", @data_id = "#=Guid#", @data_date = "#=InvoiceDateTxt#", @data_desctiption = "#=Description#", @data_invoice = "#=InvoiceNum#", @data_payids = "#=PayIds#" });
+
+            columns.Bound(x => x.Guid).HtmlAttributes(new { @class = "ReturnPayInvoiceGrid", @data_id = "#=Guid#" }).Hidden();
+            columns.Bound(x => x.PayIds).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.InvoiceDateTxt).Filterable(false).Title(Localizer["InvoiceDate"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InvoiceNum).Filterable(false).Title(Localizer["InvoiceNum"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+            columns.Bound(x => x.TotalPrice).Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= ReturnPay_Databound(TotalPrice)#");
+            columns.Bound(x => x.Description).Filterable(false).Title(Localizer["Description"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+        }
+    })
+
+        //.DataSource(dataSource => dataSource
+        //.Ajax()
+        //.ServerOperation(false)
+        //.Model(model =>
+        //{
+        //    model.Id(p => p.Guid);
+        //})
+        //.PageSize(10)
+        //.Read(read => read.Action("GetAllSupplierAccount", "SupplierAccount").Data("GetSupplierId"))
+        //)
+        //.Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+
+    function ReturnPay_Databound(total) {
+        //var baseCurrencyId = $("#BaseCurrencyId").data("kendoDropDownList");
+        //let currency = baseCurrencyId.text();
+
+        let text = "";
+        if (total != null) {
+
+            let res = total.toString().split("_");
+            for (let i = 0; i < res.length; i++) {
+                //if (res[i].includes(currency)) {
+                //}
+                text += "<div style=''>" + res[i] + " </div>";
+            }
+        }
+        return text;
+    }
+
+    $(document).ready(function () {
+
+    })
+
+</script>

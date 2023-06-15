@@ -1,0 +1,197 @@
+﻿@model WPH.Models.CustomDataModels.Disease.DiseaseViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string width = "", k_direction = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        width = " width:107%; ";
+        k_direction = " ";
+        direction = " ";
+    }
+    else
+    {
+        width = " width:115%; ";
+        k_direction = " k-rtl ";
+        direction = " direction:rtl; ";
+    }
+
+}
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewDiseaseForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.Guid)
+                    @Html.HiddenFor(x => x.NameHolder)
+                    @Html.HiddenFor(x => x.ClinicSectionId)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Explanation"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Explanation")
+                                .Value(Model.Explanation)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+
+                        </span>
+                        <span id="Explanation-box" class="emptybox hidden" data-isEssential="false" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["DiseaseType"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("DiseaseTypeId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  //.Filter("contains")
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllDiseaseTypes", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+
+                        </span>
+                        <span id="Producer-box" class="emptybox hidden" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <div id="window"></div>
+
+                    <div class="hr hr-16 hr-dotted"></div>
+
+                    <div class="listbox-kendo hidden" role="application">
+                        <div class="k-content wide @k_direction">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label for="optional">@Localizer["AllMedicines"]</label>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="selected">@Localizer["MedicinesForDisease"]</label>
+                                </div>
+                                <br />
+                                <div class="col-sm-6">
+                                    <div class="k-widget k-header" style="width:93%;"><input id="search" autocomplete="off" style="width:100%;" class="k-textbox" /></div>
+                                    <select id="allMeds" class="listbox-kendo-all-items" style="@width"></select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="k-widget k-header" style="width:100%;"><input id="searchallMedsForDisease" autocomplete="off" style="width:100%;" class="k-textbox" /></div>
+                                    <select id="allMedsForDisease" style="width:100%;"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        @if ((bool)ViewBag.AccessNewMedicine)
+                        {
+                            @(Html.Kendo().Button()
+                            .Name("btn-AddMed")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "AddMedicine()" })
+                            .Content(Localizer["NewMedicine"]))
+                        }
+
+                    </div>
+
+                    <div class="space-24"></div>
+
+                    <div class="hr hr-16 hr-dotted"></div>
+                    <div class="listbox-kendo hidden" role="application">
+                        <div class="k-content wide @k_direction">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label for="optional">@Localizer["AllSymptoms"]</label>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="selected">@Localizer["SymptomsForDisease"]</label>
+                                </div>
+                                <br />
+                                <div class="col-sm-6">
+                                    <div class="k-widget k-header" style="width:93%;"><input id="searchSymptoms" autocomplete="off" style="width:100%;" class="k-textbox" /></div>
+                                    <select id="allSymptoms" class="listbox-kendo-all-items" style="@width"></select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="k-widget k-header" style="width:100%;"><input id="searchAllSymptomsForDisease" autocomplete="off" style="width:100%;" class="k-textbox" /></div>
+                                    <select id="allSymptomsForDisease" style="width:100%;"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div id="AddMedicineModal" class="modal fade" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="addMedicineHide()" aria-hidden="true">&times;</button>
+                <h3 id="modalform-header" class="smaller lighter blue no-margin"></h3>
+                <h4 class="modal-title" id="myModalLabel">@Localizer["NewMedicine"]</h4>
+            </div>
+
+            <div id="AddMedicineModal-body" class="modal-body">
+
+            </div>
+
+            <div id="ERROR_MedicineWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addMedicine-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewMedicine()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-addMedicine-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "addMedicineHide()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Content/js/DiseaseNewModal.js"></script>
+
+
+

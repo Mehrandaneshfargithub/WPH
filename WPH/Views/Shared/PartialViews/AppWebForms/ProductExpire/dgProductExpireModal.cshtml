@@ -1,0 +1,128 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string select_title = Localizer["SelectProduct"];
+}
+
+
+<div>
+    <h1 id="ExpireProductId" class="hidden">@Model</h1>
+    @(Html.Kendo().Grid<WPH.Models.Product.ProductWithExpireViewModel>()
+    .Name("productExpireKendoGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-error grid-btn edit' onClick='SelectExpire(this);' data-id='#=Guid#' data-type='#=SaleType#'   data-rel='tooltip' title='{select_title}' data-original-title='select'>
+                    <span class='green'>
+                        <i class='ace-icon fa fa-check-square bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            //columns.Bound(x => x.PurchaseDate).Format("{0: dd/MM/yyyy}").Title(Localizer["PurchaseDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Stock).Format("{0:N0}").Title(Localizer["Number"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ExpireDate).Format("{0: dd/MM/yyyy}").Title(Localizer["ExpireDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.SaleType).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Guid).Hidden();
+
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.SaleType).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ExpireDate).Format("{0: dd/MM/yyyy}").Title(Localizer["ExpireDate"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Stock).Format("{0:N0}").Title(Localizer["Number"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            //columns.Bound(x => x.PurchaseDate).Format("{0: dd/MM/yyyy}").Title(Localizer["PurchaseDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-error grid-btn edit' onClick='SelectExpire(this);' data-id='#=Guid#' data-type='#=SaleType#' data-rel='tooltip' title='{select_title}' data-original-title='select'>
+                    <span class='green'>
+                        <i class='ace-icon fa fa-check-square bigger-120'></i>
+                    </span>
+                </a>
+            ");
+        }
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(true)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+            .PageSize(10)
+            .Read(read => read.Action("GetAllProductExpireList", "Product", new { Id = Model }))
+        )
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#productKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#productKendoGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+    function SelectExpire(element) {
+        let saleTypeText = $("#SalePriceTypeId").data("kendoDropDownList").dataItem();
+
+        let saleType = saleTypeText.Name;
+        //let saleType = $("#SalePriceTypeId").data("kendoDropDownList").text();
+
+        let Guid = $(element).attr('data-id');
+        let type = $(element).attr('data-type');
+        let productId = $("#ExpireProductId").text();
+        let latsetPrice = $("#LatestSellingPrice").is(":checked");
+
+        $.ajax({
+            data: { InvoiceId: Guid, InvoiceType: type, SaleType: saleType, ProductId: productId, LatestPrice: latsetPrice },
+            url: "/Product/GetProductDetailsFromExpireList",
+            /**/
+            success: function (response) {
+                /**/
+                if (response != 0) {
+                    SetProductDetails(response, productId);
+                    
+                    $('#ExpireListModal').modal('toggle');
+                    $('#ExpireListModal-body').empty();
+                    const freeNumChild = $("#SaleInvoiceDetailKendoGrid tr:eq(1) td[data-field='Num']");
+                    const freeNumIndex = $(freeNumChild).parent().children().index(freeNumChild);
+                    let grid = $("#SaleInvoiceDetailKendoGrid").data("kendoGrid");
+
+                    grid.editCell($("#SaleInvoiceDetailKendoGrid tr:eq(1) td:eq(" + freeNumIndex + ")"));
+                }
+                else {
+                    $("#ProductStock-box").removeClass("hidden");
+                }
+            }
+        });
+
+    }
+
+</script>

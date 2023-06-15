@@ -1,0 +1,205 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        <h3 id="newPatientVariableText" class="hidden">@Localizer["New"] @Localizer["PatientVariable"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        <h3 id="newPatientVariableText" class="hidden">@Localizer["PatientVariable"] @Localizer["New"]</h3>
+    }
+    <h3 id="editPatientVariableText" class="hidden">@Localizer["Edit"] @Localizer["PatientVariable"]</h3>
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["PatientVariable"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewPatientVariable)
+    {
+        <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddPatientVariable(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+</div><!-- /.page-header -->
+
+
+<div id="AddPatientVariableModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+            @:direction:rtl
+                }">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddPatientVariableModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddPatientVariableModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddPatientVariableModal-body" class="modal-body" style="width:60rem">
+            </div>
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addPatientVariable-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewPatientVariable()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addPatientVariable-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddPatientVariableModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/PatientVariable/dgPatientVariableGrid.cshtml")
+</div>
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+<script>
+
+    function AddPatientVariable(element) {
+        $("#AddPatientVariableModal #ERROR_Data").addClass("hidden");
+        $("#AddPatientVariableModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/PatientVariable/AddAndNewModal";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newPatientVariableText").text();
+
+        $('#AddPatientVariableModal-header').text(header);
+        $('#AddPatientVariableModal').modal('toggle');
+        $('#AddPatientVariableModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditPatientVariable(element) {
+        $("#AddPatientVariableModal #ERROR_Data").addClass("hidden");
+        $("#AddPatientVariableModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddPatientVariableModal').modal('toggle');
+        let header = $("#editPatientVariableText").text();
+        $('#AddPatientVariableModal-header').text(header);
+        var link = "/PatientVariable/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddPatientVariableModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+
+    }
+
+
+    function addNewPatientVariable() {
+        $("#AddPatientVariableModal #ERROR_Data").addClass("hidden");
+        $("#AddPatientVariableModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        var link = "/PatientVariable/AddOrUpdate";
+
+        var data = $("#addNewPatientVariableForm").serialize();
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddPatientVariableModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddPatientVariableModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddPatientVariableModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $(".k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AddPatientVariableModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    }
+
+    function closeAddPatientVariableModal() {
+
+        $('#AddPatientVariableModal').modal('hide');
+        $('#AddPatientVariableModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+</script>

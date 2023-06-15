@@ -1,0 +1,1817 @@
+﻿@model WPH.Models.PurchaseInvoiceDetail.EditPurchaseInvoiceDetailViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", pull_rev = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " direction:rtl; ";
+    }
+
+}
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.Guid, new { id = "DetailGuid" })
+@Html.HiddenFor(m => m.DiscountTxt)
+@Html.HiddenFor(a => a.NumTxt)
+@Html.HiddenFor(a => a.PurchasePriceTxt)
+@Html.HiddenFor(a => a.SellingPriceTxt)
+@Html.HiddenFor(a => a.FreeNumTxt)
+@Html.HiddenFor(a => a.WholeSellPriceTxt)
+@Html.HiddenFor(a => a.MiddleSellPriceTxt)
+@Html.HiddenFor(a => a.WholePurchasePriceTxt)
+
+
+
+<input type="hidden" id="ModelCurrencyId" value="@Model.CurrencyId" />
+
+
+<div class="row @font" style="@dir">
+
+    @*<div class="@pull col-sm-12 " style=" margin-bottom: 20px; height: 200px; overflow: auto;border-radius: 0px;">*@
+
+    <script>
+
+        function GetProductId() {
+            return {
+                productId: $("#ProductId").val()
+            }
+        }
+
+        function ProductIdChange(e) {
+
+            $("#purchaseHistoryKendoGrid .k-pager-refresh")[0].click();
+        }
+
+    </script>
+
+
+    <div class="col-sm-12 Grid-Content shadow-border @font" style="margin-bottom:2rem">
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/PurchaseInvoiceDetail/dgPurchaseInvoiceDetailHistoryGrid.cshtml")
+    </div>
+    @*</div>*@
+
+    <script>
+
+        function FilterProductItems(e) {
+            e.preventDefault();
+
+            var txt = e.filter.value;
+            var filter_list = FilterProductLists(product_list, txt);
+
+            $("#ProductId").data("kendoDropDownList").dataSource.data(filter_list);
+        }
+
+        function ResetSellingCurrency() {
+            $("#SellingBaseAmount").val(1);
+            $("#SellingDestAmount").val(1);
+
+            var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+            var dest_currency = $("#SellingCurrencyId").data("kendoDropDownList").text();
+
+            $("#lblSellingBaseAmount").text(base_currency);
+            $("#lblSellingDestAmount").text(dest_currency);
+
+            var moneyConvert = $("#SellingFactorId").data("kendoDropDownList");
+            moneyConvert.dataSource.data('');
+            moneyConvert.value('');
+
+            $("#SellAmountContainer").addClass("hidden");
+
+            SetProfit();
+        }
+
+        function ResetWholeSellCurrency() {
+            $("#WholeSellBaseAmount").val(1);
+            $("#WholeSellDestAmount").val(1);
+
+            var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+            var dest_currency = $("#WholeSellCurrencyId").data("kendoDropDownList").text();
+
+            $("#lblWholeSellBaseAmount").text(base_currency);
+            $("#lblWholeSellDestAmount").text(dest_currency);
+
+            var moneyConvert = $("#WholeSellFactorId").data("kendoDropDownList");
+            moneyConvert.dataSource.data('');
+            moneyConvert.value('');
+
+            $("#WholeSellAmountContainer").addClass("hidden");
+
+            SetWholeSellProfit();
+        }
+
+        function ResetMiddleSellCurrency() {
+            $("#MiddleSellBaseAmount").val(1);
+            $("#MiddleSellDestAmount").val(1);
+
+            var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+            var dest_currency = $("#MiddleSellCurrencyId").data("kendoDropDownList").text();
+
+            $("#lblMiddleSellBaseAmount").text(base_currency);
+            $("#lblMiddleSellDestAmount").text(dest_currency);
+
+            var moneyConvert = $("#MiddleSellFactorId").data("kendoDropDownList");
+            moneyConvert.dataSource.data('');
+            moneyConvert.value('');
+
+            $("#MiddleSellAmountContainer").addClass("hidden");
+
+            SetMiddleSellProfit();
+        }
+
+        function CurrencyIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+
+            var sellingCurrencyId = $("#SellingCurrencyId").data("kendoDropDownList");
+            sellingCurrencyId.value(dataItem.Id);
+            ResetSellingCurrency();
+
+            var wholeSellCurrencyId = $("#WholeSellCurrencyId").data("kendoDropDownList");
+            wholeSellCurrencyId.value(dataItem.Id);
+            ResetWholeSellCurrency();
+
+
+            var middleSellCurrencyId = $("#MiddleSellCurrencyId").data("kendoDropDownList");
+            middleSellCurrencyId.value(dataItem.Id);
+            ResetMiddleSellCurrency();
+        }
+
+        function SellingCurrencyIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+            var currency = $("#CurrencyId").val();
+            if (dataItem.Id == currency) {
+                ResetSellingCurrency();
+            } else {
+
+                $(".loader").removeClass("hidden");
+                $.ajax({
+                    type: "Get",
+                    url: "/MoneyConvert/GetLatestMoneyConverts",
+                    data: {
+                        baseCurrencyId: currency,
+                        destCurrencyId: dataItem.Id
+                    },
+                    success: function (response) {
+
+                        var moneyConvert = $("#SellingFactorId").data("kendoDropDownList");
+                        moneyConvert.dataSource.data(response);
+                        moneyConvert.value('');
+                        moneyConvert.trigger("change");
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    }
+                });
+            }
+        }
+
+        function WholeSellCurrencyIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+            var currency = $("#CurrencyId").val();
+            if (dataItem.Id == currency) {
+                ResetWholeSellCurrency();
+            } else {
+
+                $(".loader").removeClass("hidden");
+                $.ajax({
+                    type: "Get",
+                    url: "/MoneyConvert/GetLatestMoneyConverts",
+                    data: {
+                        baseCurrencyId: currency,
+                        destCurrencyId: dataItem.Id
+                    },
+                    success: function (response) {
+
+                        var moneyConvert = $("#WholeSellFactorId").data("kendoDropDownList");
+                        moneyConvert.dataSource.data(response);
+                        moneyConvert.value('');
+                        moneyConvert.trigger("change");
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    }
+                });
+            }
+        }
+
+        function MiddleSellCurrencyIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+            var currency = $("#CurrencyId").val();
+            if (dataItem.Id == currency) {
+                ResetMiddleSellCurrency();
+            } else {
+
+                $(".loader").removeClass("hidden");
+                $.ajax({
+                    type: "Get",
+                    url: "/MoneyConvert/GetLatestMoneyConverts",
+                    data: {
+                        baseCurrencyId: currency,
+                        destCurrencyId: dataItem.Id
+                    },
+                    success: function (response) {
+
+                        var moneyConvert = $("#MiddleSellFactorId").data("kendoDropDownList");
+                        moneyConvert.dataSource.data(response);
+                        moneyConvert.value('');
+                        moneyConvert.trigger("change");
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    }
+                });
+            }
+        }
+    </script>
+
+    <script>
+
+        function SellingFactorIdChange(e) {
+
+            var dataItem = this.dataItem(e.item);
+            if (dataItem.Guid == '') {
+
+                var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+                var dest_currency = $("#SellingCurrencyId").data("kendoDropDownList").text();
+
+                $("#lblSellingBaseAmount").text(base_currency);
+                $("#lblSellingDestAmount").text(dest_currency);
+
+                $("#SellingBaseAmount").val(1);
+                $("#SellingDestAmount").val(1);
+
+                $("#SellAmountContainer").removeClass("hidden");
+            } else {
+                $("#SellAmountContainer").addClass("hidden");
+
+                $("#SellingBaseAmount").val(dataItem.BaseAmount);
+                $("#SellingDestAmount").val(dataItem.DestAmount);
+                $("#lblSellingBaseAmount").text(dataItem.BaseCurrencyName);
+                $("#lblSellingDestAmount").text(dataItem.DestCurrencyName);
+            }
+
+            SetProfit();
+        }
+
+
+        function WholeSellFactorIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+            if (dataItem.Guid == '') {
+
+                var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+                var dest_currency = $("#WholeSellCurrencyId").data("kendoDropDownList").text();
+
+                $("#lblWholeSellBaseAmount").text(base_currency);
+                $("#lblWholeSellDestAmount").text(dest_currency);
+
+                $("#WholeSellBaseAmount").val(1);
+                $("#WholeSellDestAmount").val(1);
+
+                $("#WholeSellAmountContainer").removeClass("hidden");
+            } else {
+                $("#WholeSellAmountContainer").addClass("hidden");
+
+                $("#WholeSellBaseAmount").val(dataItem.BaseAmount);
+                $("#WholeSellDestAmount").val(dataItem.DestAmount);
+                $("#lblWholeSellBaseAmount").text(dataItem.BaseCurrencyName);
+                $("#lblWholeSellDestAmount").text(dataItem.DestCurrencyName);
+            }
+
+            SetWholeSellProfit();
+        }
+
+
+        function MiddleSellFactorIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+            if (dataItem.Guid == '') {
+
+                var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+                var dest_currency = $("#MiddleSellCurrencyId").data("kendoDropDownList").text();
+
+                $("#lblMiddleSellBaseAmount").text(base_currency);
+                $("#lblMiddleSellDestAmount").text(dest_currency);
+
+                $("#MiddleSellBaseAmount").val(1);
+                $("#MiddleSellDestAmount").val(1);
+
+                $("#MiddleSellAmountContainer").removeClass("hidden");
+            } else {
+                $("#MiddleSellAmountContainer").addClass("hidden");
+
+                $("#MiddleSellBaseAmount").val(dataItem.BaseAmount);
+                $("#MiddleSellDestAmount").val(dataItem.DestAmount);
+                $("#lblMiddleSellBaseAmount").text(dataItem.BaseCurrencyName);
+                $("#lblMiddleSellDestAmount").text(dataItem.DestCurrencyName);
+            }
+
+            SetMiddleSellProfit();
+        }
+    </script>
+
+
+    <div class="@pull col-sm-12 ">
+
+        <form id="updatePurchaseInvoiceDetailForm">
+            <fieldset>
+                <div class="col-sm-12">
+                    <div class="col-sm-3">
+                        <label class="block clearfix ">
+                            <label for="form-field-8">@Localizer["Type"] @Localizer["Currency"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DropDownList()
+                                .Name("CurrencyId")
+                                .DataTextField("Name")
+                                .DataValueField("Id")
+                                .Events(e => e.Change("CurrencyIdChange"))
+                                //.DataSource(source =>
+                                //{
+                                //    source.Read(read =>
+                                //    {
+                                //        read.Action("GetAllCurrencies", "BaseInfo");
+                                //    })
+                                //    .ServerFiltering(false);
+                                //})
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3" style="display:flex;align-items:flex-end">
+
+                        @if ((bool)(ViewBag.AccessNewStoreroom ?? false))
+                        {
+                            <div class="col-sm-10" style="padding:0;margin:0">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Product"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ProductId")
+                                        .DataTextField("FullName")
+                                        .DataValueField("Guid")
+                                        .Filter("contains")
+                                        .Events(x => x.Filtering("FilterProductItems").Change("ProductIdChange"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetLimitedProductsName", "Product", new { productId = Model.ProductId });
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .Value(Model.ProductId.ToString())
+                                        .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Product-box" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="col-sm-2" style="padding:0;margin-bottom:0.5rem">
+                                <a href="\\#" class="btn btn-danger @pull_rev" onclick="NewProduct()" style=" padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-sm-12" style="padding:0;margin:0">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Product"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ProductId")
+                                        .DataTextField("FullName")
+                                        .DataValueField("Guid")
+                                        .Filter("contains")
+                                        .Events(x => x.Filtering("FilterProductItems").Change("ProductIdChange"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetLimitedProductsName", "Product");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .Value(Model.ProductId.ToString())
+                                        .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Product-box" })
+                                    )
+                                    </span>
+                                </label>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["ExpDate"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DatePicker()
+                                .Name("ExpireDateTxt")
+                                .Value(Model.ExpireDate)
+                                .Format("dd/MM/yyyy")
+                                .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "ExpireDate-box" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["BujNumber"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("BujNumber")
+                                .Value(Model.BujNumber)
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="Product-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="ExpireDate-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+
+                        <span id="Date-valid" class="emptybox hidden" style="color:red;">
+                            @Localizer["DateNotValid"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                    </div>
+
+                </div>
+
+
+                <div class="col-sm-12">
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Number"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("Num")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(Model.Num)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Num-box" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["FreeNum"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("FreeNum")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(Model.FreeNum)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["PurchasePrice"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("PurchasePrice")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(Model.PurchasePrice)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "PurchasePrice-box" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["TotalPurchasePrice"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("WholePurchasePrice")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(Model.Num.GetValueOrDefault(0) * Model.PurchasePrice.GetValueOrDefault(0))
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "WholePurchasePrice-box" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+                        <span id="Num-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="PurchasePrice-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="WholePurchasePrice-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="col-sm-12" style="display:flex;align-items:flex-end">
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">% @Localizer["Discount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("Discount")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .Max(100)
+                                .SelectOnFocus(true)
+                                .Value(0)
+                                .HtmlAttributes(new { style = "width: 100%",@id= "DetailDiscount" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3 hidden">
+                        <label class="block clearfix">
+                            <label for="form-field-8"># @Localizer["Discount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("DiscountSharp")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(Model.Discount)
+                                .HtmlAttributes(new { style = "width: 100%",@id= "DiscountSharp" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["TotalAfterDiscount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("TotalAfterDiscount")
+                                .Enable(false)
+                                //.Culture("en-US")
+                                //.Format("#.##")
+                                //.Min(0)
+                                //.SelectOnFocus(true)
+                                //.Value(Model.Discount)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Consideration"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("Consideration")
+                                .Value(Model.Consideration)
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-sm-12" style="display:flex;align-items:flex-start">
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["SalePrice"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("SellingPrice")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(Model.SellingPrice)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "SellingPrice-box" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">% @Localizer["Profit"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("Profit")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                .Value(0)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix ">
+                            <label for="form-field-8">@Localizer["Type"] @Localizer["SaleCurrency"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DropDownList()
+                                .Name("SellingCurrencyId")
+                                .DataTextField("Name")
+                                .DataValueField("Id")
+                                .Events(e => e.Change("SellingCurrencyIdChange"))
+                                //.DataSource(source =>
+                                //{
+                                //    source.Read(read =>
+                                //    {
+                                //        read.Action("GetAllCurrencies", "BaseInfo");
+                                //    })
+                                //    .ServerFiltering(false);
+                                //})
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <div class="col-sm-12" style="padding:0px;">
+                            <label class="block clearfix ">
+                                <label for="form-field-8"> @Localizer["MoneyConvert"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DropDownList()
+                                    .Name("SellingFactorId")
+                                    .DataTextField("ShowMoneyConvert")
+                                    .DataValueField("Guid")
+                                    .Events(e => e.Change("SellingFactorIdChange"))
+                                    .OptionLabel(" ")
+                                    //.DataSource(source =>
+                                    //{
+                                    //    source.Read(read =>
+                                    //    {
+                                    //        read.Action("GetAllCurrencies", "BaseInfo");
+                                    //    })
+                                    //    .ServerFiltering(false);
+                                    //})
+                                    .HtmlAttributes(new { style = "width: 100%;" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-12 hidden" style="padding:0px;" id="SellAmountContainer">
+                            <div class="col-sm-6">
+                                <label class="block clearfix ">
+                                    <label id="lblSellingBaseAmount" for="form-field-8"></label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().TextBox()
+                                        .Name("SellingBaseAmount")
+                                        .HtmlAttributes(new { style = "width: 100%", onkeypress = "return OnlyNumberKey(event)" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="block clearfix ">
+                                    <label id="lblSellingDestAmount" for="form-field-8"></label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().TextBox()
+                                        .Name("SellingDestAmount")
+                                        .HtmlAttributes(new { style = "width: 100%", onkeypress = "return OnlyNumberKey(event)" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+                        <span id="SellingPrice-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                </div>
+
+                @if ((bool)(ViewBag.CanUseWholeSellPrice ?? false))
+                {
+                    <div class="col-sm-12" style="display:flex;align-items:flex-start">
+
+                        <div class="col-sm-3">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["WholeSellPrice"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("WholeSellPrice")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    //.Value(Model.WholeSellPrice)
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="block clearfix">
+                                <label for="form-field-8">% @Localizer["WholeSellProfit"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("WholeSellProfit")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    .Value(0)
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="block clearfix ">
+                                <label for="form-field-8">@Localizer["Type"] @Localizer["WholeSellCurrency"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DropDownList()
+                                    .Name("WholeSellCurrencyId")
+                                    .DataTextField("Name")
+                                    .DataValueField("Id")
+                                    .Events(e => e.Change("WholeSellCurrencyIdChange"))
+                                    //.DataSource(source =>
+                                    //{
+                                    //    source.Read(read =>
+                                    //    {
+                                    //        read.Action("GetAllCurrencies", "BaseInfo");
+                                    //    })
+                                    //    .ServerFiltering(false);
+                                    //})
+                                    .HtmlAttributes(new { style = "width: 100%;" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <div class="col-sm-12" style="padding:0px;">
+                                <label class="block clearfix ">
+                                    <label for="form-field-8"> @Localizer["MoneyConvert"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("WholeSellFactorId")
+                                        .DataTextField("ShowMoneyConvert")
+                                        .DataValueField("Guid")
+                                        .Events(e => e.Change("WholeSellFactorIdChange"))
+                                        .OptionLabel(" ")
+                                        //.DataSource(source =>
+                                        //{
+                                        //    source.Read(read =>
+                                        //    {
+                                        //        read.Action("GetAllCurrencies", "BaseInfo");
+                                        //    })
+                                        //    .ServerFiltering(false);
+                                        //})
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-12 hidden" style="padding:0px;" id="WholeSellAmountContainer">
+                                <div class="col-sm-6">
+                                    <label class="block clearfix ">
+                                        <label id="lblWholeSellBaseAmount" for="form-field-8"></label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name("WholeSellBaseAmount")
+                                            .HtmlAttributes(new { style = "width: 100%", onkeypress = "return OnlyNumberKey(event)" })
+                                            )
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label class="block clearfix ">
+                                        <label id="lblWholeSellDestAmount" for="form-field-8"></label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name("WholeSellDestAmount")
+                                            .HtmlAttributes(new { style = "width: 100%", onkeypress = "return OnlyNumberKey(event)" })
+                                            )
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+
+                    @(Html.Kendo().NumericTextBox<decimal>()
+                    .Name("WholeSellPrice")
+                    .Enable(false)
+                    .Value(0)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    @(Html.Kendo().DropDownList()
+                    .Name("WholeSellCurrencyId")
+                    .DataTextField("Name")
+                    .DataValueField("Id")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    @(Html.Kendo().DropDownList()
+                    .Name("WholeSellFactorId")
+                    .DataTextField("ShowMoneyConvert")
+                    .DataValueField("Guid")
+                    .OptionLabel(" ")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    <label id="lblWholeSellBaseAmount" class="hidden"></label>
+                    @(Html.Kendo().TextBox()
+                    .Name("WholeSellBaseAmount")
+                    .HtmlAttributes(new { style = "width: 100%", @class = "hidden" })
+                    )
+
+                    <label id="lblWholeSellDestAmount" class="hidden"></label>
+                    @(Html.Kendo().TextBox()
+                    .Name("WholeSellDestAmount")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%", @class = "hidden" })
+                    )
+
+                    @(Html.Kendo().NumericTextBox<decimal>()
+                    .Name("WholeSellProfit")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%", @class = "hidden" })
+                    )
+
+                }
+
+
+                @if ((bool)(ViewBag.CanUseMiddleSellPrice ?? false))
+                {
+                    <div class="col-sm-12" style="display:flex;align-items:flex-start">
+
+                        <div class="col-sm-3">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["MiddleSellPrice"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("MiddleSellPrice")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    //.Value(Model.MiddleSellPrice)
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="block clearfix">
+                                <label for="form-field-8">% @Localizer["MiddleSellProfit"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("MiddleSellProfit")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    .Value(0)
+                                    .HtmlAttributes(new { style = "width: 100%"})
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="block clearfix ">
+                                <label for="form-field-8">@Localizer["Type"] @Localizer["MiddleSellCurrency"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DropDownList()
+                                    .Name("MiddleSellCurrencyId")
+                                    .DataTextField("Name")
+                                    .DataValueField("Id")
+                                    .Events(e => e.Change("MiddleSellCurrencyIdChange"))
+                                    //.DataSource(source =>
+                                    //{
+                                    //    source.Read(read =>
+                                    //    {
+                                    //        read.Action("GetAllCurrencies", "BaseInfo");
+                                    //    })
+                                    //    .ServerFiltering(false);
+                                    //})
+                                    .HtmlAttributes(new { style = "width: 100%;" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-3">
+
+                            <div class="col-sm-12" style="padding:0px;">
+                                <label class="block clearfix ">
+                                    <label for="form-field-8"> @Localizer["MoneyConvert"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("MiddleSellFactorId")
+                                        .DataTextField("ShowMoneyConvert")
+                                        .DataValueField("Guid")
+                                        .Events(e => e.Change("MiddleSellFactorIdChange"))
+                                        .OptionLabel(" ")
+                                        //.DataSource(source =>
+                                        //{
+                                        //    source.Read(read =>
+                                        //    {
+                                        //        read.Action("GetAllCurrencies", "BaseInfo");
+                                        //    })
+                                        //    .ServerFiltering(false);
+                                        //})
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-12 hidden" style="padding:0px;" id="MiddleSellAmountContainer">
+                                <div class="col-sm-6">
+                                    <label class="block clearfix ">
+                                        <label id="lblMiddleSellBaseAmount" for="form-field-8"></label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name("MiddleSellBaseAmount")
+                                            .HtmlAttributes(new { style = "width: 100%", onkeypress = "return OnlyNumberKey(event)" })
+                                            )
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label class="block clearfix ">
+                                        <label id="lblMiddleSellDestAmount" for="form-field-8"></label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name("MiddleSellDestAmount")
+                                            .HtmlAttributes(new { style = "width: 100%", onkeypress = "return OnlyNumberKey(event)" })
+                                            )
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+
+                    @(Html.Kendo().NumericTextBox<decimal>()
+                    .Name("MiddleSellPrice")
+                    .Enable(false)
+                    .Value(0)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    @(Html.Kendo().DropDownList()
+                    .Name("MiddleSellCurrencyId")
+                    .DataTextField("Name")
+                    .DataValueField("Id")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    @(Html.Kendo().DropDownList()
+                    .Name("MiddleSellFactorId")
+                    .DataTextField("ShowMoneyConvert")
+                    .DataValueField("Guid")
+                    .OptionLabel(" ")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    <label id="lblMiddleSellBaseAmount" class="hidden"></label>
+                    @(Html.Kendo().TextBox()
+                    .Name("MiddleSellBaseAmount")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    <label id="lblMiddleSellDestAmount" class="hidden"></label>
+                    @(Html.Kendo().TextBox()
+                    .Name("MiddleSellDestAmount")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                    @(Html.Kendo().NumericTextBox<decimal>()
+                    .Name("MiddleSellProfit")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%;", @class = "hidden" })
+                    )
+
+                }
+
+                <div class="col-sm-12 space-0"></div>
+
+            </fieldset>
+        </form>
+
+
+
+    </div>
+
+</div><!-- /.signup-box -->
+
+
+<div id="AddNewProductModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir ">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddNewProductModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddNewProductModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"] - @Localizer["Product"]
+                </h3>
+            </div>
+
+            <div id="AddNewProductModal-body" class="modal-body" style="width:80rem">
+            </div>
+
+            <div id="ERROR_Barcode" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["RepeatedBarcode"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProduct-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProduct-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeAddNewProductModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+
+    var product_list = [];
+    var updated = false;
+    let ModelCurrencyId = $("#ModelCurrencyId").val();
+    let ModelSellingCurrencyId = $("#ModelSellingCurrencyId").val();
+    let ModelWholeSellCurrencyId = $("#ModelWholeSellCurrencyId").val();
+    let ModelMiddleSellCurrencyId = $("#ModelMiddleSellCurrencyId").val();
+
+    $(document).ready(function () {
+
+        $('#Num').data("kendoNumericTextBox").value($("#NumTxt").val());
+        $('#FreeNum').data("kendoNumericTextBox").value($("#FreeNumTxt").val());
+        $('#PurchasePrice').data("kendoNumericTextBox").value($("#PurchasePriceTxt").val());
+        $('#WholePurchasePrice').data("kendoNumericTextBox").value($("#WholePurchasePriceTxt").val());
+        $('#DiscountSharp').data("kendoNumericTextBox").value($("#DiscountTxt").val());
+        $('#SellingPrice').data("kendoNumericTextBox").value($("#SellingPriceTxt").val());
+        $('#WholeSellPrice').data("kendoNumericTextBox").value($("#WholeSellPriceTxt").val());
+        $('#MiddleSellPrice').data("kendoNumericTextBox").value($("#MiddleSellPriceTxt").val());
+
+        $.ajax({
+            type: "Get",
+            url: "/BaseInfo/GetAllCurrencies",
+            success: function (response) {
+
+                var currencyId = $("#CurrencyId").data("kendoDropDownList");
+                currencyId.dataSource.data(response);
+                currencyId.value(ModelCurrencyId);
+
+                var sellingCurrencyId = $("#SellingCurrencyId").data("kendoDropDownList");
+                sellingCurrencyId.dataSource.data(response);
+                sellingCurrencyId.value(ModelSellingCurrencyId);
+
+                var wholeSellCurrencyId = $("#WholeSellCurrencyId").data("kendoDropDownList");
+                wholeSellCurrencyId.dataSource.data(response);
+                wholeSellCurrencyId.value(ModelWholeSellCurrencyId);
+
+                var middleSellCurrencyId = $("#MiddleSellCurrencyId").data("kendoDropDownList");
+                middleSellCurrencyId.dataSource.data(response);
+                middleSellCurrencyId.value(ModelMiddleSellCurrencyId);
+            }
+        });
+
+        SetDiscount();
+        GetAllProductList().done(function (data) {
+
+            product_list = data;
+        });
+
+        setTimeout(function () {
+            $('#CurrencyId').data("kendoDropDownList").focus();
+        }, 200);
+
+    });
+
+    $("#CurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#ProductId').data("kendoDropDownList").focus();
+        }
+    });
+
+    $("#ProductId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#ExpireDateTxt').focus();
+        }
+    });
+
+    $("#ExpireDateTxt").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#BujNumber').focus();
+        }
+    });
+
+    $("#BujNumber").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Num').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Num").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#FreeNum').data("kendoNumericTextBox").focus();
+
+        }
+    });
+
+    $("#Num").focusout(function () {
+
+        var count = $('#Num').val();
+        var whole = $('#PurchasePrice').val();
+        var price = whole * count;
+
+        if (price) {
+            var purchase = $('#WholePurchasePrice').data("kendoNumericTextBox");
+            purchase.value(price);
+        }
+    });
+
+
+
+    $("#Num").on("focus", function (e) {
+        $('#Num').select();
+    });
+
+    $("#FreeNum").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#PurchasePrice').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#FreeNum").on("focus", function (e) {
+        $('#FreeNum').select();
+    });
+
+    $("#PurchasePrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#WholePurchasePrice').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#PurchasePrice").on("focus", function (e) {
+        $('#PurchasePrice').select();
+    });
+
+    $("#PurchasePrice").focusout(function () {
+
+        var count = $('#Num').val();
+        var whole = $('#PurchasePrice').val();
+        var price = whole * count;
+
+        if (price) {
+            var purchase = $('#WholePurchasePrice').data("kendoNumericTextBox");
+            purchase.value(price);
+        }
+    });
+
+    $("#WholePurchasePrice").focusout(function () {
+        var count = $('#Num').val();
+        var whole = $('#WholePurchasePrice').val();
+        var price = whole / count;
+
+        if (price) {
+            var purchase = $('#PurchasePrice').data("kendoNumericTextBox");
+            purchase.value(price);
+
+        }
+    });
+
+    $("#WholePurchasePrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#DetailDiscount').data("kendoNumericTextBox").focus();
+
+        }
+    });
+
+    $("#WholePurchasePrice").on("focus", function (e) {
+        $('#WholePurchasePrice').select();
+    });
+
+    $("#DetailDiscount").on("keypress", function (e) {
+        if (e.which === 13) {
+            //$('#TotalAfterDiscount').data("kendoNumericTextBox").focus();
+            $('#Consideration').focus();
+        }
+    });
+
+    $("#DetailDiscount").on("focus", function (e) {
+        $('#DetailDiscount').select();
+    });
+
+    $("#DetailDiscount").focusout(function () {
+
+        let wholepur = $('#WholePurchasePrice').data("kendoNumericTextBox").value();
+        if (wholepur > 0) {
+            let dis = $('#DetailDiscount').data("kendoNumericTextBox").value();
+            let amount = (dis * wholepur) / 100;
+            $('#DiscountSharp').data("kendoNumericTextBox").value(amount);
+
+            $('#TotalAfterDiscount').val(wholepur - amount);
+        }
+
+    });
+
+    $("#TotalAfterDiscount").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Consideration').focus();
+        }
+    });
+
+    //$("#TotalAfterDiscount").on("focus", function (e) {
+    //    $('#TotalAfterDiscount').select();
+    //});
+
+    $("#DiscountSharp").focusout(function () {
+        SetDiscount();
+    });
+
+    function SetDiscount() {
+        let wholepur = $('#WholePurchasePrice').data("kendoNumericTextBox").value();
+        if (wholepur > 0) {
+            let dis = $('#DiscountSharp').data("kendoNumericTextBox").value();
+            let amount = (100 * dis) / wholepur;
+            $('#DetailDiscount').data("kendoNumericTextBox").value(amount);
+
+            $('#TotalAfterDiscount').val(wholepur - dis);
+        }
+    }
+
+    $("#Consideration").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#SellingPrice').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#SellingPrice").on("focus", function (e) {
+        $('#SellingPrice').select();
+    });
+
+
+    $("#SellingPrice").focusout(function () {
+        SetProfit();
+    });
+
+    function SetProfit() {
+
+        let sellPrice = $('#SellingPrice').data("kendoNumericTextBox").value();
+        let purchasePrice = $('#PurchasePrice').data("kendoNumericTextBox").value();
+        let base_amount = $("#SellingBaseAmount").val();
+        let dest_amount = $("#SellingDestAmount").val();
+        let min;
+
+        var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+        var dest_currency = $("#SellingCurrencyId").data("kendoDropDownList").text();
+        var base_lbl = $("#lblSellingBaseAmount").text();
+
+        if (base_currency == dest_currency ) {
+
+            min = ((sellPrice - purchasePrice) / purchasePrice) * 100;
+
+        } else if (dest_currency == base_lbl) {
+
+            min = (((sellPrice * dest_amount / base_amount) - purchasePrice) / purchasePrice) * 100;
+
+        } else {
+
+            min = (((sellPrice * base_amount / dest_amount) - purchasePrice) / purchasePrice) * 100;
+        }
+
+        if (min == 'NaN' || min =='Infinity')
+            min = 0;
+
+        $('#Profit').data("kendoNumericTextBox").value((min >= 0) ? min : 0);
+    }
+
+    $("#SellingPrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Profit').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Profit").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#SellingCurrencyId').data("kendoDropDownList").focus();
+
+        }
+    });
+
+    $("#SellingCurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+
+            $('#SellingFactorId').data("kendoDropDownList").focus();
+        }
+    });
+    
+    $("#SellingFactorId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            if (!$('#WholeSellPrice').hasClass('hidden')) {
+                $('#WholeSellPrice').data("kendoNumericTextBox").focus();
+
+            } else if (!$('#MiddleSellPrice').hasClass('hidden')) {
+                $('#MiddleSellPrice').data("kendoNumericTextBox").focus();
+
+            } else {
+                $('#btn-EditPurchaseInvoiceDetailModal-accept').focus();
+
+            }
+        }
+    });
+
+    $("#Profit").on("focus", function (e) {
+        $('#Profit').select();
+    });
+
+    $("#Profit").change(function () {
+        SetSellPrice();
+    });
+
+    //$("#Profit").focusout(function () {
+    //    SetSellPrice();
+    //});
+
+    function SetSellPrice() {
+
+        let profit = $('#Profit').data("kendoNumericTextBox").value();
+        let purchasePrice = $('#PurchasePrice').data("kendoNumericTextBox").value();
+        let am = ((profit / 100) * purchasePrice) + purchasePrice;
+
+        let base_amount = $("#SellingBaseAmount").val();
+        let dest_amount = $("#SellingDestAmount").val();
+
+        var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+        var dest_currency = $("#SellingCurrencyId").data("kendoDropDownList").text();
+        var base_lbl = $("#lblSellingBaseAmount").text();
+
+        if (base_currency == dest_currency) {
+
+            am = am;
+
+        } else if (dest_currency == base_lbl ) {
+
+            am = am * base_amount / dest_amount;
+
+        } else {
+
+            am = am * dest_amount / base_amount;
+        }
+
+        $('#SellingPrice').data("kendoNumericTextBox").value(am);
+    }
+
+    $("#WholeSellPrice").on("focus", function (e) {
+        $('#WholeSellPrice').select();
+    });
+
+
+    $("#WholeSellPrice").focusout(function () {
+        SetWholeSellProfit();
+    });
+
+    function SetWholeSellProfit() {
+        let sellPrice = $('#WholeSellPrice').data("kendoNumericTextBox").value();
+        let purchasePrice = $('#PurchasePrice').data("kendoNumericTextBox").value();
+        let base_amount = $("#WholeSellBaseAmount").val();
+        let dest_amount = $("#WholeSellDestAmount").val();
+        let min;
+
+        var base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+        var dest_currency = $("#WholeSellCurrencyId").data("kendoDropDownList").text();
+        var base_lbl = $("#lblWholeSellBaseAmount").text();
+
+        if (base_currency == dest_currency ) {
+
+            min = ((sellPrice - purchasePrice) / purchasePrice) * 100;
+
+        } else if (dest_currency == base_lbl ) {
+
+            min = (((sellPrice * dest_amount / base_amount) - purchasePrice) / purchasePrice) * 100;
+
+        } else {
+
+            min = (((sellPrice * base_amount / dest_amount) - purchasePrice) / purchasePrice) * 100;
+        }
+
+        if (min == 'NaN' || min == 'Infinity')
+            min = 0;
+
+        $('#WholeSellProfit').data("kendoNumericTextBox").value((min >= 0) ? min : 0);
+    }
+
+
+    $("#WholeSellPrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#WholeSellProfit').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#WholeSellProfit").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#WholeSellCurrencyId').data("kendoDropDownList").focus();
+
+        }
+    });
+
+    $("#WholeSellCurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#WholeSellFactorId').data("kendoDropDownList").focus();
+        }
+    });
+    
+    $("#WholeSellFactorId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            if (!$('#MiddleSellPrice').hasClass('hidden')) {
+                $('#MiddleSellPrice').data("kendoNumericTextBox").focus();
+
+            } else {
+                $('#btn-EditPurchaseInvoiceDetailModal-accept').focus();
+
+            }
+        }
+    });
+
+    $("#WholeSellProfit").on("focus", function (e) {
+        $('#WholeSellProfit').select();
+    });
+
+    $("#WholeSellProfit").change(function () {
+        SetWholeSellPrice();
+    });
+
+    //$("#WholeSellProfit").focusout(function () {
+    //    SetWholeSellPrice();
+    //});
+
+    function SetWholeSellPrice() {
+        let profit = $('#WholeSellProfit').data("kendoNumericTextBox").value();
+        let purchasePrice = $('#PurchasePrice').data("kendoNumericTextBox").value();
+        let am = ((profit / 100) * purchasePrice) + purchasePrice;
+
+        let base_amount = $("#WholeSellBaseAmount").val();
+        let dest_amount = $("#WholeSellDestAmount").val();
+
+        let base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+        let dest_currency = $("#WholeSellCurrencyId").data("kendoDropDownList").text();
+        let base_lbl = $("#lblWholeSellBaseAmount").text();
+
+        if (base_currency == dest_currency) {
+
+            am = am;
+
+        } else if (dest_currency == base_lbl) {
+
+            am = am * base_amount / dest_amount;
+
+        } else {
+
+            am = am * dest_amount / base_amount;
+        }
+
+        $('#WholeSellPrice').data("kendoNumericTextBox").value(am);
+    }
+
+    $("#MiddleSellPrice").on("focus", function (e) {
+        $('#MiddleSellPrice').select();
+    });
+
+
+    $("#MiddleSellPrice").focusout(function () {
+        SetMiddleSellProfit();
+    });
+
+    function SetMiddleSellProfit() {
+        let sellPrice = $('#MiddleSellPrice').data("kendoNumericTextBox").value();
+        let purchasePrice = $('#PurchasePrice').data("kendoNumericTextBox").value();
+        let base_amount = $("#MiddleSellBaseAmount").val();
+        let dest_amount = $("#MiddleSellDestAmount").val();
+        let min;
+
+        let base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+        let dest_currency = $("#MiddleSellCurrencyId").data("kendoDropDownList").text();
+        let base_lbl = $("#lblMiddleSellBaseAmount").text();
+
+        if (base_currency == dest_currency ) {
+
+            min = ((sellPrice - purchasePrice) / purchasePrice) * 100;
+
+        } else if (dest_currency == base_lbl ) {
+
+            min = (((sellPrice * dest_amount / base_amount) - purchasePrice) / purchasePrice) * 100;
+
+        } else {
+
+            min = (((sellPrice * base_amount / dest_amount) - purchasePrice) / purchasePrice) * 100;
+        }
+
+        if (min == 'NaN' || min == 'Infinity')
+            min = 0;
+
+        $('#MiddleSellProfit').data("kendoNumericTextBox").value((min >= 0) ? min : 0);
+    }
+
+    $("#MiddleSellPrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#MiddleSellProfit').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#MiddleSellProfit").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#MiddleSellCurrencyId').data("kendoDropDownList").focus();
+        }
+    });
+
+    $("#MiddleSellCurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#MiddleSellFactorId').data("kendoDropDownList").focus();
+        }
+    });
+    
+    $("#MiddleSellFactorId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-EditPurchaseInvoiceDetailModal-accept').focus();
+        }
+    });
+
+    $("#MiddleSellProfit").on("focus", function (e) {
+        $('#MiddleSellProfit').select();
+    });
+
+    $("#MiddleSellProfit").change(function () {
+        SetMiddleSellPrice();
+    });
+
+    //$("#MiddleSellProfit").focusout(function () {
+    //    SetMiddleSellPrice();
+    //});
+
+    function SetMiddleSellPrice() {
+        let profit = $('#MiddleSellProfit').data("kendoNumericTextBox").value();
+        let purchasePrice = $('#PurchasePrice').data("kendoNumericTextBox").value();
+        let am = ((profit / 100) * purchasePrice) + purchasePrice;
+
+        let base_amount = $("#MiddleSellBaseAmount").val();
+        let dest_amount = $("#MiddleSellDestAmount").val();
+
+        let base_currency = $("#CurrencyId").data("kendoDropDownList").text();
+        let dest_currency = $("#MiddleSellCurrencyId").data("kendoDropDownList").text();
+        let base_lbl = $("#lblMiddleSellBaseAmount").text();
+
+        if (base_currency == dest_currency) {
+
+            am = am;
+
+        } else if (dest_currency == base_lbl) {
+
+            am = am * base_amount / dest_amount;
+
+        } else {
+
+            am = am * dest_amount / base_amount;
+        }
+
+        $('#MiddleSellPrice').data("kendoNumericTextBox").value(am);
+    }
+
+    function NewProduct() {
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = `/Product/AddAndNewModal`;
+        $(".loader").removeClass("hidden");
+
+        $('#AddNewProductModal').modal('toggle');
+        $('#AddNewProductModal-body').load(link + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    $("#btn-AddNewProduct-accept").click(function () {
+
+        $(this).attr("disabled", true);
+
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddNewProductModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddNewProductModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-AddNewProduct-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Product/AddOrUpdate";
+
+        var product = $("#addNewProductForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: product,
+            success: function (response) {
+                $('#btn-AddNewProduct-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#ProductName-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddNewProductModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "RepeatedBarcode") {
+
+                        $("#AddNewProductModal #ERROR_Barcode").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddNewProductModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddNewProductModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        $("#ProductId").data("kendoDropDownList").dataSource.read();
+                        let pr = $("#ProductId").data("kendoDropDownList");
+                        pr.bind("dataBound", function () {
+                            pr.value(response);
+                        });
+
+                        GetAllProductList().done(function (data) {
+                            product_list = data;
+                        });
+
+                    }
+                } else {
+
+                    $("#AddNewProductModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    })
+
+    function closeAddNewProductModal() {
+
+        $('#AddNewProductModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+        $('#AddNewProductModal-body').empty();
+    }
+
+</script>

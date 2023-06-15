@@ -1,0 +1,1148 @@
+﻿@model WPH.Models.SupplierAccount.SupplierAccountFilterViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", dir = "";
+
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        dir = " ";
+        <h3 id="newPayText" class="hidden">@Localizer["New"] @Localizer["Pay"]</h3>
+        <h3 id="newPartialPayText" class="hidden">@Localizer["New"] @Localizer["PartialPay"]</h3>
+        <h3 id="editPayText" class="hidden">@Localizer["Edit"] @Localizer["Pay"]</h3>
+        <h3 id="editPartialPayText" class="hidden">@Localizer["Edit"] @Localizer["PartialPay"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        dir = " direction:rtl; ";
+        <h3 id="newPayText" class="hidden">@Localizer["Pay"] @Localizer["New"]</h3>
+        <h3 id="newPartialPayText" class="hidden">@Localizer["PartialPay"] @Localizer["New"]</h3>
+        <h3 id="editPayText" class="hidden">@Localizer["Pay"] @Localizer["Edit"]</h3>
+        <h3 id="editPartialPayText" class="hidden">@Localizer["PartialPay"] @Localizer["Edit"]</h3>
+    }
+}
+
+
+<style>
+
+
+    @@media (max-width:767px) {
+        .modal-dialog {
+            width: 70vw;
+            margin: 30px auto
+        }
+
+        .modal-content {
+            -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,.5)
+        }
+
+        .modal-sm {
+            width: 300px
+        }
+
+        #AddPayModal-body {
+            width: 90vw;
+        }
+
+        #AddPayInvoiceModal-body {
+            width: 90vw;
+        }
+    }
+
+    @@media (min-width:768px) {
+        #AddPayModal-body {
+            width: 60vw;
+        }
+
+        #AddPayInvoiceModal-body {
+            width: 90vw;
+        }
+    }
+</style>
+
+
+<div class="row page-header ">
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["AccountInSuppliers"]
+        </h1>
+
+    </div>
+</div><!-- /.page-header -->
+
+<div class="row" style="@dir ">
+
+    <div class="col-sm-12" style="padding: 0; margin-bottom: 1rem; display: flex; align-items:flex-end;flex-wrap:wrap ">
+
+        <div class="col-xs-6 col-sm-4 col-md-2">
+            <label class="block clearfix @font">
+                <label for="form-field-8">@Localizer["Suppliers"] : </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DropDownList()
+                    .Name("SupplierIdFilter")
+                    .DataTextField("Name")
+                    .DataValueField("Guid")
+                    .Filter("contains")
+                    .Value(Model.SupplierId.ToString())
+                    .OptionLabel(" ")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAllSuppliers", "Supplier");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem",onchange= "supplierFilterChange(true)" })
+                        )
+                </span>
+
+            </label>
+        </div>
+
+        <div id="" class="col-xs-6 col-sm-4 col-md-2">
+            <div id="currency_container" class=" hidden">
+                <label class="block clearfix @font">
+                    <label for="form-field-8">@Localizer["Currency"] : </label>
+                    <span class="block input-icon input-icon-right">
+                        @(Html.Kendo().DropDownList()
+                    .Name("CurrencyIdFilter")
+                    .DataTextField("Name")
+                    .DataValueField("Id")
+                    .OptionLabel(" ")
+                    .Value(Model.CurrencyId.ToString())
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAllCurrencies", "BaseInfo");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "filterChange()" })
+                        )
+                    </span>
+
+                </label>
+            </div>
+        </div>
+
+        <div id="" class="col-xs-6 col-sm-4 col-md-2">
+            <div id="supplierFilter_container" class=" hidden">
+                <label class="block clearfix @font">
+                    <label for="form-field-8"> </label>
+                    <span class="block input-icon input-icon-right">
+                        @(Html.Kendo().DropDownList()
+                    .Name("SupplierFilter")
+                    .DataTextField("Name")
+                    .DataValueField("Id")
+                    .Value(Model.SupplierFilter.ToString())
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAllSupplierFilter", "Supplier");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "filterChange()" })
+                        )
+                    </span>
+
+                </label>
+            </div>
+        </div>
+
+        <div id="" class="col-xs-6 col-sm-4 col-md-2">
+            <div id="yearFilter_container" class=" hidden">
+                <label class="block clearfix @font">
+                    <label for="form-field-8"> </label>
+                    <span class="block input-icon input-icon-right">
+                        @(Html.Kendo().DropDownList()
+                    .Name("SupplierYearFilter")
+                    .DataTextField("Name")
+                    .DataValueField("Id")
+                    .Value(Model.Year.ToString())
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAllSupplierYearFilter", "Supplier");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "yearFilterChange()" })
+                        )
+                    </span>
+
+                </label>
+            </div>
+        </div>
+
+        <div class="col-xs-6 col-sm-4 col-md-3">
+
+            @if ((bool)ViewBag.AccessNewPay)
+            {
+                @(Html.Kendo().Button()
+                .Name("btn-newPay")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right hidden" })
+                .Content(Localizer["Pay"]))
+
+                @(Html.Kendo().Button()
+                .Name("btn-newInvoicePay")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right hidden" })
+                .Content(Localizer["PayByInvoice"]))
+
+                @*@(Html.Kendo().Button()
+                    .Name("btn-newPartialPay")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right hidden" })
+                    .Content(Localizer["PartialPay"]))*@
+            }
+
+        </div>
+
+        <div class="col-sm-1">
+            @if ((bool)ViewBag.AccessPrintPay)
+            {
+                <a class="pull-right" onClick="ShowPayReport()" style="padding:0.2rem;cursor:pointer;font-size: 25px;">
+                    <span>
+                        <i class="ace-icon fa fa-print align-top bigger-125"></i>
+                    </span>
+                </a>
+            }
+        </div>
+    </div>
+
+
+    <div id="time_filter_cotainer MyFont-Roboto-grid" class="col-sm-12 hidden" style="padding: 0; margin-bottom: 1rem; display: flex;align-items:flex-end; ">
+
+        <div class="col-sm-2 " style="">
+        </div>
+
+        <div class="col-sm-2 " style="">
+        </div>
+
+        <div class="col-sm-2 " style="">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["FromDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoFromDate")
+                        .Value(Model.DateFromTxt)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div class="col-sm-2 " style="">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["ToDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoDateTo")
+                        .Value(Model.DateToTxt)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div id="" class="col-sm-2 " style="">
+
+            @(Html.Kendo().Button()
+                .Name("btn-search-account")
+                .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;margin-bottom:5px;", type = "button", @class = "k-primary ", onclick = "btnSearchClick()" })
+                .Content("<i class='fa fa-search'></i>"))
+
+        </div>
+
+    </div>
+
+
+</div>
+
+<div id="AddPayModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddPayModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddPayModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddPayModal-body" class="modal-body" >
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["AmountIsGreaterThanTheRem"]
+            </div>
+
+            <div id="DiscountIsGreaterThanTheAmount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddPayModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddPayModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddPayModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="AddPartialPayModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog" style="width:85%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddPartialPayModal()" aria-hidden="true">&times;</button>
+                <div class=" blue @font" style="display:flex;">
+                    <h3 id="AddPartialPayModal-header" class="smaller lighter blue no-margin @font">
+                    </h3>
+                    &nbsp;_	&nbsp;
+                    <h3 id="AddPartialPayModal-supplier" class="smaller lighter blue no-margin @font">
+                    </h3>
+                </div>
+
+            </div>
+
+            <div id="AddPartialPayModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["AmountIsGreaterThanTheRem"]
+            </div>
+
+            <div id="DiscountIsGreaterThanTheAmount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ErrorInSelectInvoice" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ErrorInSelectInvoice"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddPartialPayModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddPartialPayModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddPartialPayModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="AddPayInvoiceModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddPayInvoiceModal()" aria-hidden="true">&times;</button>
+                <div class=" blue @font" style="display:flex;">
+                    <h3 id="AddPayInvoiceModal-header" class="smaller lighter blue no-margin @font">
+                    </h3>
+                    &nbsp;_	&nbsp;
+                    <h3 id="AddPayInvoiceModal-supplier" class="smaller lighter blue no-margin @font">
+                    </h3>
+                </div>
+
+            </div>
+
+            <div id="AddPayInvoiceModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="CurrencyConflict" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["CurrencyConflict"]
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["AmountIsGreaterThanTheRem"]
+            </div>
+
+            <div id="DiscountIsGreaterThanTheAmount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="RepeatedPay" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["RepeatedPay"]
+            </div>
+
+            <div id="NegativeAmount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NegativeAmount"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddPayInvoiceModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddPayInvoiceModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddPayInvoiceModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+    function GetSupplierId() {
+        let id = $("#SupplierIdFilter").val();
+        let currid = $("#CurrencyIdFilter").val();
+        let filter = $("#SupplierFilter").val();
+        let year = $("#SupplierYearFilter").val();
+        return {
+            SupplierId: id,
+            CurrencyId: currid,
+            SupplierFilter: filter,
+            Year: year,
+            DateFromTxt: $("#KendoFromDate").val(),
+            DateToTxt: $("#KendoDateTo").val()
+        }
+    }
+</script>
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/SupplierAccount/dgSupplierAccountGrid.cshtml")
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+<script>
+
+    $(document).ready(function () {
+        supplierFilterChange(false);
+    });
+
+    function RemoveNullAndDuplicates(main_list) {
+        let unique_list = main_list.filter(function (item, index) {
+
+            if (item == null || item == '' || item == 'null' || main_list.indexOf(item) !== index) {
+                return false;
+            }
+
+            return true;
+        });
+
+        return unique_list;
+    }
+
+    function ShowPayReport() {
+        $(".loader").removeClass("hidden");
+
+        let link = "/SupplierAccount/ShowReport";
+
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    $('#btn-newPay').on("click", function () {
+        $("#AddPayModal #RepeatedPay").addClass("hidden");
+        $("#AddPayModal #AmountOverFlow").addClass("hidden");
+        $("#AddPayModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+        $("#AddPayModal #ERROR_Data").addClass("hidden");
+        $("#AddPayModal #ERROR_Date").addClass("hidden");
+        $("#AddPayModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var supplier = $("#SupplierIdFilter").val();
+        var currency = $("#CurrencyIdFilter").val();
+
+        var link = "/Pay/PayNewModal?supplierId=";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newPayText").text();
+        $('#AddPayModal-header').text(header);
+
+        $('#AddPayModal').modal('toggle');
+        $('#AddPayModal-body').load(link + supplier + "&currencyId=" + currency + " ", function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    });
+
+    $('#btn-newPartialPay').on("click", function () {
+        $("#AddPartialPayModal #ErrorInSelectInvoice").addClass("hidden");
+        $("#AddPartialPayModal #AmountOverFlow").addClass("hidden");
+        $("#AddPartialPayModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+        $("#AddPartialPayModal #ERROR_Data").addClass("hidden");
+        $("#AddPartialPayModal #ERROR_Date").addClass("hidden");
+        $("#AddPartialPayModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var supplier = $("#SupplierIdFilter").val();
+        var currency = $("#CurrencyIdFilter").val();
+
+        var link = "/Pay/PartialPayNewModal?supplierId=";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newPartialPayText").text();
+        $('#AddPartialPayModal-header').text(header);
+
+        $('#AddPartialPayModal').modal('toggle');
+        $('#AddPartialPayModal-body').load(link + supplier + "&currencyId=" + currency + " ", function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    });
+
+    $('#btn-newInvoicePay').on("click", function () {
+        $("#AddPayInvoiceModal #CurrencyConflict").addClass("hidden");
+        $("#AddPayInvoiceModal #RepeatedPay").addClass("hidden");
+        $("#AddPayInvoiceModal #AmountOverFlow").addClass("hidden");
+        $("#AddPayInvoiceModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+        $("#AddPayInvoiceModal #ERROR_Data").addClass("hidden");
+        $("#AddPayInvoiceModal #ERROR_Date").addClass("hidden");
+        $("#AddPayInvoiceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddPayInvoiceModal #NegativeAmount").addClass("hidden");
+
+        var supplier = $("#SupplierIdFilter").val();
+        var currency = $("#CurrencyIdFilter").val();
+
+        var link = "/Pay/PayInvoiceNewModal?supplierId=";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newPayText").text();
+        $('#AddPayInvoiceModal-header').text(header);
+
+        $('#AddPayInvoiceModal').modal('toggle');
+        $('#AddPayInvoiceModal-body').load(link + supplier + "&currencyId=" + currency + " ", function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    });
+
+    function EditPay(element) {
+
+        var link = "/Pay/PayEditModal?Id=";
+        var Id = $(element).attr('data-id');
+        var payType = $(element).attr('data-payType');
+
+        $(".loader").removeClass("hidden");
+
+        if (payType == "TotalPay") {
+            $("#AddPayModal #RepeatedPay").addClass("hidden");
+            $("#AddPayModal #AmountOverFlow").addClass("hidden");
+            $("#AddPayModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+            $("#AddPayModal #ERROR_Data").addClass("hidden");
+            $("#AddPayModal #ERROR_Date").addClass("hidden");
+            $("#AddPayModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+            let header = $("#editPayText").text();
+            $('#AddPayModal-header').text(header);
+
+            $('#AddPayModal').modal('toggle');
+            $('#AddPayModal-body').load(link + Id + '', function () {
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            });
+
+        } else if (payType == "PartialPay") {
+            $("#AddPartialPayModal #ErrorInSelectInvoice").addClass("hidden");
+            $("#AddPartialPayModal #AmountOverFlow").addClass("hidden");
+            $("#AddPartialPayModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+            $("#AddPartialPayModal #ERROR_Data").addClass("hidden");
+            $("#AddPartialPayModal #ERROR_Date").addClass("hidden");
+            $("#AddPartialPayModal #ERROR_SomeThingWentWrong").addClass("hidden");
+            $("#AddPartialPayModal #NegativeAmount").addClass("hidden");
+
+            let header = $("#editPartialPayText").text();
+            $('#AddPartialPayModal-header').text(header);
+
+            $('#AddPartialPayModal').modal('toggle');
+            $('#AddPartialPayModal-body').load(link + Id + '', function () {
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            });
+
+        } else {
+            $("#AddPayInvoiceModal #CurrencyConflict").addClass("hidden");
+            $("#AddPayInvoiceModal #RepeatedPay").addClass("hidden");
+            $("#AddPayInvoiceModal #AmountOverFlow").addClass("hidden");
+            $("#AddPayInvoiceModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+            $("#AddPayInvoiceModal #ERROR_Data").addClass("hidden");
+            $("#AddPayInvoiceModal #ERROR_Date").addClass("hidden");
+            $("#AddPayInvoiceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+            $("#AddPayInvoiceModal #NegativeAmount").addClass("hidden");
+
+            let header = $("#editPayText").text();
+            $('#AddPayInvoiceModal-header').text(header);
+
+            $('#AddPayInvoiceModal').modal('toggle');
+            $('#AddPayInvoiceModal-body').load(link + Id + '', function () {
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            });
+
+        }
+
+    }
+
+    $('#btn-AddPayModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddPayModal #RepeatedPay").addClass("hidden");
+        $("#AddPayModal #AmountOverFlow").addClass("hidden");
+        $("#AddPayModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+        $("#AddPayModal #ERROR_Data").addClass("hidden");
+        $("#AddPayModal #ERROR_Date").addClass("hidden");
+        $("#AddPayModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddPayModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddPayModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-AddPayModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Pay/AddOrUpdate";
+
+        var pay_amount = [];
+
+        var pay = {
+            Amount: $("#AddPayModal #Amount").val(),
+            BaseAmount: $("#AddPayModal #BaseAmount").val(),
+            DestAmount: $("#AddPayModal #DestAmount").val(),
+            Discount: $("#AddPayModal #Discount").val(),
+            BaseCurrencyId: $("#AddPayModal #BaseCurrencyId").val(),
+            CurrencyId: $("#AddPayModal #CurrencyId").val()
+        };
+        pay_amount.push(pay);
+
+        var data = {
+            Guid: $("#AddPayModal #Guid").val(),
+            SupplierId: $("#AddPayModal #SupplierId").val(),
+            PayDateTxt: $("#AddPayModal #PayDateTxt").val(),
+            Description: $("#AddPayModal #Description").val(),
+            PayType: $("#AddPayModal #PayType").val(),
+            MainInvoiceNum: $("#AddPayModal #MainInvoiceNum").val(),
+            PayAmounts: pay_amount
+        };
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-AddPayModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+
+                    if (response === "DateNotValid") {
+
+                        $("#AddPayModal #ERROR_Date").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddPayModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                        $("#AddPayModal #DiscountIsGreaterThanTheAmount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "AmountOverFlow") {
+
+                        $("#AddPayModal #AmountOverFlow").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddPayModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddPayModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#kendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AddPayModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    $('#btn-AddPartialPayModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddPartialPayModal #ErrorInSelectInvoice").addClass("hidden");
+        $("#AddPartialPayModal #AmountOverFlow").addClass("hidden");
+        $("#AddPartialPayModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+        $("#AddPartialPayModal #ERROR_Data").addClass("hidden");
+        $("#AddPartialPayModal #ERROR_Date").addClass("hidden");
+        $("#AddPartialPayModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddPartialPayModal #NegativeAmount").addClass("hidden");
+
+        $('#AddPartialPayModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddPartialPayModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-AddPartialPayModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Pay/AddOrUpdatePartialPay";
+        var invoiceIds = [];
+        var viewModel = {
+            Guid: $("#AddPartialPayModal #Guid").val(),
+            SupplierId: $("#AddPartialPayModal #SupplierId").val(),
+            BaseCurrencyId: $("#AddPartialPayModal #BaseCurrencyId").val(),
+            CurrencyId: $("#AddPartialPayModal #CurrencyId").val(),
+            PayDateTxt: $("#AddPartialPayModal #PayDateTxt").val(),
+            Amount: $("#AddPartialPayModal #Amount").val(),
+            Discount: $("#AddPartialPayModal #Discount").val(),
+            BaseAmount: $("#AddPartialPayModal #BaseAmount").val(),
+            DestAmount: $("#AddPartialPayModal #DestAmount").val(),
+            Description: $("#AddPartialPayModal #Description").val(),
+        };
+
+        $('.select_payInvoice').each(function () {
+            let guid = $(this).attr("data-id");
+            if (guid)
+                invoiceIds.push(guid);
+        });
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                viewModel: viewModel,
+                invoiceIds: invoiceIds
+            },
+            success: function (response) {
+                $('#btn-AddPartialPayModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+
+                    if (response === "DateNotValid") {
+
+                        $("#AddPartialPayModal #ERROR_Date").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddPartialPayModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ErrorInSelectInvoice") {
+
+                        $("#AddPartialPayModal #ErrorInSelectInvoice").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                        $("#AddPartialPayModal #DiscountIsGreaterThanTheAmount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "AmountOverFlow") {
+
+                        $("#AddPartialPayModal #AmountOverFlow").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "NegativeAmount") {
+
+                        $("#AddPartialPayModal #NegativeAmount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddPartialPayModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddPartialPayModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#kendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AddPartialPayModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    $('#btn-AddPayInvoiceModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddPayInvoiceModal #CurrencyConflict").addClass("hidden");
+        $("#AddPayInvoiceModal #RepeatedPay").addClass("hidden");
+        $("#AddPayInvoiceModal #AmountOverFlow").addClass("hidden");
+        $("#AddPayInvoiceModal #DiscountIsGreaterThanTheAmount").addClass("hidden");
+        $("#AddPayInvoiceModal #ERROR_Data").addClass("hidden");
+        $("#AddPayInvoiceModal #ERROR_Date").addClass("hidden");
+        $("#AddPayInvoiceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddPayInvoiceModal #NegativeAmount").addClass("hidden");
+
+        $('#AddPayInvoiceModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddPayInvoiceModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-AddPayInvoiceModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Pay/AddOrUpdateInvoice";
+        var invoiceIds = [];
+        var returnIds = [];
+        var payAmounts = [];
+
+        $('#AddPayInvoiceModal .PayLine').each(function () {
+            let line = $(this).attr("data-line");
+            if (line) {
+                let pay = {
+                    BaseAmount: $(`#AddPayInvoiceModal #BaseAmount_${line}`).val(),
+                    DestAmount: $(`#AddPayInvoiceModal #DestAmount_${line}`).val(),
+                    Discount: $(`#AddPayInvoiceModal #Discount_${line}`).val(),
+                    CurrencyId: $(`#AddPayInvoiceModal #Currency_${line}`).val(),
+                    BaseCurrencyName: $(`#AddPayInvoiceModal #BaseCurrency_${line}`).text()
+                };
+
+                payAmounts.push(pay);
+            }
+        });
+
+        var viewModel = {
+            Guid: $("#AddPayInvoiceModal #Guid").val(),
+            SupplierId: $("#AddPayInvoiceModal #SupplierId").val(),
+            BaseCurrencyId: $("#AddPayInvoiceModal #BaseCurrencyId").val(),
+            CurrencyId: $("#AddPayInvoiceModal #CurrencyId").val(),
+            PayDateTxt: $("#AddPayInvoiceModal #PayDateTxt").val(),
+            Discount: $("#AddPayInvoiceModal #Discount").val(),
+            BaseAmount: $("#AddPayInvoiceModal #BaseAmount").val(),
+            DestAmount: $("#AddPayInvoiceModal #DestAmount").val(),
+            Description: $("#AddPayInvoiceModal #Description").val(),
+            MainInvoiceNum: $("#AddPayInvoiceModal #MainInvoiceNum").val(),
+            PayAmounts: payAmounts
+        };
+
+        $('.select_payInvoice').each(function () {
+            let guid = $(this).attr("data-id");
+            if (guid)
+                invoiceIds.push(guid);
+        });
+
+        $('.select_return_payInvoice').each(function () {
+            let guid = $(this).attr("data-id");
+            if (guid)
+                returnIds.push(guid);
+        });
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                viewModel: viewModel,
+                invoiceIds: invoiceIds,
+                returnIds: returnIds
+            },
+            success: function (response) {
+                $('#btn-AddPayInvoiceModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+
+                    if (response === "DateNotValid") {
+
+                        $("#AddPayInvoiceModal #ERROR_Date").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "CurrencyConflict") {
+
+                        $("#AddPayInvoiceModal #CurrencyConflict").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddPayInvoiceModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "RepeatedPay") {
+
+                        $("#AddPayInvoiceModal #RepeatedPay").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                        $("#AddPayInvoiceModal #DiscountIsGreaterThanTheAmount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "AmountOverFlow") {
+
+                        $("#AddPayInvoiceModal #AmountOverFlow").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "NegativeAmount") {
+
+                        $("#AddPayInvoiceModal #NegativeAmount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddPayInvoiceModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddPayInvoiceModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#kendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AddPayInvoiceModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAddPartialPayModal() {
+        $('#AddPartialPayModal').modal('hide');
+        $('#AddPartialPayModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    function closeAddPayInvoiceModal() {
+        $('#AddPayInvoiceModal').modal('hide');
+        $('#AddPayInvoiceModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    function closeAddPayModal() {
+        $('#AddPayModal').modal('hide');
+        $('#AddPayModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    function supplierFilterChange(refresh) {
+        var supplier_id = $("#SupplierIdFilter").val();
+
+        if (supplier_id == '') {
+            $("#currency_container").addClass("hidden");
+            $("#supplierFilter_container").addClass("hidden");
+            $("#yearFilter_container").addClass("hidden");
+            $("#btn-newPay").addClass("hidden");
+            $("#btn-newInvoicePay").addClass("hidden");
+            $("#btn-newPartialPay").addClass("hidden");
+            $("#time_filter_cotainer").addClass("hidden");
+
+
+        } else {
+            $("#currency_container").removeClass("hidden");
+            $("#supplierFilter_container").removeClass("hidden");
+            $("#yearFilter_container").removeClass("hidden");
+            $("#btn-newPay").removeClass("hidden");
+            $("#btn-newInvoicePay").removeClass("hidden");
+            $("#btn-newPartialPay").removeClass("hidden");
+
+            var period = $("#SupplierYearFilter").data("kendoDropDownList");
+            var periodValue = period.value();
+
+            if (periodValue == 0) {
+                $("#time_filter_cotainer").removeClass("hidden");
+
+                let date = $("#KendoFromDate").data("kendoDatePicker");
+                date.element.focus();
+                date.element.select();
+            }
+
+            if (refresh)
+                $("#kendoGrid .k-pager-refresh")[0].click();
+
+        }
+    }
+
+    function yearFilterChange() {
+
+        var period = $("#SupplierYearFilter").data("kendoDropDownList");
+        var periodValue = period.value();
+
+        if (periodValue == 0) {
+            $("#time_filter_cotainer").removeClass("hidden");
+
+            let date = $("#KendoFromDate").data("kendoDatePicker");
+            date.element.focus();
+            date.element.select();
+
+        } else {
+            $("#time_filter_cotainer").addClass("hidden");
+
+            $("#kendoGrid .k-pager-refresh")[0].click();
+        }
+
+    }
+
+    function btnSearchClick() {
+        $("#kendoGrid .k-pager-refresh")[0].click();
+    }
+
+    function filterChange() {
+        $("#kendoGrid .k-pager-refresh")[0].click();
+    }
+
+    function GoToPurchase(element) {
+
+        $(".loader").removeClass("hidden");
+        var Id = $(element).attr('data-id');
+        var link = `/PurchaseInvoice/EditModal?Id=${Id}&goBack=true`;
+
+        SaveLastPositionToStorage();
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+    function GoToReturn(element) {
+
+        $(".loader").removeClass("hidden");
+        var Id = $(element).attr('data-id');
+        var link = `/ReturnPurchaseInvoice/EditModal?Id=${Id}&goBack=true`;
+
+        SaveLastPositionToStorage();
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+    function SaveLastPositionToStorage() {
+        let filters = GetSupplierId();
+
+        sessionStorage.SupplierId = filters.SupplierId;
+        sessionStorage.CurrencyId = filters.CurrencyId;
+        sessionStorage.SupplierFilter = filters.SupplierFilter;
+        sessionStorage.Year = filters.Year;
+        sessionStorage.DateFromTxt = filters.DateFromTxt;
+        sessionStorage.DateToTxt = filters.DateToTxt;
+
+    }
+
+</script>

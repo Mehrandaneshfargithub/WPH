@@ -1,0 +1,333 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newRoomText" class="hidden">@Localizer["New"] @Localizer["Room"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newRoomText" class="hidden">@Localizer["Room"] @Localizer["New"]</h3>
+    }
+
+    <h3 id="editRoomText" class="hidden">@Localizer["Edit"] @Localizer["Room"]</h3>
+}
+
+<div style="display:flex;@if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en"){
+    @:flex-direction: row-reverse
+    }">
+    <div style="flex:1;margin:0px 3%;display:flex;flex-direction:column;">
+        <div id="RoomBedContainer" style="flex:1;margin-bottom:2%;">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/RoomBed/wpRoomBed.cshtml", Guid.Empty)
+        </div>
+        <div id="RoomItemContainer" style="flex:1;margin-top:2%;">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/RoomItem/wpRoomItem.cshtml", Guid.Empty)
+        </div>
+    </div>
+
+    <div style="flex:1;margin:0px 3%;">
+        <div class="row page-header ">
+
+            <div class="@pull">
+                <h1 class="@font" style="font-size: 2.3rem">
+                    @Localizer["Room"]
+                </h1>
+
+            </div>
+            @if ((bool)ViewBag.AccessNewRoom)
+            {
+                <div class="font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+                    <a class="btn btn-danger" onClick="AddRoom(this)" href="#" style="padding:0.2rem">
+                        @Localizer["New"]
+                        <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                    </a>
+                </div>
+            }
+
+
+
+        </div><!-- /.page-header -->
+        <div style="display:flex;align-items:center; @if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                @:flex-direction: row-reverse;
+            }
+            else {
+                @:flex-direction: row;
+            } ">
+            <div class="@font" style="font-size: 2.3rem">
+                <label>
+                    @Localizer["ClinicSection"]
+                </label>
+            </div>
+            <div style="margin:0px 5px;">
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DropDownList()
+                    .Name("ClinicSection")
+                    .DataTextField("Name")
+                    .DataValueField("Guid")
+                    .OptionLabel(" ")
+                    //.Filter("contains")
+                    .DataSource(source =>
+                    {
+                    source.Read(read =>{ read.Action("GetAllNormalClinicSectionsForUser", "ClinicSection"); })
+                    .ServerFiltering(false);
+                    })
+                    )
+                </span>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div id="AddRoomModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+            <div class="modal-dialog" style="position:fixed;left: 0;right: 0;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeAddRoomModal()" aria-hidden="true">&times;</button>
+                        <h3 id="AddRoomModal-header" class="smaller lighter blue no-margin @font">
+                        </h3>
+                    </div>
+
+                    <div id="AddRoomModal-body" class="modal-body" style="width:60rem">
+                    </div>
+
+                    <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_DataNotValid"]
+                    </div>
+
+                    <div id="ERROR_ChangeRoomCapacity" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_ChangeRoomCapacity"]
+                    </div>
+
+                    <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_InsertWrong"]
+                    </div>
+
+                    <div class="modal-footer">
+
+                        @(Html.Kendo().Button()
+                        .Name("btn-addRoom-accept")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewRoom()" })
+                        .Content(Localizer["Ok"]))
+                        @(Html.Kendo().Button()
+                        .Name("btn-addRoom-close")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddRoomModal()" })
+                        .Content(Localizer["Exit"]))
+                    </div>
+                </div> @*.modal-content*@
+            </div> @*.modal-dialog*@
+        </div>
+
+
+        <!-- Grid -->
+        <div id="RoomContainer" class="row Grid-Content @font">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Room/dgRoomGrid.cshtml")
+        </div>
+    </div>
+</div>
+
+<div style="border-top: 1px solid #eee;margin: 3% 0px;padding: 1% 3%;">
+
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ReceptionRoomBed/dgReceptionRoomBedGrid.cshtml", Model)
+
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div id="snackbar">
+    <span>
+        @Localizer["PatientSelected"]
+    </span>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $("#ClinicSection").on('change', function () {
+            $.ajax({
+                type: "Get",
+                url: "/Room/RoomGrid?SectionId=" + this.value,
+                success: function (res) {
+                    $('#RoomContainer').html(res);
+                }
+            });
+        });
+
+    });
+
+    function SelectPatientReception(element) {
+        set_reception_value = element.getAttribute("data-id");
+        old_roomBed_value = element.getAttribute("data-bed");
+
+        $("#AddPatientBedModal #ERROR_NotSelected").addClass("hidden");
+        $("#AddPatientBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+
+        var x = document.getElementById("snackbar");
+        x.className = "show";
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 2000);
+    }
+
+    function ShowBedItem(element) {
+        var guid = element.getAttribute("data-id");
+
+        $.ajax({
+            type: "Get",
+            url: "/RoomBed/form?RoomId=" + guid,
+            success: function (res) {
+                $('#RoomBedContainer').html(res);
+            }
+        });
+
+        $.ajax({
+            type: "Get",
+            url: "/RoomItem/form?RoomId=" + guid,
+            success: function (res) {
+                $('#RoomItemContainer').html(res);
+            }
+        });
+    }
+
+    function AddRoom(element) {
+
+        $("#AddRoomModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomModal #ERROR_ChangeRoomCapacity").addClass("hidden");
+        $("#AddRoomModal #Name-Exist").addClass("hidden");
+
+        var link = "/Room/AddAndNewModal";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newRoomText").text();
+
+        $('#AddRoomModal-header').text(header);
+        $('#AddRoomModal').modal('toggle');
+        $('#AddRoomModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function EditRoom(element) {
+
+        $("#AddRoomModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomModal #ERROR_ChangeRoomCapacity").addClass("hidden");
+        $("#AddRoomModal #Name-Exist").addClass("hidden");
+
+        $('#AddRoomModal').modal('toggle');
+        let header = $("#editRoomText").text();
+        $('#AddRoomModal-header').text(header);
+        var link = "/Room/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddRoomModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function addNewRoom() {
+
+        $("#AddRoomModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomModal #ERROR_ChangeRoomCapacity").addClass("hidden");
+        $("#AddRoomModal #Name-Exist").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        var link = "/Room/AddOrUpdate";
+
+        var data = $("#addNewRoomForm").serialize();
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#AddRoomModal #Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ERROR_Data") {
+
+                        $('#AddRoomModal #ERROR_Data').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else if (response === "ERROR_ChangeRoomCapacity") {
+
+                        $('#AddRoomModal #ERROR_ChangeRoomCapacity').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else {
+
+                        $('#AddRoomModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddRoomModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#roomKendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $('#AddRoomModal #ERROR_SomeThingWentWrong').removeClass('hidden');
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                }
+            }
+        });
+    }
+
+    function closeAddRoomModal() {
+
+        $('#AddRoomModal').modal('hide');
+        $('#AddRoomModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+</script>

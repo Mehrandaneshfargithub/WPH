@@ -1,0 +1,124 @@
+﻿@model string
+@using WPH.Models.CustomDataModels.BaseInfo
+
+
+@(Html.Kendo().AutoCompleteFor(m => m)
+                          .Name("TestName")
+                          .DataTextField("Name")
+                          .ValuePrimitive(true)
+                          //.Suggest(true)
+                          //.Events(events => events.Select("OnMedcineSelect"))
+                          .Filter("contains")
+                          .MinLength(1)
+                          .ClearButton(false)
+                          .BindTo(ViewBag.AllTestList as IEnumerable<BaseInfoViewModel>)
+                          .HtmlAttributes(new { style = "width:100%" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllTests", "BaseInfo");
+                                });
+
+                            })
+
+)
+
+
+<script>
+
+    var Testautocomplete;
+
+    var TestcurCell;
+
+    $(document).ready(function () {
+
+        Testautocomplete = $("#TestName").data("kendoAutoComplete");
+        Testautocomplete.bind("select", OnTestSelect);
+
+    })
+
+
+    function OnTestSelect(e) {
+
+
+        var DataItem = this.dataItem(e.item.index());
+
+
+
+        TestcurCell = $("#PrescriptionTestDetailGrid").find(".k-edit-cell");
+
+        $(TestcurCell).text(DataItem.Name);
+
+        var prevCellText = $(TestcurCell).prev().text();
+
+
+        if (prevCellText != "0") {
+
+            Testgrid.editCell(TestcurCell.next());
+
+        }
+        else {
+
+            $(".loader").removeClass("hidden");
+                var visitId = $("#data").attr("data-visitId");
+                    $.ajax({
+                        url: '/Visit/AddTestToVisit',
+                        type: "Post",
+                        dataType: "JSON",
+                        data: { visitId: visitId, testId: DataItem.Guid },
+                        success: function (eventList) {
+                            Testgrid.bind("dataBound", Testgrid_dataBound);
+                            $("#PrescriptionTestDetailGrid").find(".k-i-refresh").click();
+
+
+                            $(".loader").fadeIn("slow");
+                            $(".loader").addClass("hidden");
+                        }
+
+                     });
+
+        }
+
+        //$(curCell).text(DataItem.JoineryName);
+
+        //grid.editCell(curCell.next());
+
+        //$(curCell).next().find("input").val(DataItem.Guid);
+
+        //grid.editCell(curCell.next().next());
+
+        //curCell = $("#PrescriptionDetailGrid").find(".k-edit-cell");
+
+        //$(curCell).html("<span class='k-dirty'></span>" + DataItem.JoineryName);
+
+        //curCell.next().next().find("input").val(DataItem.JoineryName);
+
+        //grid.editCell(curCell.next().next().next());
+        //$(curCell).next().next().removeClass("k-edit-cell");
+
+        //grid.closeCell();
+        //grid.table.focus();
+
+        //$(curCell).next().html("<span class='k-dirty'></span>" + DataItem.Guid);
+
+        //$(curCell).next().next().addClass("k-dirty-cell")
+
+        //$(curCell).next().next().html("<span class='k-dirty'></span>");
+        //$(curCell).next().next().text(DataItem.JoineryName);
+        //grid.editCell(curCell.next().next());
+
+    }
+
+    function Testgrid_dataBound() {
+
+
+        Testgrid.editCell("#PrescriptionTestDetailGrid td:eq(2)");
+        Testgrid.unbind("dataBound", Testgrid_dataBound);
+
+    }
+
+
+
+
+</script>

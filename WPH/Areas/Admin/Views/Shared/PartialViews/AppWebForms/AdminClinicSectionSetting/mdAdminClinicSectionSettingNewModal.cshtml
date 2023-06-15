@@ -1,0 +1,133 @@
+﻿@model WPH.Areas.Admin.Models.AdminClinicSectionSetting.AdminClinicSectionSettingViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewAdminClinicSectionSettingForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Id)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Sname")
+                                .Value(Model.Sname)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Sname-box" })
+                            )
+                        </span>
+                        <span id="Sname-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["SectionType"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("SectionTypeId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  .Filter("contains")
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllSectionNames", "SectionManagement", new { area = "Admin" });
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.SectionTypeId?.ToString())
+                                  .HtmlAttributes(new { style = "width: 100%;" , @data_checkEmpty = "SectionType-box" })
+                            )
+                        </span>
+                        <span id="SectionType-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["SectionType"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().DropDownList()
+                            .Name("InputType")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Filter("contains")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() {
+                                    Text = "Text",
+                                    Value = ""
+                                },
+                                new SelectListItem() {
+                                    Text = "int",
+                                    Value = "int"
+                                },
+                                new SelectListItem() {
+                                    Text = "bool",
+                                    Value = "bool"
+                                },
+                                new SelectListItem() {
+                                    Text = "image",
+                                    Value = "image"
+                                }
+                            })
+                            .Value(Model.InputType)
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+                        </span>
+                    </label>
+
+
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Sname").focus();
+        }, 200);
+    });
+
+    $('#Sname').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $("#SectionTypeId").data("kendoDropDownList").focus();
+            $('#SectionTypeId').data("kendoDropDownList").open();
+        }
+    });
+
+    $("#SectionTypeId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $("#InputType").data("kendoDropDownList").focus();
+            $('#InputType').data("kendoDropDownList").open();
+        }
+    });
+
+    $("#InputType").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+
+            $('#btn-AdminClinicSectionSettingModal-accept').focus();
+        }
+    });
+
+
+
+
+</script>
+

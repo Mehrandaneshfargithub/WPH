@@ -1,0 +1,117 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div id="ClinicSectionModal" class="modal fade @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } " data-backdrop="static" data-keyboard="false" style="@if (HttpContextAccessor.HttpContext.Session.GetString("culture")!= "en") {
+            @:direction:rtl
+                }">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" aria-hidden="true" onclick = "CloseClinicSection()">&times;</button>
+                <h3 id="ClinicSectionModal-header" class="smaller lighter blue no-margin @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } ">
+                    @Localizer["Section"] @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="ClinicSectionModal-body" class="modal-body " style="width:70rem">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-ClinicSectionModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right ", onclick= "AddNewClinicSection()" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-ClinicSectionModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right ", onclick = "CloseClinicSection()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    
+
+    function AddNewClinicSection() {
+
+
+        $('#addNewClinicSectionOrUserForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#addNewClinicSectionOrUserForm .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() !== undefined) {
+                    let text = $('[data-checkEmpty="' + empty + '"]').val().replace(/ /g, '');
+                    if (text === "") {
+                        $(this).removeClass('hidden');
+                        isEmmpty = false;
+                        return;
+                    }
+                }
+
+            }
+        });
+
+
+        
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+
+        var link = "/ClinicSection/AddOrUpdate";
+        
+        var data = $("#addNewClinicSectionOrUserForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else {
+
+                        $('#ClinicSectionModal').modal('toggle');
+                        $('#ClinicSectionModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        $("#kendoClinicSectionGrid .k-pager-refresh").click();
+                    }
+                }
+            }
+        });
+    }
+
+
+    function CloseClinicSection() {
+
+        $('#ClinicSectionModal').modal('hide');
+        $('#ClinicSectionModal-body').empty();
+
+    }
+
+</script>
+

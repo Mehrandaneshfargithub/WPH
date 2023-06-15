@@ -1,0 +1,238 @@
+﻿@model WPH.Models.CustomDataModels.MoneyConvert.MoneyConvertViewModel
+@using System.Globalization;
+@inject WPH.Resources.SharedViewLocalizer Localizer
+@{
+    CultureInfo cultures = new CultureInfo("en-US");
+}
+
+<script>
+
+
+    function CurrencyIdChange(e) {
+
+        var baseCurrency = $("#BaseCurrencyId").data("kendoDropDownList");
+        var destCurrency = $("#DestCurrencyId").data("kendoDropDownList");
+        $('#DisplayConvertTxt').empty();
+        $('#ConfirmBody').text('');
+
+        let display_txt = "";
+        if (baseCurrency.value() == destCurrency.value() || baseCurrency.value() == '' || destCurrency.value() == '') {
+
+            display_txt = `@Localizer["ERROR_DataNotValid"]`;
+
+        } else {
+            //let BaseAmount = parseFloat($("#BaseAmount").val()).toLocaleString('en');
+            let BaseAmount = $("#BaseAmount").val();
+            if (isNaN(BaseAmount) || BaseAmount == '' || BaseAmount == null)
+                BaseAmount = 0;
+            BaseAmount = parseFloat(BaseAmount).toLocaleString('en');
+
+            let DestAmount = parseFloat($("#DestAmount").val()).toLocaleString('en');
+            if (isNaN(DestAmount) || DestAmount == '' || DestAmount == null)
+                DestAmount = 0;
+            DestAmount = parseFloat(DestAmount).toLocaleString('en');
+
+            display_txt = ` ${baseCurrency.text()} ${BaseAmount} = ${destCurrency.text()} ${DestAmount}`;
+
+        }
+
+        var div = document.getElementById("DisplayConvertTxt");
+        div.insertAdjacentHTML('afterbegin', display_txt);
+        let bb = $('#ConfirmBody');
+        if (bb)
+            bb.text(display_txt);
+    }
+
+
+</script>
+<input type="hidden" id="ConfirmMoneyConvert" value="false" />
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addMoneyConvertForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Date"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("DateTxt")
+                                .Enable(false)
+                                .Value(Model.Date?.ToString("dd/MM/yyyy", cultures) ?? DateTime.Now.ToString("dd/MM/yyyy", cultures))
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Date-box" })
+                            )
+                        </span>
+                        <span id="Date-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Date-valid" class="emptybox hidden" style="color:red;">
+                            @Localizer["DateNotValid"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix ">
+                        <label for="form-field-8">@Localizer["BaseCurrency"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("BaseCurrencyId")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .Events(e => e.Change("CurrencyIdChange"))
+                            //.DataSource(source =>
+                            //{
+                            //    source.Read(read =>
+                            //    {
+                            //        read.Action("GetAllCurrencies", "BaseInfo");
+                            //    })
+                            //    .ServerFiltering(false);
+                            //})
+                            .Value(Model.BaseCurrencyId.ToString())
+                            .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "BaseCurrency-box" })
+                            )
+                        </span>
+                        <span id="BaseCurrency-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix ">
+                        <label for="form-field-8">@Localizer["DestCurrency"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("DestCurrencyId")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .Events(e => e.Change("CurrencyIdChange"))
+                            //.DataSource(source =>
+                            //{
+                            //    source.Read(read =>
+                            //    {
+                            //        read.Action("GetAllCurrencies", "BaseInfo");
+                            //    })
+                            //    .ServerFiltering(false);
+                            //})
+                            .Value(Model.DestCurrencyId.ToString())
+                            .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "DestCurrency-box" })
+                            )
+                        </span>
+                        <span id="DestCurrency-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["BaseAmount"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("BaseAmount")
+                                .Decimals(0)
+                                .Format("N0")
+                                .Value(Model.BaseAmount)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "BaseAmount-box" })
+                            )
+                        </span>
+                        <span id="BaseAmount-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["DestAmount"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("DestAmount")
+                                .Decimals(0)
+                                .Format("N0")
+                                .Value(Model.DestAmount)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "DestAmount-box" })
+                            )
+                        </span>
+                        <span id="DestAmount-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <div id="DisplayConvertTxt" style="text-align: center; font-size: 20px; color: red;">
+
+                    </div>
+
+                    <div class="space-16"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $.ajax({
+        type: "Get",
+        url: "/BaseInfo/GetAllCurrencies",
+        success: function (response) {
+
+            var baseCurrency = $("#BaseCurrencyId").data("kendoDropDownList");
+            baseCurrency.dataSource.data(response);
+            baseCurrency.value(@Model.BaseCurrencyId);
+
+            var destCurrency = $("#DestCurrencyId").data("kendoDropDownList");
+            destCurrency.dataSource.data(response);
+            destCurrency.value(@Model.DestCurrencyId);
+        }
+    });
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            $("#DateTxt").focus();
+        }, 200);
+
+    });
+
+    $('#DateTxt').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#BaseCurrencyId').data("kendoDropDownList").focus();
+        }
+    });
+
+    $('#BaseCurrencyId').parent().on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#DestCurrencyId').data("kendoDropDownList").focus();
+        }
+    });
+
+    $('#DestCurrencyId').parent().on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#BaseAmount').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $('#BaseAmount').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#DestAmount').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#BaseAmount").focusout(function () {
+
+        CurrencyIdChange();
+    });
+
+    $('#DestAmount').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#btn-MoneyConvertModal-accept').focus();
+        }
+    });
+
+    $("#DestAmount").focusout(function () {
+
+        CurrencyIdChange();
+    });
+
+</script>

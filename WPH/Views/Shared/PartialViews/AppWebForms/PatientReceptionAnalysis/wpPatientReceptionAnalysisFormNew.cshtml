@@ -1,0 +1,1102 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-right ";
+        direction = " ";
+        <input class="hidden" type="text" id="RTL" data-Value="False" />
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-left ";
+        direction = " direction:rtl; ";
+        <input class="hidden" type="text" id="RTL" data-Value="True" />
+    }
+}
+
+
+@Html.AntiForgeryToken()
+
+<div class="hidden">
+
+    <input id="Guid" />
+    <input id="CreatedUserId" />
+    <input id="PatientId" />
+    <input id="ReceptionDate" />
+    <input id="AddressId" />
+    <input id="DateOfBirthDay" />
+    <input id="DateOfBirthMonth" />
+    <input id="DateOfBirthYear" />
+    <input id="DoctorId" />
+    <input id="RadiologyDoctorId" />
+    <input id="ReceptionNum" />
+
+
+</div>
+
+<style>
+
+    li span.k-link {
+        color: rgba(0,0,0,0.7) !important;
+    }
+
+        li span.k-link:hover {
+            color: white !important;
+        }
+
+    .k-pager-nav {
+        background-color: rgba(0, 0, 51,0.8) !important;
+    }
+
+    span.k-pager-input {
+        color: rgba(0,0,0,0.7) !important;
+    }
+
+    span.k-pager-info {
+        color: rgba(0,0,0,0.7) !important;
+    }
+
+    new-btn-color {
+        background-color: rgba(52, 86, 139,0.8) !important;
+        color: white !important;
+    }
+
+    .modal-open {
+        padding-right: 0 !important
+    }
+
+    .boldText {
+        font-weight: 900 !important;
+        color: black !important;
+    }
+
+
+    .analysisButtons {
+        background-color: rgba(0, 0, 51,0.8);
+        border-radius: 1rem;
+        padding: 0.5rem;
+        transition: all 0.3s;
+        font-weight: 300 !important;
+    }
+
+        .analysisButtons:hover {
+            background-color: #34568b;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+    .k-tabstrip-wrapper li .k-link {
+        color: white !important;
+    }
+
+    .k-tabstrip-wrapper li.k-state-active .k-link {
+        color: black !important;
+    }
+
+        .k-tabstrip-wrapper li.k-state-active .k-link:hover {
+            color: white !important;
+        }
+</style>
+
+
+<input id="Translated" class="hidden" data-TotalTranslated="@Localizer["Total"]" data-DiscountTranslated="@Localizer["Discount"]" data-PriceTranslated="@Localizer["Price"]"
+       data-CodeTranslated="@Localizer["Code"]" data-TypeTranslated="@Localizer["Type"]" data-NameTranslated="@Localizer["Name"]" data-AmountTranslated="@Localizer["Amount"]"
+       data-DateTranslated="@Localizer["Date"]" data-ExplanationTranslated="@Localizer["Explanation"]" data-PleaseFillPatientName="@Localizer["PleaseFillPatientName"]" />
+
+
+<h3 class="hidden" id="Reception-Id">@ViewBag.ReceptionId</h3>
+<h3 class="hidden" id="PatientId-Id">@ViewBag.PatientId</h3>
+<h3 class="hidden" id="Doctor-Id">@ViewBag.DoctorId</h3>
+<h3 class="hidden" id="ReceptionClinicSectionDescription-Id">@ViewBag.ReceptionClinicSectionDescription</h3>
+<h3 class="hidden" id="ReceptionClinicSection-Id">@ViewBag.ReceptionClinicSectionId</h3>
+
+<div id="allPage" class="row @font" style="@direction">
+
+    <div class="col-sm-12" style="margin:1rem 0;border-bottom:1px dotted rgba(0,0,0,0.3);padding-bottom:1rem">
+
+        <div class="pull-left" style="margin-left: 1rem; direction: ltr">
+            <h3 class="MyFont-Roboto">@Localizer["InvoiceNum"]: <i id="ReceptionNumlbl" style="color:#34568b"></i></h3>
+        </div>
+
+        <div class="pull-right @font">
+            <a class="k-primary " style="padding: 0.8rem; font-weight: 400; margin-right: 0.5rem" onclick="OkAndNew()">@Localizer["Ok"] @Localizer["And"] @Localizer["New"]</a>
+        </div>
+
+        <div class="pull-right">
+            <a class="k-primary  " style="padding:0.8rem;font-weight:400;margin-right:0.5rem" onclick="OkAndExit()">@Localizer["Ok"] @Localizer["And"] @Localizer["Exit"]</a>
+        </div>
+
+        <div class="pull-right">
+            <a class="k-primary " style="padding:0.8rem;margin-right:0.5rem;font-weight:400" onclick="Exit()">@Localizer["Exit"]</a>
+        </div>
+
+        <div class="pull-right">
+            <a class="k-primary " style="padding:0.8rem;margin-right:0.5rem;font-weight:400" onclick="PatientReceptionAnalysisReport()">@Localizer["Print"] @Localizer["Reception"]</a>
+        </div>
+
+        @*<div class="pull-right" style="margin-left:1rem;margin-right:2rem">
+                <a id="btnLast" class="k-primary" style="padding:0.8rem;font-weight:400" onclick="GoToCustomReception('Last')"><i class="fa fa-angle-double-right bigger-130"></i></a>
+            </div>
+
+            <div class="pull-right" style="margin-left:1rem">
+                <a id="btnNext" class="k-primary" style=" padding: 0.8rem; font-weight: 400" onclick="GoToCustomReception('Next')"><i class="fa fa-angle-right bigger-130"></i></a>
+            </div>
+
+            <div class="pull-right" style="margin-left:1rem;border:solid ;transform:translateY(-20%)">
+                <input id="ReceptionNumber" />
+            </div>
+
+            <div class="pull-right" style="margin-left:1rem">
+                <a id="btnPrevius" class="k-primary" style="padding:0.8rem;font-weight:400" onclick="GoToCustomReception('Pre')"><i class="fa fa-angle-left bigger-130"></i></a>
+            </div>
+
+            <div class="pull-right" style="margin-left:1rem">
+                <a id="btnFirst" class="k-primary" style="padding:0.8rem;font-weight:400" onclick="GoToCustomReception('First')"><i class="fa fa-angle-double-left bigger-130"></i></a>
+            </div>*@
+
+        <style>
+
+            #onlineResult {
+                margin: 0 0.5rem
+            }
+        </style>
+
+        <div class="pull-right" style="margin: 0 2rem">
+
+            @(Html.Kendo().CheckBox()
+                    .Name("onlineResult")
+                    .Label("Online Result")
+                    .Checked(bool.Parse(ViewBag.UseOnlineResult ?? "false"))
+                    .HtmlAttributes(new { onchange = "onlineResultChange(this)"})
+                    )
+
+        </div>
+
+    </div>
+
+    @if ((bool)(ViewBag.UseOnlinePrescriptionTest ?? false))
+    {
+
+        <div class="col-sm-12 shadow-border" style="margin:0.1rem 0;">
+
+            <h3 class="MyFont-Roboto-grid">@Localizer["OnlinePrescription"] </h3>
+
+            <div class="hr hr-8 hr-dotted" style="clear:both"></div>
+
+            <div id="onlineTxtContainer" class="col-sm-12">
+
+                <div class="col-sm-12" style="display: flex; align-items: flex-end;">
+                    <div class="col-sm-4">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["PrescriptionNumber"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<int>()
+                                .Name("PrescriptionNumber")
+                                .Decimals(0)
+                                .Min(0)
+                                .Format("N0")
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "PrescriptionNumber-box" })
+                            )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Name"]/@Localizer["Mobile"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("NameMobile")
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "NameMobile-box" })
+                            )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-1">
+                        @(Html.Kendo().Button()
+                        .Name("btn-search-accept")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "searchPrescription()" })
+                        .Content(Localizer["search"]))
+                    </div>
+
+                    <div class="col-sm-3"></div>
+                </div>
+
+
+                <div class="col-sm-12">
+                    <div class="col-sm-4">
+                        <label class="block clearfix">
+                            <span id="PrescriptionNumber-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <label class="block clearfix">
+                            <span id="NameMobile-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-1"></div>
+
+                    <div class="col-sm-3"></div>
+                </div>
+
+            </div>
+
+            <div class="col-sm-12" style="display: flex; justify-content: center;">
+
+                <div id="onlineGridContainer" class="col-sm-12" style="clear:both;padding:5px;margin:10px;">
+
+                </div>
+            </div>
+
+        </div>
+
+    }
+
+    <h3 id="useDollar" class="hidden">@ViewBag.useDollar</h3>
+
+    <div class="col-sm-12 shadow-border" style="margin:0.1rem 0;">
+
+        <div class="col-sm-12">
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <span class="red fa fa-asterisk smaller-60 redStar"></span>
+                    <label id="PatientNameLabel" for="form-field-8">@Localizer["PatientName"]</label>
+                    <span class="block input-icon input-icon-right">
+
+                        <input id="Name2" style="width:100%;margin:0" data_checkEmpty="Name2-box" class="boldText" />
+
+                    </span>
+                    <span id="Name2-box" class="emptybox hidden" data-isEssential="true" style="color: red; ">
+                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <label for="form-field-8">@Localizer["Mobile"]</label>
+                    <span class="block input-icon input-icon-right">
+
+                        <input id="PhoneNumber" style="width:100%;margin:0" class="boldText"  onkeypress="return OnlyNumberKey(event)" />
+
+                    </span>
+                </label>
+
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <label for="form-field-8">@Localizer["Gender"]</label>
+                    <span class="block input-icon input-icon-right">
+
+                        <input id="GenderId" style="width:100%;margin:0" class="boldText" />
+
+                    </span>
+
+                </label>
+
+            </div>
+
+            <div style="display:flex;" class="col-lg-3 col-md-4 col-sm-6">
+
+                <div style="flex:3;">
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["DateOfBirth"]</label>
+                        <span class="block input-icon input-icon-right">
+
+                            <input id="DateOfBirth" class="boldText" title="datepicker" style="width: 100%; margin: 0" onchange="dateTimePickerWorkWithSpace(this)" />
+
+                        </span>
+
+                    </label>
+                </div>
+
+                <div style="flex:5;padding:0px 10px;">
+                    <label class="block clearfix">
+
+                        <label for="form-field-8" style="width:100%">@Localizer["Age"]</label>
+
+                        <span style="width:25%">
+                            <label for="form-field-8">@Localizer["Year"]: </label>
+
+                            <input id="Year" class="boldText" style="width: 25%;margin:0;padding:0" onkeypress="return OnlyNumberKey(event)"  onchange="ReserveInsertAge(this)" />
+
+                        </span>
+
+                        <span style="width:25%">
+
+                            <label for="form-field-8">@Localizer["Month"]: </label>
+
+                            <input id="Month" class="boldText" style="width: 25%;margin:0;padding:0" onkeypress="return OnlyNumberKey(event)"  onchange="ReserveInsertAge(this)" />
+
+                        </span>
+
+                    </label>
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <div class="col-sm-12">
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <label id="RadiologyDoctorNameLabel" for="form-field-8">@Localizer["RadiologyDoctor"]</label>
+                    <span class="block input-icon input-icon-right " onkeydown="">
+
+                        <input id="RadiologyDoctor" style="width:100%;margin:0" class="MyFont-Roboto-grid boldText" />
+
+                    </span>
+                </label>
+
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <label id="DoctorNameLabel" for="form-field-8">@Localizer["Name"] @Localizer["Doctor"]</label>
+                    <span class="block input-icon input-icon-right " onkeydown="">
+
+                        <input id="Doctor" style="width:100%;margin:0" class="MyFont-Roboto-grid boldText" />
+
+                    </span>
+                </label>
+
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <label for="form-field-8">@Localizer["DoctorSpeciality"]</label>
+                    <span class="block input-icon input-icon-right">
+
+                        <a href="\\#" class="btn btn-danger @pull" onclick="AddSpeciallity()" style="padding: 0 0.2rem; margin: 0"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+
+                        <input id="Speciality" style="width:80%;margin:0" class="MyFont-Roboto-grid boldText" />
+
+                    </span>
+                </label>
+
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <label class="block clearfix">
+                    <label for="form-field-8">@Localizer["Section"]</label>
+                    <span class="block input-icon input-icon-right">
+
+                        <input id="ClinicSectionId" style="width:100%;margin:0" class="MyFont-Roboto-grid boldText" />
+
+                    </span>
+                </label>
+
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 classHidden hidden">
+
+                <label for="form-field-8" style="font-size: 1.5rem;font-weight:900">@Localizer["MoneyConvert"]</label>
+
+                <div class="col-sm-12" style="direction:ltr">
+
+                    <div class="col-sm-3">
+                        <h3 style="transform:translateY(50%);font-size:1.3rem;text-align:right" class="MyFont-Roboto-grid">100 $</h3>
+
+                    </div>
+
+                    <div class="col-sm-2" style="text-align:center">
+                        <h3 style="transform:translateY(20%)">=</h3>
+                    </div>
+
+                    <div class="col-sm-7">
+
+                        <input id="MoneyConvertAmount" class="MyFont-Roboto-grid boldText" type="number" style="width: 100%; font-size: 1.3rem; margin: 0" />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="ReceptionClinicSectionDescriptionParent" class="col-sm-12 hidden">
+
+            <textarea id="ReceptionClinicSectionDescription" style="width: 100%;"></textarea>
+
+        </div>
+
+        <div class="col-sm-12 hidden">
+
+            <textarea id="Explanation" style="width: 100%;"></textarea>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-sm-12 shadow-border">
+
+        <div class="col-sm-11 MyFont-Roboto-grid">
+
+            <div id="buttonTabstrip" style="font-size: 1.4rem">
+                <ul>
+                    <li>
+                        @Localizer["GroupAnalysis"]
+                    </li>
+                    <li>
+                        @Localizer["Analyses"]
+                    </li>
+                    <li class="k-state-active">
+                        @Localizer["AnalysisItems"]
+                    </li>
+                </ul>
+                <div>
+                    <div id="groupAnalysisButton" class="col-sm-12" style="padding: 0; height: 8rem;overflow-y:auto">
+
+                        <div style="display: inline-block; position: absolute;left:50%;top:30%">
+                            <img src="~/Content/kendo/css/Default/loading_2x.gif" alt="" />
+                        </div>
+
+                    </div>
+                </div>
+                <div>
+                    <div id="analysisButton" class="col-sm-12" style="padding: 0; height: 8rem; overflow-y: auto;position:relative">
+
+                        <div style="display: inline-block; position: absolute;left:50%;top:30%">
+                            <img src="~/Content/kendo/css/Default/loading_2x.gif" alt="" />
+                        </div>
+
+                    </div>
+                </div>
+
+                <div>
+                    <div id="analysisItemButton" class="col-sm-12" style="padding: 0; height: 8rem; overflow-y: auto ">
+
+                        <div style="display: inline-block; position: absolute;left:50%;top:30%">
+                            <img src="~/Content/kendo/css/Default/loading_2x.gif" alt="" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-sm-1">
+
+            <div class="col-sm-12 k-primary MyFont-Merriweather-grid" style="padding: 0.8rem;font-weight: 400; text-align: center" onclick="ChosseAnalysisModal()">
+                Choose Analysis
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-sm-5 " style="height:40rem;margin:0.1rem 0">
+
+
+        <div class="col-sm-12 shadow-border">
+
+            <div class="col-sm-12" style="margin-bottom:2rem">
+
+                <div class="col-sm-8">
+                    <input id="AllNameAutoComplete" style="width:100%" />
+                </div>
+
+                <div class="col-sm-4">
+                    <input id="AllCodeAutoComplete" style="width:100%" />
+                </div>
+
+            </div>
+
+            <div class="col-sm-12" style="padding:0">
+
+                <div id="tabstrip" style="font-size: 1.4rem">
+                    <ul>
+                        <li>
+                            @Localizer["GroupAnalysis"]
+                        </li>
+                        <li>
+                            @Localizer["Analyses"]
+                        </li>
+                        <li class="k-state-active">
+                            @Localizer["AnalysisItems"]
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="col-sm-12" style="padding:0">
+
+                            <div class="col-sm-12" style="padding:0">
+
+                                <div class="col-sm-6">
+                                    <input id="GroupAnalysisNameAutoComplete" style="width:100%" />
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <input id="GroupAnalysisCodeAutoComplete" style="width: 100%" />
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-sm-12" style="direction: ltr; overflow: auto; margin-top: 2rem; padding: 0">
+
+                                <div id="groupAnalysisList" style="height: 180px; position: relative">
+
+                                    <div style="display: inline-block; position: absolute;left:50%;top:30%">
+                                        <img src="~/Content/kendo/css/Default/loading_2x.gif" alt="" />
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="col-sm-12" style="padding:0">
+
+                            <div class="col-sm-12" style="padding:0">
+
+                                <div class="col-sm-6">
+                                    <input id="AnalysisNameAutoComplete" style="width: 100%" />
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <input id="AnalysisCodeAutoComplete" style="width:100%" />
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-sm-12" style="direction:ltr;overflow:auto;margin-top:2rem;padding:0">
+
+                                <div id="analysisList" style="height: 180px; position: relative">
+
+                                    <div style="display: inline-block; position: absolute;left:50%;top:30%">
+                                        <img src="~/Content/kendo/css/Default/loading_2x.gif" alt="" />
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="col-sm-12" style="padding:0">
+
+                            <div class="col-sm-12" style="padding:0">
+
+                                <div class=" col-sm-6">
+                                    <input id="AnalysisItemNameAutoComplete" style="width:100%" />
+                                </div>
+
+                                <div class=" col-sm-4">
+                                    <input id="AnalysisItemCodeAutoComplete" style="width:100%" />
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-sm-12" style="direction:ltr;overflow:auto;margin-top:2rem;padding:0">
+
+                                <div id="analysisItemList" style="height: 180px; position: relative">
+
+                                    <div style="display: inline-block; position: absolute;left:50%;top:30%">
+                                        <img src="~/Content/kendo/css/Default/loading_2x.gif" alt="" />
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        @*<div class="col-sm-12 shadow-border classHidden hidden">
+
+            <div id="PatientReceptionReceivedDetailGrid" style="direction:ltr">
+
+            </div>
+
+        </div>*@
+
+    </div>
+
+    <div class="col-sm-7 shadow-border" style="height:auto;margin:0.1rem 0;overflow-y:auto">
+
+        <div class="col-sm-12">
+            <h3 class="MyFont-Roboto-grid" style="margin-bottom:1rem"> Selected Analysis </h3>
+            <div id="SelectedGrid" style="direction:ltr">
+
+
+
+            </div>
+
+        </div>
+
+        <div class="col-sm-12" style="direction:ltr;margin:1rem 0;">
+            <div class="pull-left MyFont-Merriweather-grid" style="border-radius:1rem">
+
+                <a class="k-primary" style="padding:0.7rem 0.3rem;color:white;border-radius:1rem" onclick="DeleteAllSelectedItems()">@Localizer["Delete"] @Localizer["All"]</a>
+
+            </div>
+
+        </div>
+
+        <div class="col-sm-12" style="margin:0.5rem 0 ;border-top:dotted 1px rgba(0,0,0,0.4);padding-top:1rem">
+            <div class=" col-md-4 ">
+                <h4 style="text-align:left" class="@font">
+                    @Localizer["TotalAmount"]
+                </h4>
+            </div>
+            <div class="  dollarclass  col-md-8 @font">
+
+                <input id="totalAmount" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+            <div class="col-md-4 classHidden hidden">
+
+                <input id="totalAmountDollar" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+        </div>
+
+        <div class="col-sm-12" style="margin:0.5rem 0">
+            <div class="col-md-4 ">
+                <h4 style="text-align:left" class="@font">
+                    @Localizer["Discount"]
+                </h4>
+            </div>
+            <div class="col-md-8 dollarclass">
+
+                <input id="DiscountAmount" class="MyFont-Roboto-grid boldText" style="width: 100%" onchange="changeDiscountAmount()" />
+
+            </div>
+
+            <div class="col-md-4 classHidden hidden">
+
+                <input id="Discount" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" onchange="changeDiscount()" />
+
+            </div>
+
+        </div>
+
+
+        <div class="col-sm-12" style="margin:0.5rem 0">
+            <div class="col-md-4 ">
+                <h4 style="text-align:left" class="@font">
+                    @Localizer["TotalAmount"] @Localizer["With"] @Localizer["Discount"]
+                </h4>
+            </div>
+            <div class="col-md-8 dollarclass">
+
+                <input id="totalAmountWithDiscount" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+            <div class="col-md-4 classHidden hidden">
+
+                <input id="totalAmountWithDiscountDollar" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+        </div>
+
+
+        <div class="col-sm-12 classHidden hidden" style="margin:0.5rem 0">
+            <div class="col-md-4">
+                <h4 style="text-align:left" class="@font">
+                    @Localizer["Remain"]
+                </h4>
+            </div>
+            <div class="col-md-8 dollarclass">
+
+                <input id="RemainedAmount" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+            <div class="col-md-4">
+
+                <input id="RemainedAmountDollar" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+        </div>
+
+        <div class="col-sm-12 classHidden hidden" style="margin:0.5rem 0">
+            <div class="col-md-4 col-lg-4">
+                <h4 style="text-align:left" class="@font">
+                    @Localizer["Receive"]
+                </h4>
+            </div>
+            <div class="col-md-4 col-lg-4">
+
+                <input id="PatientReceptionReceivedAmount" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+            <div class="col-md-4 col-lg-4">
+
+                <input id="PatientReceptionReceivedAmountDollar" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+
+        </div>
+
+        <div class="col-sm-12 classHidden hidden" style="margin:0.5rem 0">
+            <div class="col-md-4 ">
+                <h4 style="text-align:left" class="@font">
+                    @Localizer["Total"] @Localizer["Received"]
+                </h4>
+            </div>
+            <div class="col-md-4 ">
+
+                <input id="TotalReceived" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+            <div class="col-md-4 ">
+
+                <input id="TotalReceivedDollar" class="MyFont-Roboto-grid boldText" style="width: 100%; font-size: 1.4rem" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-sm-12 @font" style="margin:2rem 0">
+
+
+        <div class=" @pull">
+
+            <a href="#" id="btnOkNew" class="k-primary " style="padding: 0.8rem; font-weight: 400; margin-right: 0.5rem" onclick="OkAndNew()">@Localizer["Ok"] @Localizer["And"] @Localizer["New"]</a>
+
+        </div>
+
+
+        <div class=" @pull">
+
+            <a href="#" id="btnOkExit" class="k-primary " style="padding:0.8rem;font-weight:400;margin-right:0.5rem" onclick="OkAndExit()">@Localizer["Ok"] @Localizer["And"] @Localizer["Exit"]</a>
+
+        </div>
+
+        <div class=" @pull">
+
+            <a href="#" id="btnExit" class="k-primary " style="padding:0.8rem;margin-right:0.5rem;font-weight:400" onclick="Exit()">@Localizer["Exit"]</a>
+
+        </div>
+
+        <div class=" @pull">
+
+            <a href="#" id="btnPrint" class="k-primary " style="padding:0.8rem;margin-right:0.5rem;font-weight:400" onclick="PatientReceptionAnalysisReport()">@Localizer["Print"] @Localizer["Reception"]</a>
+
+        </div>
+
+        <div class=" @pull">
+
+            <a href="#" id="btnDescription" class="k-primary " style="padding:0.8rem;margin-right:0.5rem;font-weight:400" onclick="ShowDescription()">@Localizer["Desc"]</a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<input class="hidden" type="text" id="Speciallity" data-Value="@ViewBag.speciallityId" />
+
+<div id="AddressModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="CloseModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddressModal-header" class="smaller lighter blue no-margin @font">
+
+                    @Localizer["DoctorSpeciality"] @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="AddressModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button id="btn-address-accept" class="k-primary pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="addNewAddress()">@Localizer["Ok"]</button>
+
+
+                <button id="btn-address-close" class="pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="CloseModal()">@Localizer["Exit"]</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="MoneyConvertModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content col-xs-12">
+            <div class="modal-header col-xs-12">
+                <button type="button" class="close" aria-hidden="true">&times;</button>
+                <h3 id="MoneyConvertModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["MoneyConvert"]
+                </h3>
+            </div>
+
+            <div id="MoneyConvertModal-body" class="modal-body col-xs-12">
+
+            </div>
+
+            <div class="modal-footer col-xs-12">
+
+                <button id="btn-moneyConvert-accept" class="k-primary pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="addNewMoneyConvert()">@Localizer["Ok"]</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="AllMoneyConvertModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content col-xs-12">
+            <div class="modal-header col-xs-12">
+                <button type="button" class="close" onclick="closeAllMoneyConvertModal()" aria-hidden="true">&times;</button>
+                <h3 id="AllMoneyConvertModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["MoneyConvert"]
+                </h3>
+            </div>
+
+            <div id="AllMoneyConvertModal-body" class="modal-body col-xs-12">
+
+            </div>
+
+            <div class="modal-footer col-xs-12">
+
+                <button id="btn-allMoneyConvert-accept" class="k-primary pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="addAllNewMoneyConvert()">@Localizer["Ok"]</button>
+
+
+                <button id="btn-allMoneyConvert-close" class="pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="closeAllMoneyConvertModal()">@Localizer["Exit"]</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="PatientReceptionReceivedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content col-xs-12">
+            <div class="modal-header col-xs-12">
+                <button type="button" class="close" onclick="closePatientReceptionReceivedModal()" aria-hidden="true">&times;</button>
+                <h3 id="PatientReceptionReceivedModal-header" class="smaller lighter blue no-margin @font">
+                    Received
+                </h3>
+            </div>
+
+            <div id="PatientReceptionReceivedModal-body" class="modal-body col-xs-12">
+
+            </div>
+
+            <div class="modal-footer col-xs-12">
+
+                <button id="btn-PatientReceptionReceived-accept" class="k-primary pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="addNewPatientReceptionReceived()">@Localizer["Ok"]</button>
+
+
+                <button id="btn-PatientReceptionReceived-close" class="pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="closePatientReceptionReceivedModal()">@Localizer["Exit"]</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="PatientReceptionReceivedDetailedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content ">
+            <div class="modal-header ">
+                <button type="button" class="close" onclick="closePatientReceptionReceivedDetailedModal()" aria-hidden="true">&times;</button>
+                <h3 id="PatientReceptionReceivedDetailedModal-header" class="smaller lighter blue no-margin @font">
+                    Detail
+                </h3>
+            </div>
+
+            <div id="PatientReceptionReceivedDetailedModal-body" class="modal-body" style="width:50vw">
+
+            </div>
+
+            <div class="modal-footer ">
+
+                <button id="btn-PatientReceptionReceivedDetailed-close" class="pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="closePatientReceptionReceivedDetailedModal()">@Localizer["Exit"]</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="ChosseAnalysisModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content col-xs-12" style="width: 50vw">
+            <div class="modal-header col-xs-12">
+                <button type="button" class="close" onclick="closeChosseAnalysisModal()" aria-hidden="true">&times;</button>
+                <h3 id="ChosseAnalysisModal-header" class="smaller lighter blue no-margin @font">
+                    Choose Analysis
+                </h3>
+            </div>
+
+            <div id="ChosseAnalysisModal-body" class="modal-body col-xs-12">
+
+                <div id="tabstripChooseAnalysis" style="font-size: 1.4rem;width:100%;height:60vh;overflow:auto">
+                    <ul>
+                        <li>
+                            @Localizer["GroupAnalysis"]
+                        </li>
+                        <li class="k-state-active">
+                            @Localizer["Analyses"]
+                        </li>
+                        <li>
+                            @Localizer["AnalysisItems"]
+                        </li>
+                    </ul>
+                    <div>
+
+                        <div id="groupAnalysisListChooseAnalysis" class="col-sm-12" style="direction: ltr; overflow: auto; margin-top: 2rem; padding: 0">
+
+                        </div>
+
+                    </div>
+                    <div>
+
+                        <div id="analysisListChooseAnalysis" class="col-sm-12" style="direction: ltr; overflow: auto; margin-top: 2rem; padding: 0">
+
+                        </div>
+
+                    </div>
+                    <div>
+
+                        <div id="analysisItemListChooseAnalysis" class="col-sm-12" style="direction: ltr; overflow: auto; margin-top: 2rem; padding: 0">
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer col-xs-12 " style="display:inline-block">
+
+                <button id="btn-ChosseAnalysis-accept" class="k-primary pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="ChosseAnalysisAccept()">@Localizer["Ok"]</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+
+    .OtherCheckbox {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 1.5rem;
+        padding: 0.5rem 0;
+        font-weight: bolder;
+    }
+
+        .OtherCheckbox:hover {
+            background-color: rgba(86, 250, 15,0.2);
+            border-radius: 0.7rem;
+            cursor: pointer;
+        }
+
+    .kendoCheckbox {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 1.5rem;
+        padding: 0.5rem 0;
+        font-weight: bolder;
+    }
+
+        .kendoCheckbox:hover {
+            background-color: rgba(86, 250, 15,0.2);
+            border-radius: 0.7rem;
+            cursor: pointer;
+        }
+
+    .activeCheckbox {
+        background-color: greenyellow;
+        border-radius: 0.7rem;
+        border: solid rgb(56, 176, 4) 2px;
+    }
+
+    .k-primary {
+        padding: 0.5rem;
+    }
+
+        .k-primary:hover {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .k-primary a:hover {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+    .clearfix label {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .OddDivs {
+    }
+</style>
+
+
+<script>
+
+    var RTL = $("#RTL").attr('data-Value');
+
+</script>
+
+<script src="~/Content/Js/PatientReceptionAnalysisNew.js"></script>

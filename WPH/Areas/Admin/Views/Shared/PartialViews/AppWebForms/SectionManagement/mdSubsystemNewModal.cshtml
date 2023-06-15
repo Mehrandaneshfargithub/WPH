@@ -1,0 +1,190 @@
+﻿@model WPH.Areas.Admin.Models.SectionManagement.SubsystemViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewSubsystemForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Id)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Parent"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("Parent")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .Filter("contains")
+                            .OptionLabel(" ")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSubsystemParents", "SectionManagement", new { area = "Admin" });
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.Parent?.ToString())
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Link"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Link")
+                                .Value(Model.Link)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["ShowName"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("ShowName")
+                                .Value(Model.ShowName)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "ShowName-box" })
+                            )
+                        </span>
+                        <span id="ShowName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Priority"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<int>()
+                                .Name("Priority")
+                                .Value(Model.Priority)
+                                .Decimals(0)
+                                .Min(1)
+                                .Format("0")
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Priority-box" })
+                            )
+                        </span>
+                        <span id="Priority-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Icon"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Icon")
+                                .Value(Model.Icon)
+                                .HtmlAttributes(new { style = "width: 95%" })
+                            )
+
+                            <span class='blue' style="width:5%;">
+                                <i id="IconShow" class='ace-icon fa @Model.Icon bigger-120' aria-hidden='true'></i>
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        @(Html.Kendo().CheckBox()
+                        .Name("Active")
+                        .Checked(Model.Active.GetValueOrDefault(false))
+                        .Label(Localizer["Active"])
+                        .HtmlAttributes(new {style=""}))
+                    </label>
+
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+    });
+
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#Name").select();
+    });
+
+    $('#Name').on('keypress', function (e) {
+        if (e.which === 13) {
+            $('#Parent').data("kendoDropDownList").focus();
+        }
+    });
+
+    $("#Parent").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $("#Link").focus();
+        }
+    });
+
+    $("#Link").on("keypress", function (e) {
+        if (e.which === 13) {
+            $("#ShowName").focus();
+        }
+    });
+
+    $("#ShowName").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Priority').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Priority").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Icon').focus();
+        }
+    });
+
+    $("#Icon").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Active').focus();
+        }
+    });
+
+    $("#Active").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-SubsystemModal-accept').focus();
+        }
+    });
+
+    $('#Icon').on('input', function (e) {
+        $("#IconShow").removeClass();
+        var txt = $('#Icon').val();
+        $("#IconShow").addClass(`ace-icon fa ${txt} bigger-120`);
+    });
+
+</script>

@@ -1,0 +1,362 @@
+﻿
+@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newCostText" class="hidden">@Localizer["New"] @Localizer["Cost"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newCostText" class="hidden">@Localizer["Cost"] @Localizer["New"]</h3>
+    }
+    <h3 id="editCostText" class="hidden">@Localizer["Edit"] @Localizer["Cost"]</h3>
+
+}
+
+@Html.AntiForgeryToken()
+<div class="row page-header">
+    <div class="@pull ">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Costs"]
+        </h1>
+
+    </div>
+
+
+    <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+        <a class="btn btn-danger" onClick="AddCost()" href="#" style="padding:0.2rem">
+            @Localizer["New"]
+            <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+        </a>
+    </div>
+
+    <button type="button" class="close" onclick="closeShowCostsListModal()" aria-hidden="true">&times;</button>
+
+
+</div>
+
+<div class="space-10"></div>
+
+<div class="row MyFont-Roboto-grid">
+
+
+</div>
+
+
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Cost/dgSaleInvoiceCostGrid.cshtml", Model)
+</div>
+
+
+<div id="CostModal" class="modal fade  @font" data-backdrop=" static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="position: fixed; left: 0; right: 0;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeCostModal()" aria-hidden="true">&times;</button>
+                <h3 id="CostModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="CostModal-body" class="modal-body" style="width:70rem">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                .Name("btn-CostModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-CostModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeCostModal()" })
+                .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="DeleteCostModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm" style="position: fixed; left: 0; right: 0;">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeDeleteCostModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteCostModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+
+                <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["InvoiceInUse"]
+                </div>
+
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteCost-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteCost-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeDeleteCostModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    function closeCostModal() {
+
+        $('#CostModal').modal('toggle');
+        $('#CostModal-body').empty();
+
+    }
+
+    function AddCost() {
+        $("#CostModal #ERROR_Data").addClass("hidden");
+        $("#CostModal #InvoiceInUse").addClass("hidden");
+        $("#CostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        let header = $("#newCostText").text();
+        $("#CostModal-header").text(header);
+
+        var link = `/Cost/SaleInvoiceCostAddNewModal?SaleInvoiceId=${'@Model'}`;
+
+        $(".loader").removeClass("hidden");
+        $('#CostModal').modal('toggle');
+        $('#CostModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+            let num = $("#InvoiceNum1").val();
+
+
+            $("#InvoiceNumCost").val(num);
+
+        });
+    }
+
+    function EditCost(element) {
+        $("#CostModal #ERROR_Data").addClass("hidden");
+        $("#CostModal #InvoiceInUse").addClass("hidden");
+        $("#CostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        let header = $("#editCostText").text();
+        $("#CostModal-header").text(header);
+
+        var link = "/Cost/SaleInvoiceCostEditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#CostModal').modal('toggle');
+        $('#CostModal-body').load(link + Id, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+
+    $("#btn-CostModal-accept").on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#CostModal #ERROR_Data").addClass("hidden");
+        $("#CostModal #InvoiceInUse").addClass("hidden");
+        $("#CostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#CostModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#CostModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-CostModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Cost/SaleInvoiceCostAddOrUpdate";
+        var data = $("#addNewCostForm").serialize();
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-CostModal-accept').removeAttr("disabled");
+
+                if (response === 0) {
+
+                    $("#CostModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#CostModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    $("#CostModal #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#CostModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    $('#CostModal-body').empty();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#kendoCostGrid .k-pager-refresh")[0].click();
+
+                }
+            }
+        });
+
+
+    });
+
+    function closeDeleteCostModal() {
+
+        $('#DeleteCostModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+    }
+
+    function GridDeleteCostFunction(element) {
+        $("#DeleteCostModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteCostModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteCostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteCostModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeleteCost-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+
+    $("#btn-DeleteCost-accept").on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteCostModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteCostModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteCostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        var link = "/Cost/SaleInvoiceCostRemove";
+        var Id = $(this).attr('data-id');
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                costId: Id
+            },
+            success: function (response) {
+                $('#btn-DeleteCost-accept').removeAttr("disabled");
+
+                if (response === 0) {
+
+                    $("#DeleteCostModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+
+                    $("#DeleteCostModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#DeleteCostModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong") {
+
+                    $("#DeleteCostModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#DeleteCostModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    $('#DeleteCostModal-body').empty();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#kendoCostGrid .k-pager-refresh")[0].click();
+
+                }
+            }
+        });
+
+
+    });
+
+
+</script>
+
+
+

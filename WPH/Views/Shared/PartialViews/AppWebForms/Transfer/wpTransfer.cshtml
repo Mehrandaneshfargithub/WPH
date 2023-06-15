@@ -1,0 +1,676 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", pull_rev = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        direction = "  ";
+        <h3 id="newTransferText" class="hidden">@Localizer["New"] @Localizer["Transfer"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        direction = " direction:rtl; ";
+        <h3 id="newTransferText" class="hidden">@Localizer["Transfer"] @Localizer["New"]</h3>
+    }
+    <h3 id="editTransferText" class="hidden">@Localizer["Edit"] @Localizer["Transfer"]</h3>
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Transfers"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewTransfer)
+    {
+        <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddTransfer(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+    @if ((bool)(ViewBag.AccessPrintTransfer ?? false))
+    {
+        <div class="@pull_rev" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="" onClick="ShowTransferReport()" style="padding:0.2rem;cursor:pointer;font-size: 20px;">
+                <span>
+                    <i class="ace-icon fa fa-print align-top bigger-125"></i>
+                </span>
+            </a>
+        </div>
+    }
+
+</div><!-- /.page-header -->
+
+<script>
+    function GetPeriodAndFilterForTransfer() {
+
+        var periodId = $('#period-id').attr('data-Value');
+
+        var fromDate = $("#KendoFromDate").data("kendoDatePicker");
+        var toDate = $("#KendoDateTo").data("kendoDatePicker");
+
+        var frDate = fromDate.value();
+        var tDate = toDate.value();
+        let frMonth = frDate.getMonth() + 1;
+        let frDay = frDate.getDate();
+        let toMonth = tDate.getMonth() + 1;
+        let toDay = tDate.getDate();
+
+        if (frMonth < 10)
+            frMonth = "0" + frMonth;
+        if (toMonth < 10)
+            toMonth = "0" + toMonth;
+        if (frDay < 10)
+            frDay = "0" + frDay;
+        if (toDay < 10)
+            toDay = "0" + toDay;
+
+        let from = frDate.getFullYear() + "-" + frMonth + "-" + frDay;
+        let too = tDate.getFullYear() + "-" + toMonth + "-" + toDay;
+
+        let Type = $("#Type").data("kendoDropDownList");
+        let ClinicSection = $("#ClinicSection").data("kendoDropDownList");
+
+        let filterViewModel = {
+            PeriodId: periodId,
+            TxtDateFrom: from,
+            TxtDateTo: too,
+            TypeId: Type.value(),
+            ClinicSectionId: ClinicSection.value()
+        };
+
+        return filterViewModel;
+    }
+</script>
+
+<div style="overflow:hidden;">
+
+    <div class="col-sm-12 @font">
+
+        <div class="col-sm-3">
+            @(Html.Kendo().DropDownList()
+            .Name("periods")
+            .BindTo(Model.periods)
+            .DataTextField("Name")
+            .DataValueField("Id")
+            .Filter("contains")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+            )
+        </div>
+
+        <div class="col-sm-3">
+            @(Html.Kendo().DropDownList()
+            .Name("filters")
+            .BindTo(Model.filters)
+            .DataTextField("Name")
+            .DataValueField("Id")
+            .OptionLabel(" ")
+            .Filter("contains")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem;", onchange = "FiltersChange()" })
+            )
+        </div>
+
+        <div class="col-sm-3 hidden" id="TypeFilter">
+            @(Html.Kendo().DropDownList()
+            .Name("Type")
+            .DataTextField("Text")
+            .DataValueField("Value")
+            .Filter("contains")
+            .OptionLabel(" ")
+            .BindTo(new List<SelectListItem>() {
+                new SelectListItem() {
+                    Text = Localizer["Send"],
+                    Value = "1"
+                },
+                new SelectListItem() {
+                    Text = Localizer["Recive"],
+                    Value = "2"
+                }
+            })
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem;", onchange = "SetFilter()" })
+                )
+        </div>
+
+        <div class="col-sm-3 hidden" id="ClinicSectionFilter">
+            @(Html.Kendo().DropDownList()
+            .Name("ClinicSection")
+            .DataTextField("Name")
+            .DataValueField("Guid")
+            .OptionLabel(" ")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetSourceClinicSections", "Transfer");
+                })
+                .ServerFiltering(false);
+            })
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem;", onchange = "SetFilter()" })
+                )
+        </div>
+
+
+    </div>
+
+    <div class="col-sm-12 @font hidden" id="searchDiv" style="margin-top:20px;display:flex;align-items: flex-end;@direction">
+
+        <div class="col-sm-3 " style="">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["FromDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoFromDate")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div class="col-sm-3 " style="">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["ToDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoDateTo")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div id="" class="col-sm-2 " style="">
+
+            @(Html.Kendo().Button()
+                .Name("btn-search-purchase")
+                .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;margin-bottom:5px;", type = "button", @class = "k-primary ", onclick = "btnSearchClick()" })
+                .Content("<i class='fa fa-search'></i>"))
+
+        </div>
+
+    </div>
+
+</div>
+
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div id="AddTransferModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddTransferModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddTransferModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddTransferModal-body" class="modal-body" style="width:60rem">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addTransfer-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right"})
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addTransfer-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddTransferModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+
+<div id="AddTransferDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="width:85%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddTransferDetailModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddTransferDetailModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["TransferDetails"]
+                </h3>
+            </div>
+
+            <div id="AddTransferDetailModal-body" class="modal-body" style="margin:5px;">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addTransferDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddTransferDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteTransferModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteTransferModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+
+            </div>
+
+            <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div id="ERROR_UsedInOtherTransfer" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordUsedInOtherTransfer"]
+            </div>
+
+            <div id="ERROR_TransferAccepted" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordAcceptedInDestination"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteTransferModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteTransferModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Transfer/dgTransferGrid.cshtml")
+</div>
+
+
+<script>
+
+    function SetFilter() {
+
+        $("#transferKendoGrid").find(".k-i-reload").click();
+    }
+
+    function PeriodsChange() {
+
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        var fromTo = $("#FromTo").text();
+
+        if (periodValue === fromTo) {
+
+            $("#searchDiv").removeClass("hidden");
+
+            let date = $("#KendoFromDate").data("kendoDatePicker");
+            date.element.focus();
+            date.element.select();
+
+        } else {
+
+            $("#searchDiv").addClass("hidden");
+
+            $("#transferKendoGrid").find(".k-i-reload").click();
+
+        }
+
+    }
+
+    function btnSearchClick() {
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        $("#transferKendoGrid").find(".k-i-reload").click();
+    }
+
+    function FiltersChange() {
+
+        var filter = $("#filters").data("kendoDropDownList");
+        var filterValue = filter.value();
+
+        var type = $("#Type").data("kendoDropDownList");
+        type.value("");
+        var clinicSection = $("#ClinicSection").data("kendoDropDownList");
+        clinicSection.value("");
+
+        if (filterValue == '1') {
+
+            $("#TypeFilter").removeClass("hidden");
+            $("#ClinicSectionFilter").addClass("hidden");
+
+        } else if (filterValue == '2') {
+
+            $("#TypeFilter").addClass("hidden");
+            $("#ClinicSectionFilter").removeClass("hidden");
+
+        } else {
+
+            $("#TypeFilter").addClass("hidden");
+            $("#ClinicSectionFilter").addClass("hidden");
+            $("#transferKendoGrid").find(".k-i-reload").click();
+
+        }
+
+    }
+
+    function AddTransfer(element) {
+
+        $(".loader").removeClass("hidden");
+        $(".page-content").load("/Transfer/AddAndNewModal", function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+        //$("#AddTransferModal #ERROR_Data").addClass("hidden");
+        //$("#AddTransferModal #Date-valid").addClass("hidden");
+        //$("#AddTransferModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        //var link = "/Transfer/AddAndNewModal";
+        //$(".loader").removeClass("hidden");
+
+        //let header = $("#newTransferText").text();
+
+        //$('#AddTransferModal-header').text(header);
+        //$('#AddTransferModal').modal('toggle');
+        //$('#AddTransferModal-body').load(link, function () {
+        //    $(".loader").fadeIn("slow");
+        //    $(".loader").addClass("hidden");
+        //});
+
+    }
+
+    function EditTransfer(element) {
+
+        $(".loader").removeClass("hidden");
+        var link = "/Transfer/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".page-content").load(link + Id, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+        //$("#AddTransferModal #ERROR_Data").addClass("hidden");
+        //$("#AddTransferModal #Date-valid").addClass("hidden");
+        //$("#AddTransferModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        //$('#AddTransferModal').modal('toggle');
+        //let header = $("#editTransferText").text();
+        //$('#AddTransferModal-header').text(header);
+        //var link = "/Transfer/EditModal?Id=";
+        //var Id = $(element).attr('data-id');
+        //$(".loader").removeClass("hidden");
+        //$('#AddTransferModal-body').load(link + Id + '', function () {
+        //    $(".loader").fadeIn("slow");
+        //    $(".loader").addClass("hidden");
+
+        //});
+
+    }
+
+
+    $('#btn-addTransfer-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddTransferModal #ERROR_Data").addClass("hidden");
+        $("#AddTransferModal #Date-valid").addClass("hidden");
+        $("#AddTransferModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-addTransfer-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Transfer/AddOrUpdate";
+        var data = $("#addNewTransferForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-addTransfer-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "DateNotValid") {
+
+                        $("#AddTransferModal #Date-valid").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddTransferModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddTransferModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddTransferModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#transferKendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AddTransferModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAddTransferModal() {
+
+        $('#AddTransferModal').modal('hide');
+        $('#AddTransferModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+
+
+    function AddTransferDetail(element) {
+        $("#AddTransferDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddTransferDetailModal #Date-valid").addClass("hidden");
+        $("#AddTransferDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(element).attr('data-id');
+        var link = `/TransferDetail/Form?transferId=${Id}`;
+        $(".loader").removeClass("hidden");
+
+        $('#AddTransferDetailModal').modal('toggle');
+        $('#AddTransferDetailModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+
+    function closeAddTransferDetailModal() {
+
+        $('#AddTransferDetailModal').modal('hide');
+        $('#AddTransferDetailModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+    function ShowTransferReport() {
+        $(".loader").removeClass("hidden");
+
+        let link = "/Transfer/ShowReport";
+
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    function TransferDeleteFunction(element) {
+
+        $("#DeleteTransferModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteTransferModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteTransferModal #ERROR_UsedInOtherTransfer").addClass("hidden");
+        $("#DeleteTransferModal #ERROR_TransferAccepted").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteTransferModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeleteTransferModal-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-DeleteTransferModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteTransferModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteTransferModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteTransferModal #ERROR_UsedInOtherTransfer").addClass("hidden");
+        $("#DeleteTransferModal #ERROR_TransferAccepted").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/Transfer/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-DeleteTransferModal-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteTransferModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#transferKendoGrid .k-pager-refresh")[0].click();
+
+                } else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+
+                    $("#DeleteTransferModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                } else if (response === "TransferInUse") {
+
+                    $("#DeleteTransferModal #ERROR_UsedInOtherTransfer").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                } else if (response === "TransferAccepted") {
+
+                    $("#DeleteTransferModal #ERROR_TransferAccepted").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong") {
+
+                    $("#DeleteTransferModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                } else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+
+    });
+
+</script>

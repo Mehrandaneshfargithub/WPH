@@ -1,0 +1,538 @@
+﻿@model WPH.Models.CustomDataModels.ReserveDetail.ReserveDetailViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<style>
+
+    .k-checkbox-label {
+        font-size: 1.6rem;
+        margin-right: 0.5rem;
+    }
+</style>
+
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="PatientVisitForm" autocomplete="off">
+                <fieldset>
+
+                    @Html.AntiForgeryToken()
+
+
+                    @Html.HiddenFor(m => m.Patient.DateOfBirthYear, new { @id = "VisitPatientDateOfBirthYear" })
+                    @Html.HiddenFor(m => m.Patient.DateOfBirthMonth, new { @id = "VisitPatientDateOfBirthMonth" })
+                    @Html.HiddenFor(m => m.Patient.DateOfBirthDay, new { @id = "VisitPatientDateOfBirthDay" })
+                    @Html.HiddenFor(m => m.PatientId, new { @id = "VisitPatientPatientId" })
+
+
+                    <script>
+
+
+                        function OnSelectName(e) {
+
+
+
+                            var DataItem = this.dataItem(e.item.index());
+                            var id = this.element.attr('id');
+
+                            if (id === "VisitPatientName") {
+                                setTimeout(function () {
+                                    $("#VisitPatientName").val(DataItem.Name);
+                                });
+                                $("#VisitPatientPatientId").val(DataItem.Guid);
+                            }
+
+                            $("#VisitPatientDateOfBirth").val(DataItem.DateOfBirth);
+                            $("#VisitPatientPhoneNumber").val(DataItem.PhoneNumber);
+
+                            var dropdownlist = $("#VisitPatientGenderId").data("kendoDropDownList");
+                            dropdownlist.value(DataItem.GenderId);
+
+                            let date = $("#VisitPatientDateOfBirth").data("kendoDatePicker");
+                            date.element.focus();
+
+                            setTimeout(function () {
+
+                                $("#VisitPatientName").focus();
+                                date.element.focus();
+                            })
+
+
+                        }
+
+                    </script>
+
+                    <div class="col-xs-12">
+
+                        <label class="block clearfix">
+                            <span class="red">*</span>
+                            <label for="form-field-8">@Localizer["FName"] : </label>
+                            <span class="block input-icon input-icon-right " onkeydown="">
+
+ 
+                                @(Html.Kendo().AutoComplete()
+                                      .Name("Patient.Name")
+                                .DataTextField("NameAndFileNum")
+                                .Events(events => events.Select("OnSelectName"))
+                                .Filter("contains")
+                                .HighlightFirst(true)
+
+                                .ClearButton(false)
+                                .HtmlAttributes(new { @id = "VisitPatientName", style = "width:100%", @data_checkEmpty = "VisitPatientName-box" })
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetPatient", "Reserves");
+                                    })
+                                    .ServerFiltering(false);
+                                })
+                                .Value(Model.Patient?.Name)
+                                )
+
+
+                            </span>
+                            <span id="VisitPatientName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+
+                        <script>
+
+                            function changeBirthOfDatePatientDatetimePickerVisitPatient() {
+
+
+
+                                var age = getAgeVisitPatient(kendo.toString(this.value(), 'd'));
+
+
+                                // $('#Age').val(age);
+                            }
+
+                            function getAgeVisitPatient(dateString) {
+
+
+                                var today = new Date();
+                                var birthDate = new Date(dateString);
+
+
+                                var age = today.getFullYear() - birthDate.getFullYear();
+                                var m = today.getMonth() - birthDate.getMonth();
+                                if (m < 0) {
+                                    age--;
+                                    m = 12 + m;
+                                }
+                                if (m === 0 && today.getDate() < birthDate.getDate()) {
+                                    age--;
+                                    m = 11;
+                                }
+                                //if (m === 12) {
+                                //    age++;
+                                //    m = 0;
+                                //}
+
+                                let mon = birthDate.getMonth() + 1;
+                                $('#VisitPatientYear').val(age);
+                                $('#VisitPatientMonth').val(m);
+                                $('#VisitPatientDateOfBirthYear').val(birthDate.getFullYear());
+                                $('#VisitPatientDateOfBirthMonth').val(mon);
+                                $('#VisitPatientDateOfBirthDay').val(birthDate.getDate());
+
+                                //return age;
+                            }
+
+                        </script>
+
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["DateOfBirth"] : </label>
+                            <span class="block input-icon input-icon-right">
+
+                                @(Html.Kendo().DatePicker()
+                                    .Name("Patient.DateOfBirth")
+                                    .Value(Model.Patient?.DateOfBirth)
+                                    .Format("dd/MM/yyyy")
+                                    .Max(DateTime.Now)
+                                    .Min(new DateTime(1900,1,1))
+                                    .Animation(false)
+                                    .Events(e =>
+                                    {
+                                        e.Change("changeBirthOfDatePatientDatetimePickerVisitPatient");
+                                    })
+                                    .HtmlAttributes(new { @id = "VisitPatientDateOfBirth", style = "width: 100%", title = "datepicker", onchange = "dateTimePickerWorkWithSpace(this)"})
+                                )
+
+                                <label for="form-field-8" style="width:100%">@Localizer["Age"] : </label>
+
+                                <span style="width:25%">
+                                    <label for="form-field-8">@Localizer["Year"] : </label>
+                                    @(Html.Kendo().TextBox()
+                                        .Name("Patient.Year")
+                                        //.Readonly(true)
+                                        //.Placeholder(@ViewBag.YearTranslated)
+                                        //.Value(Model.Age.ToString())
+                                        .HtmlAttributes(new { onchange = "ReserveInsertAgeVisitPatient(this)", id = "VisitPatientYear", style = "width: 25%", onkeypress = "return OnlyNumberKey(event)" })
+                                    )
+                                </span>
+
+
+                                <span style="width:25%">
+
+                                    <label for="form-field-8">@Localizer["Month"] : </label>
+
+                                    @(Html.Kendo().TextBox()
+                                        .Name("Patient.Month")
+                                        //.Readonly(true)
+                                        //.Placeholder(@ViewBag.MonthTranslated)
+                                        //.Value(Model.Age.ToString())
+                                        .HtmlAttributes(new { onchange = "ReserveInsertAgeVisitPatient(this)", id = "VisitPatientMonth", style = "width: 25%", onkeypress = "return OnlyNumberKey(event)" })
+                                    )
+
+                                </span>
+
+
+                            </span>
+                            <span id="Age-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+
+                        <script>
+
+
+                            function OnPhoneNumberSelectVisitPatient(e) {
+
+                                var DataItem = this.dataItem(e.item.index());
+
+                                $("#VisitPatientDateOfBirth").val(DataItem.DateOfBirth);
+                                $("#VisitPatientName").val(DataItem.Name);
+
+                                var dropdownlist = $("#VisitPatientGenderId").data("kendoDropDownList");
+
+                                dropdownlist.value(DataItem.GenderId);
+
+                                let date = $("#VisitPatientDateOfBirth").data("kendoDatePicker");
+                                date.element.focus();
+                                setTimeout(function () {
+                                    $("#VisitPatientPhoneNumber").val(DataItem.PhoneNumber);
+                                })
+
+                                dropdownlist.focus();
+                                //$('#btn-NewPatientModal-accept').focus();
+
+                            }
+
+
+                        </script>
+
+
+                        @{
+                            if (HttpContextAccessor.HttpContext.Session.GetString("PatientPhoneRequired") == "true")
+                            {
+                                <label class="block clearfix">
+                                    <span class="red">*</span><label for="form-field-8">@Localizer["Mobile"] : </label>
+                                    <span class="block input-icon input-icon-right">
+
+                                        @(Html.Kendo().AutoComplete()
+                                     .Name("Patient.PhoneNumber")
+                                     .DataTextField("PhoneNumberAndName")
+                                     .BindTo(Model.Patient.PhoneNumber)
+                                     .Events(events => events.Select("OnPhoneNumberSelectVisitPatient"))
+                                     .Filter("contains")
+                                     .HighlightFirst(true)
+                                     .MinLength(0)
+                                     .ClearButton(false)
+                                     .HtmlAttributes(new { @id = "VisitPatientPhoneNumber", style = "width:100%", @data_checkEmpty = "VisitPatientPhoneNumber-box" })
+                                     .DataSource(source =>
+                                     {
+                                         source.Read(read =>
+                                         {
+                                             read.Action("GetPatient", "Reserves");
+                                         })
+                                         .ServerFiltering(false);
+                                     })
+                                     .Value(Model.Patient.PhoneNumber)
+                                )
+
+
+                                    </span>
+                                    <span id="VisitPatientPhoneNumber-box" class="emptybox hidden" data-isEssential="false" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+                                </label>
+                            }
+                            else
+                            {
+
+
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Mobile"] : </label>
+                                    <span class="block input-icon input-icon-right">
+
+                                        @(Html.Kendo().TextBox()
+                                            .Name("Patient.PhoneNumber")
+                                            //.Readonly(true)
+                                            //.Placeholder(@ViewBag.MonthTranslated)
+                                            //.Value(Model.Age.ToString())
+                                            .HtmlAttributes(new { id = "VisitPatientPhoneNumber", style = "width: 100%" })
+                                        )
+
+
+                                    </span>
+
+                                </label>
+                            }
+                        }
+
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Gender"] : </label>
+                            <span class="block input-icon input-icon-right">
+
+
+                                @(Html.Kendo().DropDownList()
+                                      .Name("Patient.GenderId")
+                                      .DataTextField("Name")
+                                      .DataValueField("Id")
+                                      .DataSource(source =>
+                                        {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetAllGenders", "BaseInfo");
+                                          })
+                                          .ServerFiltering(false);
+                                      })
+                                      .HtmlAttributes(new { @id = "VisitPatientGenderId", style = "width: 100%;", @data_checkEmpty = "VisitPatientGender-box" })
+                                )
+
+                            </span>
+                            <span id="VisitPatientGender-box" class="emptybox hidden" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+                    </div>
+
+
+                    <div class="space-24"></div>
+
+                </fieldset>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<style>
+
+    .k-primary:focus {
+        border: solid 2px black;
+    }
+</style>
+
+<script>
+
+    var allPatient = [];
+    var Patients = [];
+    var formNumber;
+    var Job;
+    let addressAuto;
+    let fatherJobAuto;
+    let motherJobAuto;
+    let nameAuto;
+    let fileNumAuto;
+    let formNumAuto;
+    let phoneAuto;
+    var patient_list = [];
+
+    var KurdishKey = [1632, 1633, 1634, 1635, 1636, 1637, 1638, 1639, 1640, 1641, 1602, 96, 1608, 1749, 1610, 1585, 1685, 1578, 1591, 1740, 1742, 1574, 1569
+        , 1581, 1593, 1734, 1572, 1662, 1579, 1575, 1570, 1587, 1588, 1583, 1584, 1601, 1573, 1711, 1594, 1607, 8204, 1688, 1571, 1705, 1603, 1604
+        , 1717, 1586, 1590, 1582, 1589, 1580, 1670, 1700, 1592, 1576, 1609, 1606, 1577, 1605, 1600
+    ];
+
+    var EnglishKey = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "Q", "w", "e", "E", "r", "R", "t", "T", "y", "Y", "u", "U", "i", "I", "o", "O", "p", "P", "a"
+        , "A", "s", "S", "d", "D", "f", "F", "g", "G", "h", "H", "j", "J", "k", "K", "l", "L", "z", "Z", "x", "X", "c", "C", "v", "V", "b", "B", "n", "N", "m", "M"];
+
+    var Numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "/", ".","٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩" , " "];
+
+    $(document).ready(function () {
+
+        GetAllPatientList().done(function (data) {
+            patient_list = data;
+        });
+
+        let date = $("#VisitPatientDateOfBirth").data("kendoDatePicker");
+        if ($("#VisitPatientDateOfBirth").val() !== "")
+        getAge(kendo.toString(date.value(), 'd'));
+
+        setTimeout(function () {
+            let date = $("#VisitPatientDateOfBirth").data("kendoDatePicker");
+            date.open();
+            date.close();
+            let s = $("#VisitPatientDateOfBirth").attr('aria-owns');
+
+            let s3 = $("#" + s + " .k-footer a").click();
+            $("#VisitPatientName").focus();
+        },200);
+
+
+        nameAuto = $("#VisitPatientName").data("kendoAutoComplete");
+
+        phoneAuto = $("#VisitPatientPhoneNumber").data("kendoAutoComplete");
+
+    });
+
+    $('#VisitPatientName').on('input', function () {
+        var txt = $("#VisitPatientName").val();
+
+        var filter_list = FilterPatientLists(patient_list, txt);
+
+        $("#VisitPatientName").data("kendoAutoComplete").dataSource.data(filter_list);
+
+    });
+
+    $('#VisitPatientPhoneNumber').on('input', function () {
+        var txt = $("#VisitPatientPhoneNumber").val();
+
+        var filter_list = FilterPatientListsByMobileAndName(patient_list, txt);
+
+        $("#VisitPatientPhoneNumber").data("kendoAutoComplete").dataSource.data(filter_list);
+
+    });
+
+    $("#VisitPatientName").on('focus', function (e) {
+
+            let value = nameAuto.value();
+            nameAuto.search(value);
+    });
+
+    $("#VisitPatientPhoneNumber").on('focus', function (e) {
+
+            let value = phoneAuto.value();
+            phoneAuto.search(value);
+        });
+
+
+
+    $('#VisitPatientName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+
+            let date = $("#VisitPatientDateOfBirth").data("kendoDatePicker");
+                date.element.focus();
+        }
+
+    });
+
+
+    $('#VisitPatientDateOfBirth').keypress(function (e) {
+
+        let char = Numbers.indexOf(e.key)
+
+        if (char !== -1 || e.which === 13 || e.which === 9) {
+            let index = KurdishKey.indexOf(e.which);
+
+            if (e.which === 13 || e.which === 9)
+
+                $('#VisitPatientPhoneNumber').focus();
+
+            else if (index !== -1) {
+                e.preventDefault();
+                let index1 = EnglishKey[index];
+                let preVal = $(this).val();
+                $(this).val(preVal + index1);
+            }
+        }
+        else {
+            e.preventDefault();
+        }
+
+
+    });
+
+    $('#VisitPatientAge').keypress(function (e) {
+        let index = KurdishKey.indexOf(e.which);
+
+        if (e.which === 13 || e.which === 9)
+
+            $('#VisitPatientPhoneNumber').focus();
+        else if(index !== -1) {
+            e.preventDefault();
+            let index1 = EnglishKey[index];
+            let preVal = $(this).val();
+            $(this).val(preVal + index1);
+        }
+    });
+
+    $('#VisitPatientPhoneNumber').keypress(function (e) {
+
+        let char = Numbers.indexOf(e.key)
+
+        if (char !== -1 || e.which === 13 || e.which === 9) {
+            let index = KurdishKey.indexOf(e.which);
+            if (e.which === 13 || e.which === 9) {
+                let gender = $("#VisitPatientGenderId").data("kendoDropDownList");
+                    gender.focus();
+            }
+            else if(index !== -1) {
+                e.preventDefault();
+                let index1 = EnglishKey[index];
+                let preVal = $(this).val();
+                $(this).val(preVal + index1);
+            }
+        }
+        else {
+            e.preventDefault();
+        }
+
+
+    });
+
+
+    $('#VisitPatientGenderId').parent().keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#btn-NewPatientModal-accept').focus();
+        }
+    });
+
+
+    function Pasand() {
+
+        $('#btn-NewPatientModal-accept').click();
+
+    }
+
+
+    function ReserveInsertAgeVisitPatient(element) {
+
+        var Year = parseInt($('#VisitPatientYear').val());
+        var Month = parseInt($('#VisitPatientMonth').val());
+        if ($('#VisitPatientMonth').val() === "") {
+            Month = 0;
+            $('#VisitPatientMonth').val(0);
+        }
+        if ($('#VisitPatientYear').val() === "") {
+            Year = 0;
+            $('#VisitPatientYear').val(0);
+        }
+        var today = new Date();
+        var birthDay = today;
+        birthDay.setFullYear(birthDay.getFullYear() - Year);
+        birthDay.setMonth(birthDay.getMonth() - Month);
+        let birthMonth = birthDay.getMonth() + 1;
+        $('#VisitPatientDateOfBirth').val('1/' + birthMonth + '/' + birthDay.getFullYear());
+
+        $('#VisitPatientDateOfBirthYear').val(birthDay.getFullYear());
+        $('#VisitPatientDateOfBirthMonth').val(birthMonth);
+        $('#VisitPatientDateOfBirthDay').val(1);
+
+
+    }
+
+</script>

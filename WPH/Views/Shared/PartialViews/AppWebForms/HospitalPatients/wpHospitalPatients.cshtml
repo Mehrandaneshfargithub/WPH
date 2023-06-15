@@ -1,0 +1,342 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", pull = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+    }
+
+}
+
+
+<script>
+    function GetPeriodAndStatusForHospitalPatients() {
+
+        var periodId = $('#period-id').attr('data-Value');
+
+        var fromDate = $("#KendoFromDate").data("kendoDatePicker");
+        var toDate = $("#KendoDateTo").data("kendoDatePicker");
+
+        var frDate = fromDate.value();
+        var tDate = toDate.value();
+        let frMonth = frDate.getMonth() + 1;
+        let frDay = frDate.getDate();
+        let toMonth = tDate.getMonth() + 1;
+        let toDay = tDate.getDate();
+
+        if (frMonth < 10)
+            frMonth = "0" + frMonth;
+        if (toMonth < 10)
+            toMonth = "0" + toMonth;
+        if (frDay < 10)
+            frDay = "0" + frDay;
+        if (toDay < 10)
+            toDay = "0" + toDay;
+
+        let from = frDate.getFullYear() + "-" + frMonth + "-" + frDay;
+        let too = tDate.getFullYear() + "-" + toMonth + "-" + toDay;
+
+        let statusType = $("#status").data("kendoDropDownList");
+
+
+        var period = $("#sections").data("kendoDropDownList");
+
+        var periodValue = period.value();
+        var periodText = period.text();
+
+        let section = { Id: periodValue, Name: periodText }
+
+        return {
+
+            periodId: periodId,
+            dateFrom: from,
+            dateTo: too,
+            section: section,
+            status: statusType.value()
+        };
+    }
+</script>
+<div class="row page-header ">
+
+    <div>
+
+        <div class="@pull">
+            <h1 class="@font" style="font-size: 2.3rem">
+                @Localizer["HospitalPatient"]
+            </h1>
+
+        </div>
+
+        @if ((bool)(ViewBag.AccessPrintHospitalPatient ?? false))
+        {
+            <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+                <a class="btn btn-danger" onClick="PrintHospitalPatient()" href="#" style="padding:0.2rem">
+                    @Localizer["Print"]
+                    <i class="ace-icon align-top bigger-125"></i>
+                </a>
+            </div>
+        }
+
+    </div>
+
+
+
+</div><!-- /.page-header -->
+
+
+
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div class="space-10"></div>
+<div class="row @font">
+
+
+    <div class="col-xs-12" style="padding:0;margin-bottom:1rem">
+
+        <div class="col-xs-2" style="padding-left:unset;padding-right:unset;">
+            @(Html.Kendo().DropDownList()
+    .Name("sections")
+    .BindTo(Model.sections)
+    .DataTextField("Name")
+    .DataValueField("Id")
+    .Filter("contains")
+    .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "SectionChange()" })
+            )
+        </div>
+
+        <div class="col-xs-2" style="padding-left:unset;padding-right:unset;"></div>
+
+        <div class="col-xs-2" style="padding-left:unset;padding-right:unset;">
+            @(Html.Kendo().DropDownList()
+    .Name("periods")
+    .BindTo(Model.periods)
+    .DataTextField("Name")
+    .DataValueField("Id")
+    .Filter("contains")
+
+    .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+            )
+        </div>
+
+        <div class="col-xs-2" style="padding-left:unset;padding-right:unset;"></div>
+
+
+        <div class="col-xs-2" style="padding-left:unset;padding-right:unset;">
+            @(Html.Kendo().DropDownList()
+            .Name("status")
+            .BindTo(Model.clearances)
+            .DataTextField("Name")
+            .DataValueField("Id")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "SectionChange()" })
+            )
+        </div>
+
+
+    </div>
+
+    <div class="col-xs-12" style="padding:0;margin-bottom:1rem">
+
+        <div class="col-xs-2" style="padding-left:unset;padding-right:unset;"></div>
+
+        <div class="col-xs-2 DateFromDiv hidden" style="padding-left:unset;padding-right:unset;text-align:center;">
+            <h5 class="MyFont-Roboto-grid">@Localizer["FromDate"]</h5>
+        </div>
+
+        <div class="col-xs-2 DateFromDiv hidden" style="padding-left:unset;padding-right:unset;">
+            @(Html.Kendo().DatePicker()
+            .Name("KendoFromDate")
+            .Value(DateTime.Now)
+            .Format("dd/MM/yyyy")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+            )
+        </div>
+
+        <div class="col-xs-2 DateToDiv hidden" style="padding-left:unset;padding-right:unset;text-align:center;">
+            <h5 class="MyFont-Roboto-grid">@Localizer["ToDate"]</h5>
+        </div>
+
+        <div class="col-xs-2 DateToDiv hidden" style="padding-left:unset;padding-right:unset;">
+            @(Html.Kendo().DatePicker()
+            .Name("KendoDateTo")
+            .Value(DateTime.Now)
+            .Format("dd/MM/yyyy")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+            )
+        </div>
+
+        <div id="SearchBtnDiv" class="col-xs-2 hidden" style="padding-left:unset;padding-right:unset;text-align:center;">
+
+            @(Html.Kendo().Button()
+            .Name("btn-search-visit")
+            .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary ", onclick = "btnSearchClick()" })
+            .Content("<i class='fa fa-search'></i>"))
+
+        </div>
+
+    </div>
+
+</div>
+
+<div id="GridArea">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/HospitalPatients/dgHospitalPatientGrid.cshtml")
+</div>
+
+
+
+
+<script>
+
+    function PeriodsChange() {
+
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        var fromTo = $("#FromTo").text();
+
+        if (periodValue === fromTo) {
+            $(".DateFromDiv").removeClass("hidden");
+            $(".DateToDiv").removeClass("hidden");
+            $("#SearchBtnDiv").removeClass("hidden");
+            let date = $("#KendoFromDate").data("kendoDatePicker");
+            date.element.focus();
+            date.element.select();
+        } else {
+            $(".DateFromDiv").addClass("hidden");
+            $(".DateToDiv").addClass("hidden");
+            $("#SearchBtnDiv").addClass("hidden");
+            $("#kendoHospitalPatientGrid").find(".k-i-reload").click();
+        }
+
+    }
+
+    function SectionChange() {
+
+        $("#kendoHospitalPatientGrid").find(".k-i-reload").click();
+
+    }
+
+    function btnSearchClick() {
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        $('#period-id').attr('data-Value', periodValue);
+        $("#kendoHospitalPatientGrid").find(".k-i-reload").click();
+    }
+
+
+
+
+
+    $('#KendoFromDate').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            let date = $("#KendoDateTo").data("kendoDatePicker");
+            date.element.focus();
+        }
+    });
+
+    $('#KendoFromDate').focus(function (e) {
+
+        let date = $("#KendoFromDate").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+    $('#KendoDateTo').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $("#btn-search-visit").focus();
+        }
+    });
+
+
+    $('#KendoDateTo').focus(function (e) {
+
+        let date = $("#KendoDateTo").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+
+
+    function EditHospitalPatient(element) {
+        $(".loader").removeClass("hidden");
+        let id = $(element).attr("data-id");
+
+        let link = "/HospitalPatient/Edit?Id=";
+
+        $(".page-content").load(link + id, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+
+    function draw2(imgData) {
+
+        "use strict";
+
+        var dataUrl = [];
+        for (let index = 0; index < imgData.allb.length; index++) {
+
+            var pf = "data:image/jpeg;base64," + imgData.allb[index];
+
+            dataUrl.push(pf)
+
+        }
+
+        printJS({ printable: dataUrl, type: 'image' });
+    }
+
+
+    function PrintHospitalPatient() {
+
+        $(".loader").removeClass("hidden");
+
+        var data = GetPeriodAndStatusForHospitalPatients();
+
+        link = "/HospitalPatient/PrintAllHospitalPatientReport";
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            url: link,
+            type: "Post",
+            data: data,
+            success: function (response) {
+
+                draw2(response);
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            },
+            error: function (response) {
+                console.log(response);
+                console.log(response.data);
+                console.log(response.error);
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            }
+        });
+
+    }
+
+</script>

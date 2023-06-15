@@ -1,0 +1,180 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/mainViews/_MainLayout.cshtml";
+}
+
+
+@{
+    string pull = "", direction = "", font = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = "MyFont-Roboto-grid";
+        pull = " pull-right ";
+        direction = " direction:ltr; ";
+
+    }
+    else
+    {
+        font = "MyFont-Sarchia-grid";
+        pull = " pull-left ";
+        direction = " direction:rtl; ";
+
+    }
+
+}
+
+
+<div class="main-container ace-save-state @if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                                                                                    @:rtl
+                                                                                  } " id="main-container">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_indexMainContainer.cshtml")
+</div><!-- /.main-container -->
+
+
+
+<div id="MoneyConvertStartModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="CloseMoneyConvertStart()" aria-hidden="true">&times;</button>
+                <h3 id="MoneyConvertStartModal-header" class="smaller lighter blue no-margin MyFont-Merriweather-grid">@Localizer["MoneyConvert"]</h3>
+            </div>
+
+            <div id="MoneyConvertStartModal-body" class="modal-body col-xs-12" style="background-color:white">
+
+            </div>
+
+            <div class="modal-footer col-xs-12">
+                @(Html.Kendo().Button()
+                    .Name("btn-MoneyConvertStartModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right ", onclick = "AddMoneyConvertStart()" })
+                    .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-MoneyConvertStartModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right ", onclick = "CloseMoneyConvertStart()" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@if ((ViewBag.UnReadMessage ?? 0) > 0)
+{
+    <div id="UnReadMessageModal" class="modal fade " data-backdrop="static" data-keyboard="false" style=" @direction">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close @pull" data-dismiss="modal" aria-hidden="true" style=" ">
+                        &times;
+                    </button>
+                    <h3 id="RemaningDays-header" class="smaller lighter blue no-margin ">
+                        <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["UnReadMessage"]
+                    </h3>
+                </div>
+
+                <div id="RemaningDays-body" class="modal-body" style="width:60rem;display: flex;justify-content: space-between;">
+                    <h2>
+                        @ViewBag.UnReadMessage @Localizer["UnReadMessageInReminder"]
+                    </h2>
+
+                    <h2>
+                        <a class=' grid-btn ' onClick='GoToReminder()'>
+                            <span class='' style="color: rgba(0, 0, 74,0.9);">
+                                <i class='ace-icon fa fa fa-bell-o bigger-120'></i>
+                            </span>
+                        </a>
+                    </h2>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+            $('#UnReadMessageModal').modal('toggle');
+        });
+    </script>
+}
+
+
+<script>
+
+
+    $(document).ready(function () {
+
+        //var link = "/MoneyConvert/AddNewModal";
+        //$(".loader").removeClass("hidden");
+        //$('#MoneyConvertStartModal').modal('toggle');
+        //$('#MoneyConvertStartModal-body').load(link, function () {
+        //    $(".loader").fadeIn("slow");
+        //    $(".loader").addClass("hidden");
+        //    let numerictextbox = $("#Amount").data("kendoNumericTextBox");
+        //    numerictextbox.focus();
+        //});
+
+    })
+
+    function GoToReminder() {
+
+        $(".loader").removeClass("hidden");
+        $('#UnReadMessageModal').modal('toggle');
+
+        let link = "/Reminder/Form";
+
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    function AddMoneyConvertStart() {
+
+        let amount = $("#Amount").data("kendoNumericTextBox").value();
+
+        if (amount === 0 || amount === "" || amount === null) {
+
+            bootbox.alert({
+                message: "please Insert Amount",
+                className: 'bootbox-class'
+
+            });
+            return;
+
+        }
+
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+
+
+        $.ajax({
+            type: "Post",
+            data: { __RequestVerificationToken: token.attr('value'), BaseCurrencyId: 12, DestCurrencyId: 11, Amount: amount },
+            url: "/MoneyConvert/AddOrUpdate",
+            success: function (response) {
+                $('#MoneyConvertStartModal').modal('toggle');
+                $('#MoneyConvertStartModal-body').empty();
+            }
+        });
+    }
+
+    function CloseMoneyConvertStart() {
+        $('#MoneyConvertStartModal').modal('toggle');
+        $('#MoneyConvertStartModal-body').empty();
+    }
+
+</script>

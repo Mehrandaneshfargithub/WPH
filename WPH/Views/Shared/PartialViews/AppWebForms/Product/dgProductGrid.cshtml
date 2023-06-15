@@ -1,0 +1,430 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+@{
+    string font = "", pull = "", direction = "", flex_direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        flex_direction = " flex-direction: row; ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl;";
+        flex_direction = " flex-direction: row-reverse; ";
+    }
+
+    string edit_title = Localizer["EditProduct"];
+    string remove_title = Localizer["RemoveProduct"];
+    string report_title = Localizer["ProductReport"];
+    string barcode_title = Localizer["ProductBarcode"];
+}
+
+<style>
+
+    .k-state-selected {
+        background-color: #3379b5 !important;
+    }
+
+    .elementBox {
+        height: 160px;
+        border-radius: 0.5rem;
+        background-color: #fff;
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, .125);
+        background-clip: border-box;
+        box-shadow: rgba(146, 168, 209,0.7) 0px 0px 5px 0.1px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .elementStyle {
+        overflow-wrap: break-word;
+        margin: 5px 0px;
+        padding: 2px 5px;
+    }
+
+/*        .elementStyle:hover {
+            background: lightgray;
+            border-radius: 0.5rem;
+        }*/
+
+    .even_style {
+        background: #dae9fc;
+        border-radius: 3px;
+    }
+</style>
+
+<input id="MedicineTxt" type="hidden" value="@Localizer["Medicine"]" />
+<input id="ExpDateTxt" type="hidden" value="@Localizer["ExpDate"]" />
+<input id="SuppliersTxt" type="hidden" value="@Localizer["Supplier"]" />
+<input id="BujTxt" type="hidden" value="@Localizer["BujNumber"]" />
+<input id="PurchasePriceTxt" type="hidden" value="@Localizer["PurchasePrice"]" />
+<input id="SalePriceTxt" type="hidden" value="@Localizer["SalePrice"]" />
+<input id="MiddleSellPriceTxt" type="hidden" value="@Localizer["MiddleSellPrice"]" />
+<input id="WholeSellPriceTxt" type="hidden" value="@Localizer["WholeSellPrice"]" />
+<input id="ProfitTxt" type="hidden" value="@Localizer["Profit"]" />
+<input id="ConsiderationTxt" type="hidden" value="@Localizer["Consideration"]" />
+
+<div id="productDetailContainer" class="@font" style="padding:0px 10px 5px 10px;overflow:hidden;@direction ">
+
+</div>
+
+<script>
+
+    function gridDataBounded() {
+        $(".k-hierarchy-cell").children().addClass('hidden');
+    }
+
+</script>
+
+
+<div style="clear:both">
+
+    @(Html.Kendo().Grid<WPH.Models.Product.ProductStoreroomViewModel>()
+    .Name("productKendoGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+
+
+            if ((bool)ViewBag.AccessDeleteStoreroom)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    "#if(ChildrensCount < 1){#  <a class='tooltip-error grid-btn' onClick='GridMaterialProductDeleteFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='" + remove_title + @"' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>#}#
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditStoreroom)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-success grid-btn edit' onClick='EditProduct(this);' data-id='#=ProductMasterId#' data-guid='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                "#if(ChildrensCount < 1){#<a class='tooltip-success grid-btn ' onClick='ProductReports(this);' data-id='#=Guid#' data-rel='tooltip' title='" + report_title + @"' data-original-title='History'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-file-lines bigger-120'></i>
+                    </span>
+                </a>#}#
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn ' onClick='SetProductBarcode(this);' data-id='#=Guid#' data-rel='tooltip' title='{barcode_title}' data-original-title='SetBarcode'>
+                    <span class='dark'>
+                        <i class='ace-icon fa fa-barcode bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title("").Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= Warning_Databound(Warning)#");
+            columns.Bound(x => x.Count).Format("{0:n0}").Title(Localizer["Stock"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.OrderPoint).Title(Localizer["OrderPoint"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ProductLocation).Title(Localizer["Location"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ProducerName).Title(Localizer["Producer"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ProductTypeName).Title(Localizer["ProductType"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ScientificName).Title(Localizer["ScientificName"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Name).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Warning).Hidden();
+            columns.Bound(x => x.ChildrensCount).Hidden();
+            columns.Bound(x => x.ProductMasterId).Hidden();
+            columns.Bound(x => x.Guid).Hidden().HtmlAttributes(new { @class = "productId", data_id = "#=Guid#" });
+
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden().HtmlAttributes(new {@class= "productId", data_id = "#=Guid#" });
+            columns.Bound(x => x.Warning).Hidden();
+            columns.Bound(x => x.ProductMasterId).Hidden();
+            columns.Bound(x => x.ChildrensCount).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Name).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ScientificName).Title(Localizer["ScientificName"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ProductTypeName).Title(Localizer["ProductType"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ProducerName).Title(Localizer["Producer"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ProductLocation).Title(Localizer["Location"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.OrderPoint).Title(Localizer["OrderPoint"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Count).Format("{0:n0}").Title(Localizer["Stock"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound("").Title("").Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= Warning_Databound(Warning)#");
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn ' onClick='SetProductBarcode(this);' data-id='#=Guid#' data-rel='tooltip' title='{barcode_title}' data-original-title='SetBarcode'>
+                    <span class='dark'>
+                        <i class='ace-icon fa fa-barcode bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                "#if(ChildrensCount < 1){#<a class='tooltip-success grid-btn ' onClick='ProductReports(this);' data-id='#=Guid#' data-rel='tooltip' title='" + report_title + @"' data-original-title='History'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-file-lines bigger-120'></i>
+                    </span>
+                </a>#}#
+            ");
+
+            if ((bool)ViewBag.AccessEditStoreroom)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-success grid-btn edit' onClick='EditProduct(this)' data-id='#=ProductMasterId#' data-guid='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeleteStoreroom)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    "#if(ChildrensCount < 1){#<a class='tooltip-error grid-btn' onClick='GridMaterialProductDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='" + remove_title + @"' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>#}#
+                ");
+            }
+
+
+        }
+    })
+    //.ClientDetailTemplateId("temple")
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        //.Events(e => e.RequestStart("MaterialProductKendoGridRequestStart"))
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+            .PageSize(10)
+            .Read(read => read.Action("GetAll", "Product").Data("GetClinicSectionId"))
+        )
+        //.Events(a=>a.DataBound("gridDataBounded"))
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+
+</div>
+
+
+
+<script>
+
+
+    function expandThisRow(element) {
+        let grid = $("#SaleInvoiceDetailKendoGrid").data("kendoGrid");
+
+        if ($(element).hasClass('fa-caret-left')) {
+            $(element).removeClass('fa-caret-left');
+            $(element).addClass('fa-caret-down');
+            grid.expandRow($(element).parent().parent());
+        }
+        else {
+            $(element).removeClass('fa-caret-down');
+            $(element).addClass('fa-caret-left');
+            grid.collapseRow($(element).parent().parent());
+        }
+
+    }
+
+    function Warning_Databound(warning) {
+
+        let text = "";
+        if (warning == 'true' || warning == true) {
+
+            text = `<span class='red'>
+                        <i class='ace-icon fa fa-triangle-exclamation bigger-120'></i>
+                    </span>`;
+
+        }
+        return text;
+    }
+
+    $(document).ready(function () {
+
+        $("#productKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            click_dblClick = false;
+            $("#productKendoGrid").find("tr.k-state-selected td a.edit").click();
+        });
+
+
+        $("#productKendoGrid").on("click", "tr.k-state-selected", function (element) {
+            setTimeout(function () {
+                if (click_dblClick) {
+                    var dd = $("#productKendoGrid").find("tr.k-state-selected td.productId").attr('data-id');
+                    GetProductDetailById(dd);
+                }
+            }, 300);
+        });
+
+        function GetProductDetailById(productId) {
+
+            $(".loader").removeClass("hidden");
+            $.ajax({
+                type: "Get",
+                url: "/Product/GetProductDetailById",
+                data: {
+                    clinicSectionId: $('#ClinicSectionId').val(),
+                    productId: productId
+                },
+                success: function (response) {
+
+                    $('#productDetailContainer').empty();
+                    let result = '';
+
+                    if (response !== 0) {
+
+                        let CanUseMiddleSellPrice = '@ViewBag.CanUseMiddleSellPrice';
+                        let CanUseWholeSellPrice = '@ViewBag.CanUseWholeSellPrice';
+
+                        result = `
+                            <div class="col-sm-12" style="padding:0px;">
+                                <div style='padding-top: 10px;' class="col-sm-3">
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#MedicineTxt").val()} : ${response.ProductName}</label>
+                                    </div>
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#PurchasePriceTxt").val()} : ${response.PurchasePrice}</label>
+                                    </div>
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#SalePriceTxt").val()} : ${response.SellingPrice}</label>
+                                    </div>`;
+
+                        if (CanUseMiddleSellPrice == 'true' || CanUseMiddleSellPrice == 'True') {
+                            result += `
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#MiddleSellPriceTxt").val()} : ${response.MiddleSellPrice}</label>
+                                    </div>`;
+                        }
+
+                        if (CanUseWholeSellPrice == 'true' || CanUseWholeSellPrice == 'True') {
+                            result += `
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#WholeSellPriceTxt").val()} : ${response.WholeSellPrice}</label>
+                                    </div>`;
+                        }
+
+                        result += `
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#ProfitTxt").val()} : ${response.Profit}</label>
+                                    </div>
+                                    <div style="overflow-wrap: break-word;">
+                                        <label style="">${$("#ConsiderationTxt").val()} : ${response.Consideration}</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3" style="">
+                                    <label style=" font-size: 16px;">${$("#ExpDateTxt").val()}</label>
+                                    <div class="elementBox">`;
+
+                        for (var i = 0; i < response.ProductExp.length; i++)
+                        {
+                            let set_class = '';
+                            if (i % 2 == 0)
+                                set_class = 'even_style';
+
+                            result += `
+                                    <div class="elementStyle ${set_class}">
+                                            ${response.ProductExp[i].Result}   (${response.ProductExp[i].Value})
+                                    </div>
+                            `;
+                        }
+
+                        result += `
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3" style="">
+                                    <label style=" font-size: 16px;">${$("#BujTxt").val()}</label>
+                                    <div class="elementBox">`;
+
+                        for (var i = 0; i < response.ProductBuj.length; i++)
+                        {
+                            let set_class = '';
+                            if (i % 2 == 0)
+                                set_class = 'even_style';
+
+                            result += `
+                                    <div class="elementStyle ${set_class}">
+                                            ${response.ProductBuj[i].Result}   (${response.ProductBuj[i].Value})
+                                    </div>
+                            `;
+                        }
+
+                        result += `
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3" style="">
+                                    <label style=" font-size: 16px;">${$("#SuppliersTxt").val()}</label>
+                                    <div class="elementBox">`;
+
+                        for (var i = 0; i < response.Suppliers.length; i++)
+                        {
+                            let set_class = '';
+                            if (i % 2 == 0)
+                                set_class = 'even_style';
+
+                            result += `
+                                    <div class="elementStyle ${set_class}">
+                                            ${response.Suppliers[i].Value}
+                                    </div>
+                            `;
+                        }
+
+                        result += `
+                                    </div>
+                                </div>
+
+                            </div>
+                                `;
+                    }
+
+                    var container = document.getElementById("productDetailContainer");
+                    container.insertAdjacentHTML('afterbegin', result);
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            });
+        }
+
+    })
+
+</script>

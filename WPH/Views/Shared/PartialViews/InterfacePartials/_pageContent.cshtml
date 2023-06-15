@@ -1,0 +1,70 @@
+﻿@*@Scripts.Render("~/bundles/aceJsAssets")*@
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+<div id="pageContent" class="page-content" style="padding:0 1.8rem;margin:0">
+
+    @{
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Hospital")
+        {
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Home/HospitalDashboard.cshtml")
+        }
+        else if (HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Store")
+        {
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Home/StoreDashboard.cshtml")
+        }
+        else if (HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Clinic")
+        {
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Home/ClinicDashboard.cshtml")
+        }
+        else if (HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Lab" || HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Rad")
+        {
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Home/LabDashboard.cshtml")
+        }
+
+    }
+
+
+
+
+
+</div><!-- /.page-content -->
+
+
+<script>
+
+
+    $(document).ready(function () {
+
+
+
+        //document.getElementById('pageContent').onkeydown = pageKeydown;
+
+        //function pageKeydown(evt) {
+
+        //    if (evt.altKey && evt.keyCode === 82) {
+
+        //        $(".page-content").load("/PatientReceptionAnalysis/Form", function (responce) {
+
+
+        //                    $(".loader").fadeIn("slow");
+        //                    $(".loader").addClass("hidden");
+        //                })
+
+        //        //Alt + A
+        //    } else if (evt.altKey && evt.keyCode === 65) {
+
+        //        OkAndExit();
+
+        //    }
+
+        //}
+
+    })
+
+
+
+</script>

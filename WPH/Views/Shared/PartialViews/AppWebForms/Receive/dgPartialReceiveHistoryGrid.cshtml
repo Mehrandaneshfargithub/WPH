@@ -1,0 +1,67 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.Receive.ReceiveViewModel>()
+    .Name("partialReceiveHistoryKendoGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+
+            columns.Bound(x => x.Description).Filterable(false).Title(Localizer["Description"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ReceiveType).Title(Localizer["Currency"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            //columns.Bound(x => x.Discount).Format("{0:n0}").Filterable(false).Title(Localizer["Discount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            //columns.Bound(x => x.Amount).Format("{0:n0}").Filterable(false).Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ReceiveDateTxt).Filterable(false).Title(Localizer["ReceiveDate"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Guid).Hidden();
+
+        }
+        else
+        {
+
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ReceiveDateTxt).Filterable(false).Title(Localizer["ReceiveDate"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            //columns.Bound(x => x.Amount).Format("{0:n0}").Filterable(false).Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            //columns.Bound(x => x.Discount).Format("{0:n0}").Filterable(false).Title(Localizer["Discount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ReceiveType).Title(Localizer["Currency"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Description).Filterable(false).Title(Localizer["Description"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+        }
+    })
+
+        //.DataSource(dataSource => dataSource
+        //.Ajax()
+        //.ServerOperation(false)
+        //.Model(model =>
+        //{
+        //    model.Id(p => p.Guid);
+        //})
+        //.PageSize(10)
+        //.Read(read => read.Action("GetAllCustomerAccount", "CustomerAccount").Data("GetCustomerId"))
+        //)
+        //.Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Multiple))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+
+    })
+
+</script>

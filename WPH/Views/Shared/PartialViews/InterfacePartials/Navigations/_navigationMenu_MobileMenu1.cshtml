@@ -1,0 +1,287 @@
+﻿@{
+    String navbarFixed = "";
+    if (ViewBag.FixedNavbar == "True")
+    {
+        navbarFixed = "navbar-fixed-top";
+    }
+}
+<script src="/Content/assets/js/bootstrap.min.js"></script>
+<script src="/Content/assets/js/ace.min.js"></script>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+    <div id="navbar" class="navbar navbar-default navbar-collapse ace-save-state @navbarFixed" style="background-color: rgb(0, 0, 51)">
+        
+            <div class="navbar-container ace-save-state" id="navbar-container">
+                @{
+                    string pullr = "", pulll = "", flexDir = "", direction = "";
+                    bool is_admin;
+                    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+                    {
+                        pullr = "pull-right";
+                        pulll = "pull-left";
+                        flexDir = "flex-direction: row-reverse;";
+                        direction = " ";
+                    }
+                    else
+                    {
+                        pullr = "pull-left";
+                        pulll = "pull-right";
+                        flexDir = "flex-direction: row;";
+                        direction = " direction:rtl; ";
+                    }
+
+                    if (HttpContextAccessor.HttpContext.Session.GetString("AccessTypeName") == "ClinicAdmin")
+                    {
+                        is_admin = true;
+                    }
+                    else
+                    {
+                        is_admin = false;
+                    }
+                }
+
+                <button type="button" class="navbar-toggle menu-toggler @pullr" id="menu-toggler"  data-target="#sidebar" onclick="expandMenu(event)">
+                    <span class="sr-only">Toggle sidebar</span>
+
+                    <span class="icon-bar"></span>
+
+                    <span class="icon-bar"></span>
+
+                    <span class="icon-bar"></span>
+                </button>
+            
+                <div class="navbar-header @pullr">
+                    <a href="\\#" class="navbar-brand @pulll" style="font-size: 3rem" onclick="GoToDashboard()">
+
+                        <i class="fa fa-leaf"></i>
+                        @ViewBag.ClinicSectionName - mehran
+
+
+                    </a>
+
+                    @*<div id="MyClockDisplay"  onload="showTime()" style="position: absolute; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%); color: #A9C7FF; font-size: 15px; font-family: Orbitron; letter-spacing: 7px;"></div>*@
+
+                    <button class="@pulll navbar-toggle navbar-toggle-img collapsed" type="button" data-toggle="collapse" data-target=".navbar-buttons">
+                        <span class="sr-only">Toggle user menu</span>
+
+                        <img src="~/Content/assets/images/avatars/user.jpg" alt="Jason's Photo" />
+                    </button>
+
+                </div>
+
+                <div class="navbar-buttons navbar-header @pulll  collapse navbar-collapse MyFont-Roboto-grid" role="navigation">
+                    <ul class="nav ace-nav MyFont-Roboto-grid" style="display:flex;@flexDir">
+
+                        <li id="MyClockDisplay" onload="showTime()" style="color: rgba(255,255,255,0.9); font-size: 20px; font-family: MyFont-Roboto-grid; letter-spacing: 7px;margin:0px 5px;"></li>
+
+                        <li class="light-blue dropdown-modal">
+                            <a data-toggle="dropdown" href="#" class="dropdown-toggle" style="background-color:rgba(0, 0, 90,0.9)">
+                                <img class="nav-user-photo" src="~/Content/assets/images/avatars/avatar5.png" alt="Jason's Photo" />
+                                <span class="user-info MyFont-Roboto-grid">
+                                    <small>@Localizer["Welcome"]</small>
+                                    @ViewBag.NameOfUser
+                                </span>
+
+                                <i  class="ace-icon fa fa-caret-down userMenuListArrow" onclick="showList()"></i>
+
+                            </a>
+
+                            <ul id="userMenuList" class="userMenuListArrow user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close" style="display:normal">
+
+                                @if (is_admin)
+                                {
+                                    <li>
+                                        <a href="#" id="sections-page-menu">
+                                            <i class="ace-icon fa fa-cogs "></i>
+                                            @Localizer["Sections"]
+                                        </a>
+                                    </li>
+
+                                    <li class="divider"></li>
+
+                                }
+
+                                <li>
+                                    <a href="#" id="settings-page-Navigation-menu">
+                                        <i class="ace-icon fa fa-cog "></i>
+                                        @Localizer["Setting"]
+                                    </a>
+                                </li>
+
+                                @*<li>
+                                    <a href="profile.html">
+                                        <i class="ace-icon fa fa-user"></i>
+                                        Profile
+                                    </a>
+                                </li>*@
+
+                                <li class="divider" ></li>
+
+                                <li>
+                                    <a href="@Url.Action("Logout", "UserHandler", new { area=""})">
+                                        <i class='ace-icon fa fa-power-off'></i>
+                                        @Localizer["LogOut"]
+                                    </a>
+
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- /.navbar-container -->
+        </div>
+        @*@Scripts.Render("~/bundles/Login")*@
+
+        <div id="AdminLoginModal" class="modal fade MyFont-Roboto-grid" data-backdrop="static" data-keyboard="false" style="@direction">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeAdminLoginModal()" aria-hidden="true">&times;</button>
+
+                        <h3 class='smaller MyFont-Roboto-grid'>
+                            Admin Login
+                        </h3>
+                    </div>
+
+                    <div id="AdminLoginModal-body" class="modal-body">
+
+
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div> @*.modal-content*@
+            </div> @*.modal-dialog*@
+        </div>
+
+        @if (is_admin)
+        {
+
+            <script>
+
+
+
+
+                $('#sections-page-menu').on("click", function () {
+
+                    $("#AdminLoginModal #ERROR_SomeThingWentWrong").addClass("hidden");
+                    $("#AdminLoginModal #accessError").addClass("hidden");
+                    $("#AdminLoginModal #loginError").addClass("hidden");
+
+                    var link = "/UserManagment/ShowAdminLogin";
+                    $(".loader").removeClass("hidden");
+
+                    $('#AdminLoginModal').modal('toggle');
+                    $('#AdminLoginModal-body').load(link, function () {
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    });
+
+                });
+
+                function closeAdminLoginModal() {
+                    $('#AdminLoginModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                }
+
+            </script>
+
+        }
+
+
+        <script>
+
+            $(document).mouseup(function (e) {
+                var container = $(".userMenuListArrow");
+
+                // if the target of the click isn't the container nor a descendant of the container
+                if (!container.is(e.target) && container.has(e.target).length === 0) {
+                    $("#userMenuList").css('display', 'none');
+                }
+            });
+
+            function showList() {
+
+                console.log($("#userMenuList").css('display'));
+
+                if ($("#userMenuList").css('display') == "none")
+                    $("#userMenuList").css('display', 'block');
+                else 
+                    $("#userMenuList").css('display', 'none');
+            }
+
+
+            function expandsubmenus(element) {
+                $(element).toggleClass('open');
+            }
+
+            function expandMenu(e) {
+                
+                e.preventDefault();
+
+                setTimeout(() => {
+                    if ($("#sidebar").hasClass('in')) {
+                        $("#sidebar").removeClass('in');
+                        $("#sidebar").css('height', '1px');
+                        $("#sidebar").attr('aria-expanded', 'false');
+                    }
+                    else {
+                        $("#sidebar").addClass('in');
+                        $("#sidebar").css('height', 'auto');
+                        $("#sidebar").attr('aria-expanded', 'true');
+                    }
+                })
+
+            }
+
+            $('#settings-page-Navigation-menu').on("click", function () {
+
+                goToThisLink('/ClinicSectionSetting/Form');
+
+            });
+
+            function showTime() {
+                var date = new Date();
+                var h = date.getHours(); // 0 - 23
+                var m = date.getMinutes(); // 0 - 59
+                var s = date.getSeconds(); // 0 - 59
+                var session = "AM";
+
+                if (h == 0) {
+                    h = 12;
+                }
+
+                if (h > 12) {
+                    h = h - 12;
+                    session = "PM";
+                }
+
+                h = (h < 10) ? "0" + h : h;
+                m = (m < 10) ? "0" + m : m;
+                s = (s < 10) ? "0" + s : s;
+
+                var time = h + ":" + m + ":" + s + " " + session;
+
+
+
+                document.getElementById("MyClockDisplay").innerText = time;
+                document.getElementById("MyClockDisplay").textContent = time;
+
+                setTimeout(showTime, 1000);
+
+            }
+
+            showTime();
+
+            function GoToDashboard() {
+                $(".loader").removeClass("hidden");
+                $(".page-content").load("/Dashboard/Form", function (responce) {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                })
+            }
+
+        </script>

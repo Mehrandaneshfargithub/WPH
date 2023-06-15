@@ -1,0 +1,176 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div class="row page-header ">
+    <div class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+            @:pull-right
+        }
+        else {
+        @:pull-left
+        } ">
+        <h1 class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } " style="font-size: 2.3rem">
+            @Localizer["AnalysisResult"]
+        </h1>
+
+    </div>
+</div><!-- /.page-header -->
+
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div class="space-10"></div>
+<div class="row @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } ">
+
+
+    <div class="col-xs-2" style="padding-left:unset;padding-right:unset;">
+        @(Html.Kendo().DropDownList()
+                                  .Name("periods")
+                                  .BindTo(Model.periods)
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  .Filter("contains")
+
+                                  .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+        )
+    </div>
+
+
+
+    <div class="col-xs-7">
+
+        <div id="DateFromDiv" class="col-xs-12 col-sm-5 hidden">
+            <div class="col-xs-4 " style="text-align:left">
+
+                <h5>@Localizer["FromDate"]</h5>
+
+            </div>
+            <div class="col-xs-8">
+                <input id="DateFrom" value="@DateTime.Now" title="datepicker" style="width: 100%;font-size:1.5rem" />
+
+
+            </div>
+        </div>
+
+        <div id="DateToDiv" class="col-xs-12 col-sm-5 hidden">
+
+            <div class="col-xs-4" style="text-align:left">
+
+                <h5>@Localizer["ToDate"]</h5>
+
+            </div>
+
+            <div class="col-xs-8">
+
+                <input id="DateTo" value="@DateTime.Now" title="datepicker" style="width: 100%;font-size:1.5rem" />
+
+            </div>
+
+        </div>
+
+        <div id="SearchBtnDiv" class="col-xs-1 hidden">
+
+            @(Html.Kendo().Button()
+                .Name("btn-search-visit")
+                .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary pull-right", onclick = "btnSearchClick()" })
+                .Content("<i class='fa fa-search'></i>"))
+
+        </div>
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="row Grid-Content @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } ">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/AnalysisResult/dgAnalysisResultGrid.cshtml")
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#DateFrom").kendoDatePicker({
+
+            format: "dd/MM/yyyy"
+
+        });
+
+        $("#DateTo").kendoDatePicker({
+
+            format: "dd/MM/yyyy"
+
+        });
+
+    })
+
+
+    function PeriodsChange() {
+
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        var fromTo = $("#FromTo").text();
+
+        if (periodValue === fromTo) {
+            $("#DateFromDiv").removeClass("hidden");
+            $("#DateToDiv").removeClass("hidden");
+            $("#SearchBtnDiv").removeClass("hidden");
+
+        }
+
+        else {
+            $("#DateFromDiv").addClass("hidden");
+            $("#DateToDiv").addClass("hidden");
+            $("#SearchBtnDiv").addClass("hidden");
+            $("#kendoPatientReceptionGrid").find(".k-i-refresh").click();
+        }
+
+
+
+    }
+
+    function btnSearchClick() {
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+
+        $('#period-id').attr('data-Value', periodValue);
+        $("#kendoPatientReceptionGrid").find(".k-i-refresh").click();
+
+    }
+
+
+</script>

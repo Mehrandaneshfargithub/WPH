@@ -1,0 +1,1422 @@
+﻿@model WPH.Models.ReturnPurchaseInvoice.ReturnPurchaseInvoiceViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    var now = DateTime.Now;
+    string font = "", pull = "", pull_rev = "", dir = "", header_txt = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = "  ";
+        <h3 id="NewReturnPurchaseInvoiceHeader" class="hidden"> @Localizer["New"] - @Localizer["ReturnPurchaseInvoice"] </h3>
+        <h3 id="EditReturnPurchaseInvoiceHeader" class="hidden"> @Localizer["Edit"] - @Localizer["ReturnPurchaseInvoice"] </h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " direction:rtl; ";
+        <h3 id="NewReturnPurchaseInvoiceHeader" class="hidden"> @Localizer["ReturnPurchaseInvoice"] - @Localizer["New"] </h3>
+        <h3 id="EditReturnPurchaseInvoiceHeader" class="hidden"> @Localizer["ReturnPurchaseInvoice"] - @Localizer["Edit"] </h3>
+    }
+
+    if (Model.Guid == Guid.Empty)
+    {
+        header_txt = $"{Localizer["ReturnPurchaseInvoice"]} _ {Localizer["New"]}";
+
+    }
+    else
+    {
+        header_txt = $"{Localizer["ReturnPurchaseInvoice"]} _ {Localizer["Edit"]}";
+
+    }
+
+    bool can_change = !(bool)(ViewBag.ReturnPurchasePaid ?? false);
+}
+
+<style>
+
+
+    @@media (max-width:767px) {
+        .modal-dialog {
+            width: 70vw;
+            margin: 30px auto
+        }
+
+        .modal-content {
+            -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,.5)
+        }
+
+        .modal-sm {
+            width: 300px
+        }
+
+        #AddReturnPurchaseInvoiceDetailModal-body {
+            width: 90vw;
+        }
+    }
+
+    @@media (min-width:768px) {
+        #AddReturnPurchaseInvoiceDetailModal-body {
+            width: 60vw;
+        }
+    }
+</style>
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @header_txt
+        </h1>
+
+    </div>
+
+    @*<div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="ExitReturnPurchase(this)" href="#" style="padding:0.2rem">
+                @Localizer["Exit"]
+
+            </a>
+        </div>*@
+
+</div><!-- /.page-header -->
+
+
+<div class="row @font" style="@dir">
+    <div class="col-sm-12 shadow-border" style="margin:1rem 0">
+
+        <form id="addNewReturnPurchaseInvoiceForm">
+            <fieldset>
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Guid)
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix ">
+                            <label for="form-field-8">@Localizer["Supplier"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DropDownList()
+                                    .Name("SupplierId")
+                                    .DataTextField("Name")
+                                    .DataValueField("Guid")
+                                    .Filter("contains")
+                                    .Enable(can_change && Model.CanChange)
+                                    .OptionLabel(" ")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllSuppliers", "Supplier");
+                                        })
+                                        .ServerFiltering(false);
+                                    })
+                                    .Value(Model.SupplierId?.ToString())
+                                    .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Supplier1-box" })
+                                    )
+                            </span>
+                            <span id="Supplier1-box" class="emptybox hidden" data-isEssential="true" style="color:red;font-size: 11px;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["InvoiceNum"]:</label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                    .Name("InvoiceNumTxt")
+                                    .Enable(false)
+                                    .Value(Model.InvoiceNum)
+                                    .HtmlAttributes(new { style = "width: 100%;" })
+                                    )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["InvoiceDate"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DatePicker()
+                                .Name("InvoiceDateTxt")
+                                .Value(Model.InvoiceDate ?? now)
+                                .Format("dd/MM/yyyy")
+                                .Max(now)
+                                .Enable((bool)ViewBag.AccessEditDate && can_change)
+                                .HtmlAttributes(new { style = "width: 100%;", onchange = "TryDateWithOutFuture(this)", @data_checkEmpty = "InvoiceDate-box" })
+                                )
+                            </span>
+                            <span id="InvoiceDate-box" class="emptybox hidden" data-isEssential="true" style="color:red;font-size: 11px;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                            <span id="Date-valid" class="emptybox hidden" style="color:red;">
+                                @Localizer["DateNotValid"]
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Description"]:</label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("Description")
+                                .Value(Model.Description)
+                                .Enable(can_change)
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12" style="display:flex;align-items:flex-end">
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-6">
+                        @(Html.Kendo().Button()
+                        .Name("btn-addReturnPurchasePurchaseInvoiceDetail-exit")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-danger " + pull_rev + "", onclick = "ExitReturnPurchase(this)" })
+                        .Content((bool)(ViewBag.BackToAccount ?? false) ? Localizer["ReturnPurchaseInvoiceList"] : Localizer["Exit"]))
+                        @(Html.Kendo().Button()
+                        .Name("btn-addReturnPurchasePurchaseInvoiceDetail-accept")
+                        .Enable(can_change)
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary " + pull_rev + "" })
+                        .Content(Localizer["Ok"]))
+                        @(Html.Kendo().Button()
+                        .Name("btn-updateReturnPurchaseInvoice-accept")
+                        .Enable(can_change)
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary hidden " + pull_rev + "" })
+                        .Content(Localizer["Ok"]))
+
+                        @if ((bool)(ViewBag.BackToAccount ?? false))
+                        {
+                            @(Html.Kendo().Button()
+                            .Name("btn-updateReturnPurchaseInvoice-exit-accept")
+                            .Enable(can_change)
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary hidden " + pull_rev + "" })
+                            .Content($"{Localizer["Ok"]} {Localizer["And"]} {Localizer["Exit"]}"))
+                        }
+
+                        @if ((bool)ViewBag.AccessNewReturnPurchaseInvoiceDetail)
+                        {
+                            @(Html.Kendo().Button()
+                            .Name("btn-ReturnPurchaseInvoiceDetailNewModal")
+                            .Enable(can_change)
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary hidden " + pull_rev + "", onclick = "AddReturnPurchaseInvoiceDetail()" })
+                            .Content(Localizer["AddProduct"]))
+                        }
+
+                        @(Html.Kendo().Button()
+                        .Name("btn-ShowDiscountsList")
+                        .Enable(can_change)
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-secondary hidden " + pull_rev+"" })
+                        .Content(Localizer["Discount"]))
+
+                        @if ((bool)(ViewBag.BackToAccount ?? false))
+                        {
+                            <div class="btn k-button @pull_rev" style=" font-size: 15px; height: 35px; margin: 2px;">
+                                <a class="" onClick="BackToPay()" style="">
+                                    <span>
+                                        <i class="ace-icon fa fa-arrow-left align-top bigger-125"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+                <div>
+                    <div id="CantChangeSupplier" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ToChangeSupplierDeleteDetailsFirst"]
+                    </div>
+
+                    <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_DataNotValid"]
+                    </div>
+
+                    <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["InvoiceInUse"]
+                    </div>
+
+                    <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_InsertWrong"]
+                    </div>
+                </div>
+
+                <div class="space-24"></div>
+            </fieldset>
+        </form>
+    </div>
+
+
+    <div class="@pull col-sm-12 shadow-border">
+
+        <script>
+
+            function GetReturnPurchaseInvoiceId() {
+                return {
+                    returnPurchaseInvoiceId: $("#Guid").val()
+                }
+            }
+
+            function GetParametersForSelectReturn() {
+                return {
+                    masterId: $("#Guid").val(),
+                    productId: $("#ProductId").val(),
+                    like: $("#Like").is(":checked")
+                }
+            }
+
+        </script>
+
+
+        <div class="col-sm-12 Grid-Content @font">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ReturnPurchaseInvoiceDetail/dgReturnPurchaseInvoiceDetailGrid.cshtml")
+        </div>
+    </div>
+
+</div><!-- /.signup-box -->
+
+<div id="AddReturnPurchaseInvoiceDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir ">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddReturnPurchaseInvoiceDetailModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddReturnPurchaseInvoiceDetailModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["Edit"] @Localizer["ReturnPurchaseInvoice"]
+                </h3>
+            </div>
+
+            <div id="AddReturnPurchaseInvoiceDetailModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_MoneyConvert" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ThereIsNoMoneyConvert"]
+            </div>
+
+            <div id="NotEnoughProductCount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NotEnoughProductCount"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddReturnPurchaseInvoiceDetailModal-okAndNew")
+                .Enable(can_change)
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["OkAndNew"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddReturnPurchaseInvoiceDetailModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-warning pull-right k-button" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddReturnPurchaseInvoiceDetailModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddReturnPurchaseInvoiceDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteReturnPurchaseInvoiceDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteReturnPurchaseInvoiceDetailModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteReturnPurchaseInvoiceDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteReturnPurchaseInvoiceDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowDiscountsListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog" style="width:80%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowDiscountsListModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowDiscountsListModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="ShowDiscountsListModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowDiscountsList-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowDiscountsListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowPurchaseInvoiceDetailListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir ">
+    <div class="modal-dialog" style="width:85%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowPurchaseInvoiceDetailListModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowPurchaseInvoiceDetailListModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["PurchaseInvoiceDetail"]
+                </h3>
+            </div>
+
+            <div id="ShowPurchaseInvoiceDetailListModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ERROR_NothingSelected" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NothingSelected"]
+            </div>
+
+            <div id="ERROR_AccessDenied" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["AccessDenied"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                    .Name("btn-ShowPurchaseInvoiceDetailListModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-ShowPurchaseInvoiceDetailListModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowPurchaseInvoiceDetailListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+
+    var product_list = [];
+    var updated = false;
+    var ok_exit = false;
+
+    $(document).ready(function () {
+        SetTotalPrice('@Model.TotalPrice');
+        let invoice = $('#Guid').val();
+
+        if (invoice !== null && invoice !== "" && invoice !== "00000000-0000-0000-0000-000000000000" && invoice !== undefined) {
+            $('#btn-updateReturnPurchaseInvoice-accept').removeClass('hidden');
+            $('#btn-updateReturnPurchaseInvoice-exit-accept').removeClass('hidden');
+            $('#btn-ReturnPurchaseInvoiceDetailNewModal').removeClass('hidden');
+            $('#btn-ShowDiscountsList').removeClass('hidden');
+            $('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').addClass('hidden');
+        }
+
+        //setTimeout(function () {
+        //    $("#SupplierId").focus();
+        //    $('#SupplierId').data("kendoDropDownList").open();
+        //}, 200);
+
+    });
+
+    $("#SupplierId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#InvoiceDateTxt').focus();
+        }
+    });
+
+    $('#InvoiceDateTxt').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $("#Description").focus();
+        }
+    });
+
+    $("#Description").on("keypress", function (e) {
+        if (e.which === 13) {
+            if ($('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').hasClass('hidden')) {
+                $('#btn-updateReturnPurchaseInvoice-accept').focus();
+            }
+            else {
+                $('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').focus();
+            }
+        }
+    });
+
+    $('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#addNewReturnPurchaseInvoiceForm #CantChangeSupplier").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #ERROR_Data").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #Date-valid").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #InvoiceInUse").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#addNewReturnPurchaseInvoiceForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/ReturnPurchaseInvoice/AddOrUpdate";
+
+        let purchaseInvoice = {
+            Guid: $("#Guid").val(),
+            SupplierId: $("#SupplierId").val(),
+            InvoiceDateTxt: $("#InvoiceDateTxt").val(),
+            Description: $("#Description").val(),
+        };
+
+        var data = purchaseInvoice;
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+
+                    if (response === "DateNotValid") {
+
+                        $('"#addNewReturnPurchaseInvoiceForm #Date-valid"').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "InvoiceInUse") {
+
+                        $("#addNewReturnPurchaseInvoiceForm #InvoiceInUse").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "CantChangeSupplier") {
+
+                        $("#addNewReturnPurchaseInvoiceForm #CantChangeSupplier").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#addNewReturnPurchaseInvoiceForm #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ThereIsNoMoneyConvert") {
+
+                        bootbox.alert({
+                            message: " @Localizer["ThereIsNoMoneyConvert"]",
+                            className: 'bootbox-class'
+                        });
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response.includes("YouHaveJust")) {
+
+                        bootbox.alert({
+                            message: `${response}`,
+                            className: 'bootbox-class'
+                        });
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        let guid = response.split("_");
+                        $('#Guid').val(guid[0]);
+                        $('#InvoiceNumTxt').val(guid[1]);
+
+                        $('#btn-updateReturnPurchaseInvoice-accept').removeClass('hidden');
+                        $('#btn-updateReturnPurchaseInvoice-exit-accept').removeClass('hidden');
+                        $('#btn-ReturnPurchaseInvoiceDetailNewModal').removeClass('hidden');
+                        $('#btn-ShowDiscountsList').removeClass('hidden');
+                        $('#btn-addReturnPurchasePurchaseInvoiceDetail-accept').addClass('hidden');
+                    }
+                } else {
+
+                    $("#addNewReturnPurchaseInvoiceForm #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+
+    $("#btn-ShowDiscountsList").on("click", function () {
+
+        $("#ShowDiscountsListModal #ERROR_Data").addClass("hidden");
+        $("#ShowDiscountsListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowDiscountsListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#ShowDiscountsListModal').modal('toggle');
+
+        var link = "/ReturnPurchaseInvoiceDiscount/Form?returnPurchaseInvoiceId=";
+        var Id = $("#Guid").val();
+        $(".loader").removeClass("hidden");
+        $('#ShowDiscountsListModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    });
+
+    function closeShowDiscountsListModal() {
+
+        $('#ShowDiscountsListModal').modal('hide');
+        $('#ShowDiscountsListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    $("#btn-updateReturnPurchaseInvoice-exit-accept").on("click", function () {
+
+        ok_exit = true;
+        $('#btn-updateReturnPurchaseInvoice-accept').trigger('click');
+    });
+
+    $("#btn-updateReturnPurchaseInvoice-accept").on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#addNewReturnPurchaseInvoiceForm #CantChangeSupplier").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #ERROR_Data").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #Date-valid").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #InvoiceInUse").addClass("hidden");
+        $("#addNewReturnPurchaseInvoiceForm #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#addNewReturnPurchaseInvoiceForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#addNewReturnPurchaseInvoiceForm .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-updateReturnPurchaseInvoice-accept').removeAttr("disabled");
+                    ok_exit = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/ReturnPurchaseInvoice/AddOrUpdate";
+
+        let purchaseInvoice = {
+            Guid: $("#Guid").val(),
+            SupplierId: $("#SupplierId").val(),
+            InvoiceDateTxt: $("#InvoiceDateTxt").val(),
+            Description: $("#Description").val(),
+        };
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: purchaseInvoice,
+            success: function (response) {
+                $('#btn-updateReturnPurchaseInvoice-accept').removeAttr("disabled");
+
+                if (response === 0) {
+
+                    ok_exit = false;
+                    $("#addNewReturnPurchaseInvoiceForm #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    ok_exit = false;
+                    $("#addNewReturnPurchaseInvoiceForm #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DateNotValid") {
+
+                    ok_exit = false;
+                    $("#addNewReturnPurchaseInvoiceForm #Date-valid").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "CantChangeSupplier") {
+
+                    ok_exit = false;
+                    $("#addNewReturnPurchaseInvoiceForm #CantChangeSupplier").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    ok_exit = false;
+                    $("#addNewReturnPurchaseInvoiceForm #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    if (ok_exit) {
+                        ExitReturnPurchase();
+                    } else {
+                        SetTotalPrice(response);
+                    }
+                }
+            }
+        });
+
+
+    });
+
+
+    function AddReturnPurchaseInvoiceDetail() {
+        $("#AddReturnPurchaseInvoiceDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #Date-valid").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        let header = $("#NewReturnPurchaseInvoiceHeader").text();
+        $('#AddReturnPurchaseInvoiceDetailModal-header').text(header);
+        $('#AddReturnPurchaseInvoiceDetailModal').modal('toggle');
+
+        $('#AddReturnPurchaseInvoiceDetailModal-body').empty();
+
+        var link = "/ReturnPurchaseInvoiceDetail/AddModal";
+
+        $(".loader").removeClass("hidden");
+        $('#AddReturnPurchaseInvoiceDetailModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function EditReturnPurchaseInvoiceDetail(element) {
+        $("#AddReturnPurchaseInvoiceDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #Date-valid").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        let header = $("#EditReturnPurchaseInvoiceHeader").text();
+        $('#AddReturnPurchaseInvoiceDetailModal-header').text(header);
+        $('#AddReturnPurchaseInvoiceDetailModal').modal('toggle');
+
+        $('#AddReturnPurchaseInvoiceDetailModal-body').empty();
+
+        var link = "/ReturnPurchaseInvoiceDetail/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddReturnPurchaseInvoiceDetailModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function closeAddReturnPurchaseInvoiceDetailModal() {
+        $('#AddReturnPurchaseInvoiceDetailModal').modal('hide');
+        $('#AddReturnPurchaseInvoiceDetailModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+
+    $('#btn-AddReturnPurchaseInvoiceDetailModal-okAndNew').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddReturnPurchaseInvoiceDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #Date-valid").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        $('#AddReturnPurchaseInvoiceDetailModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddReturnPurchaseInvoiceDetailModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-AddReturnPurchaseInvoiceDetailModal-okAndNew').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        let returnDetail = {
+
+            Guid: $("#DetailGuid").val(),
+            MasterId: $("#Guid").val(),
+            PurchaseInvoiceDetailId: $("#PurchaseInvoiceDetailId").val(),
+            TransferDetailId: $("#TransferDetailId").val(),
+            NumTxt: $("#Num").val(),
+            FreeNumTxt: $("#FreeNum").val(),
+            DiscountTxt: $("#DiscountSharp").val(),
+            TotalPriceTxt: $("#TotalPrice").val(),
+            CurrencyId: $("#CurrencyId").val(),
+            ReasonTxt: $("#ReasonTxt").val(),
+        }
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: "/ReturnPurchaseInvoiceDetail/AddOrUpdate",
+            data: returnDetail,
+            success: function (response) {
+                $('#btn-AddReturnPurchaseInvoiceDetailModal-okAndNew').removeAttr("disabled");
+
+                if (response === "NotEnoughProductCount") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #NotEnoughProductCount").removeClass("hidden");
+
+                    let max = $("#FixMaxRem").val();
+                    let freeMax = $("#FixMaxFreeRem").val();
+                    $("#Num").data("kendoNumericTextBox").value(max);
+                    $("#FreeNum").data("kendoNumericTextBox").value(freeMax);
+                    SetWholePrice();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ThereIsNoMoneyConvert") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #ERROR_MoneyConvert").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === 0) {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#purchaseInvoiceDetailKendoGrid .k-pager-refresh")[0].click();
+
+                    $('#AddReturnPurchaseInvoiceDetailModal').modal('hide');
+                    $('#AddReturnPurchaseInvoiceDetailModal-body').empty();
+                    $(".modal-backdrop:last").remove();
+
+                    setTimeout(function () {
+                        $('#btn-ReturnPurchaseInvoiceDetailNewModal').trigger('click');
+                    }, 500);
+
+                    SetTotalPrice(response);
+                }
+            }
+        });
+
+    });
+
+
+    $('#btn-AddReturnPurchaseInvoiceDetailModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddReturnPurchaseInvoiceDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #Date-valid").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddReturnPurchaseInvoiceDetailModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddReturnPurchaseInvoiceDetailModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-AddReturnPurchaseInvoiceDetailModal-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        let returnDetail = {
+
+            Guid: $("#DetailGuid").val(),
+            MasterId: $("#Guid").val(),
+            PurchaseInvoiceDetailId: $("#PurchaseInvoiceDetailId").val(),
+            TransferDetailId: $("#TransferDetailId").val(),
+            NumTxt: $("#Num").val(),
+            FreeNumTxt: $("#FreeNum").val(),
+            DiscountTxt: $("#DiscountSharp").val(),
+            TotalPriceTxt: $("#TotalPrice").val(),
+            CurrencyId: $("#CurrencyId").val(),
+            ReasonTxt: $("#ReasonTxt").val(),
+        }
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: "/ReturnPurchaseInvoiceDetail/AddOrUpdate",
+            data: returnDetail,
+            success: function (response) {
+                $('#btn-AddReturnPurchaseInvoiceDetailModal-accept').removeAttr("disabled");
+
+                if (response === "NotEnoughProductCount") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #NotEnoughProductCount").removeClass("hidden");
+
+                    let max = $("#FixMaxRem").val();
+                    let freeMax = $("#FixMaxFreeRem").val();
+                    $("#Num").data("kendoNumericTextBox").value(max);
+                    $("#FreeNum").data("kendoNumericTextBox").value(freeMax);
+                    SetWholePrice();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ThereIsNoMoneyConvert") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #ERROR_MoneyConvert").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === 0) {
+
+                    $("#AddReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#purchaseInvoiceDetailKendoGrid .k-pager-refresh")[0].click();
+                    closeAddReturnPurchaseInvoiceDetailModal();
+
+                    SetTotalPrice(response);
+                }
+            }
+        });
+
+    });
+
+    function ReturnPurchaseInvoiceDetailDeleteFunction(element) {
+
+        $("#DeleteReturnPurchaseInvoiceDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteReturnPurchaseInvoiceDetailModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteReturnPurchaseInvoiceDetailModal #AmountOverFlow").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteReturnPurchaseInvoiceDetailModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteReturnPurchaseInvoiceDetail-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-deleteReturnPurchaseInvoiceDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteReturnPurchaseInvoiceDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteReturnPurchaseInvoiceDetailModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteReturnPurchaseInvoiceDetailModal #AmountOverFlow").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+
+        var link = "/ReturnPurchaseInvoiceDetail/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteReturnPurchaseInvoiceDetail-accept').removeAttr("disabled");
+
+                if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteReturnPurchaseInvoiceDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong" || response === 0) {
+                    $("#DeleteReturnPurchaseInvoiceDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#DeleteReturnPurchaseInvoiceDetailModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#DeleteReturnPurchaseInvoiceDetailModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+                    $('#DeleteReturnPurchaseInvoiceDetailModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#purchaseInvoiceDetailKendoGrid .k-pager-refresh")[0].click();
+                    SetTotalPrice(response);
+                }
+            }
+        });
+    });
+
+    function ExitReturnPurchase() {
+        $(".loader").removeClass("hidden");
+        var link = "/ReturnPurchaseInvoice/Form";
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    function SetTotalPrice(total) {
+        let enable = true;
+        let result = "";
+        let res = total.toString().split("#");
+        if (res.length == 3) {
+
+            let price = res[0].split("_");
+            let discount = res[1].split("_");
+            let price_after_discount = res[2].split("_");
+
+            result += `
+                <div class="col-sm-12" style="padding:0px;">
+
+                    <div class="col-sm-4" style="">
+                        <label style=" font-size: 18px;">${$("#TotalTxt").val()}</label>
+                        <div class="elementBox">`;
+            for (let i = 0; i < price.length; i++) {
+                let txt = price[i].split(" ");
+                if (txt.length > 1) {
+                    enable = false;
+                    result += `<div class=" elementStyle"> <div style="white-space: nowrap;" class="col-sm-2">${txt[0]}</div>  <div style="white-space: nowrap;" class="col-sm-10">${txt[1]}</div> </div>`;
+                }
+            }
+            result += `
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4" style="">
+                        <label style=" font-size: 18px;">${$("#TotalDiscountTxt").val()}</label>
+                        <div class="elementBox">`;
+            for (let i = 0; i < discount.length; i++) {
+                let txt = discount[i].split(" ");
+                if (txt.length > 1)
+                    result += `<div class=" elementStyle"> <div style="white-space: nowrap;" class="col-sm-2">${txt[0]}</div>  <div style="white-space: nowrap;" class="col-sm-10">${txt[1]}</div> </div>`;
+            }
+            result += `
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4" style="">
+                        <label style=" font-size: 18px;">${$("#TotalPriceAfterDiscountTxt").val()}</label>
+                        <div class="elementBox">`;
+            for (let i = 0; i < price_after_discount.length; i++) {
+                let txt = price_after_discount[i].split(" ");
+                if (txt.length > 1)
+                    result += `<div class=" elementStyle"> <div style="white-space: nowrap;" class="col-sm-2">${txt[0]}</div>  <div style="white-space: nowrap;" class="col-sm-10">${txt[1]}</div> </div>`;
+            }
+            result += `
+                        </div>
+                    </div>
+
+                </div>`;
+        }
+        $('#purchaseInvoiceDetailTotalPrice').empty();
+
+        $("#SupplierId").data("kendoDropDownList").enable(enable);
+
+        var ul = document.getElementById("purchaseInvoiceDetailTotalPrice");
+        ul.insertAdjacentHTML('afterbegin', result);
+    }
+
+    function ShowPurchaseInvoiceDetailListModal() {
+        $("#ShowPurchaseInvoiceDetailListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_NothingSelected").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_AccessDenied").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #MultiReason-box").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_Data-box").addClass("hidden");
+
+        $('#ShowPurchaseInvoiceDetailListModal').modal('toggle');
+        $('#ShowPurchaseInvoiceDetailListModal-body').empty();
+
+        var link = "/ReturnPurchaseInvoiceDetail/SelectModal";
+
+        $(".loader").removeClass("hidden");
+            $('#ShowPurchaseInvoiceDetailListModal-body').load(link , function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function closeShowPurchaseInvoiceDetailListModal() {
+        $("#PurchaseInvoiceDetailId").val("");
+        $("#TransferDetailId").val("");
+        $("#PurchaseInvoiceDetailTxt").val("");
+        $("#FixMaxRem").val("");
+        $("#FixMaxFreeRem").val("");
+        var productId = $("#ProductId").data("kendoDropDownList");
+        productId.value('');
+
+        $('#ShowPurchaseInvoiceDetailListModal').modal('hide');
+        $('#ShowPurchaseInvoiceDetailListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+
+    $('#btn-ShowPurchaseInvoiceDetailListModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+        var returns = [];
+        let reason = $("#MultiReason").val();
+
+        $("#ShowPurchaseInvoiceDetailListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_NothingSelected").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_AccessDenied").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #MultiReason-box").addClass("hidden");
+        $("#ShowPurchaseInvoiceDetailListModal #ERROR_Data").addClass("hidden");
+
+        $('.select_return').each(function () {
+            if ($(this).is(":checked")) {
+                var item = {
+                    MasterId: $("#Guid").val(),
+                    PurchaseInvoiceDetailId: $(this).attr("data-id"),
+                    TransferDetailId: $(this).attr("data-transfer"),
+                    Num: $(this).attr("data-rem"),
+                    Price: $(this).attr("data-price"),
+                    CurrencyName: $(this).attr("data-currency"),
+                    TXT: $(this).attr("data-txt"),
+                    ReasonTxt: reason
+                };
+                returns.push(item);
+            }
+        });
+
+        if (returns.length == 0) {
+
+            $("#ShowPurchaseInvoiceDetailListModal #ERROR_NothingSelected").removeClass("hidden");
+            $('#btn-ShowPurchaseInvoiceDetailListModal-accept').removeAttr("disabled");
+            return;
+        }
+
+        if (returns.length == 1) {
+
+            $("#PurchaseInvoiceDetailId").val(returns[0].PurchaseInvoiceDetailId);
+            $("#TransferDetailId").val(returns[0].TransferDetailId);
+            $("#PurchaseInvoiceDetailTxt").val(returns[0].TXT);
+
+            let num = $("#Num").data("kendoNumericTextBox");
+            num.value(returns[0].Num);
+            $("#FixMaxRem").val(returns[0].Num);
+
+            let price = $("#Price").data("kendoNumericTextBox");
+            price.value(returns[0].Price);
+
+            let total = $("#TotalPrice").data("kendoNumericTextBox");
+            total.value(returns[0].Num * returns[0].Price);
+
+            var dropdownlist = $("#CurrencyId").data("kendoDropDownList");
+            dropdownlist.text(returns[0].CurrencyName);
+
+            $('#btn-ShowPurchaseInvoiceDetailListModal-accept').removeAttr("disabled");
+            $('#ShowPurchaseInvoiceDetailListModal').modal('hide');
+            $('#ShowPurchaseInvoiceDetailListModal-body').empty();
+            $(".modal-backdrop:last").remove();
+
+        } else {
+
+            if (reason == '') {
+                $("#ShowPurchaseInvoiceDetailListModal #MultiReason-box").removeClass("hidden");
+                $('#btn-ShowPurchaseInvoiceDetailListModal-accept').removeAttr("disabled");
+                return;
+            }
+
+            $(".loader").removeClass("hidden");
+
+            $.ajax({
+                type: "Post",
+                url: "/ReturnPurchaseInvoiceDetail/AddList",
+                data: {
+                    viewModels: returns
+                },
+                success: function (response) {
+                    $('#btn-ShowPurchaseInvoiceDetailListModal-accept').removeAttr("disabled");
+
+                    if (response === 0) {
+
+                        $("#ShowPurchaseInvoiceDetailListModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "InvoiceInUse") {
+
+                        $("#ShowPurchaseInvoiceDetailListModal #InvoiceInUse").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "AccessDenied") {
+
+                        $("#ShowPurchaseInvoiceDetailListModal #ERROR_AccessDenied").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "EmptyList") {
+
+                        $("#ShowPurchaseInvoiceDetailListModal #ERROR_NothingSelected").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "EmptyReason") {
+
+                        $("#ShowPurchaseInvoiceDetailListModal #MultiReason-box").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#ShowPurchaseInvoiceDetailListModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#ShowPurchaseInvoiceDetailListModal').modal('hide');
+                        $('#ShowPurchaseInvoiceDetailListModal-body').empty();
+
+                        closeAddReturnPurchaseInvoiceDetailModal();
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#purchaseInvoiceDetailKendoGrid .k-pager-refresh")[0].click();
+                        SetTotalPrice(response);
+                    }
+                }
+            });
+
+        }
+
+    });
+
+    function BackToPay() {
+        $(".loader").removeClass("hidden");
+
+        let link = "/SupplierAccount/Form";
+
+        let data = {
+            SupplierId: sessionStorage.SupplierId,
+            CurrencyId: sessionStorage.CurrencyId,
+            SupplierFilter: sessionStorage.SupplierFilter,
+            Year: sessionStorage.Year,
+            DateFromTxt: sessionStorage.DateFromTxt,
+            DateToTxt: sessionStorage.DateToTx
+        };
+
+        $(".page-content").load(link, data, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+</script>

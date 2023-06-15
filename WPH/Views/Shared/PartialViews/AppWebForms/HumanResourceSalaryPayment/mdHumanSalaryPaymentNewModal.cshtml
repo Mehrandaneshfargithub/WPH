@@ -1,0 +1,103 @@
+﻿@model WPH.Models.HumanResourceSalaryPayment.HumanResourceSalaryPaymentViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main" style="padding:0px !important;">
+            <form id="addNewHumanResourceSalaryPaymentForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(p => p.Guid, new { id = "PayGuid" })
+                    @Html.HiddenFor(p => p.HumanResourceSalaryId)
+
+                    <div class="tab-content" id="recive-money" style="width:70%;margin: 0px auto;padding: 20px;">
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Amount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("Amount")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    .Value(Model.Amount)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Price-box" }))
+                            </span>
+                            <span id="Price-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Description"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                    .Name("Description")
+                                    .Value(Model.Description)
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                            </span>
+                        </label>
+
+                        @if (ViewBag.useDollar != "false")
+                        {
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Currency"]</label>
+                                <span class="block input-icon input-icon-right ">
+
+                                    @(Html.Kendo().DropDownList()
+                                        .Name("ReciveCurrencyId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .DataSource(source =>
+                                        {
+                                        source.Read(read =>
+                                        {
+                                        read.Action("GetAllCurrencies", "BaseInfo");
+                                        })
+                                        .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                </span>
+                            </label>
+                        }
+                    </div>
+
+
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            let numerictextbox = $("#Amount").data("kendoNumericTextBox");
+            numerictextbox.focus();
+        }, 200);
+
+    });
+
+    $("#Amount").on("keypress", function (e) {
+        if (e.which === 13) {
+
+            $('#Description').focus();
+        }
+    });
+
+    $('#Description').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            e.preventDefault();
+
+            $('#btn-payHumanSalary-accept').focus();
+        }
+    });
+</script>

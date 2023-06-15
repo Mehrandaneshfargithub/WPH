@@ -1,0 +1,1264 @@
+﻿@model Guid
+
+@using Microsoft.AspNetCore.Http
+@inject WPH.Resources.SharedViewLocalizer Localizer
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    string edit_title = Localizer["EditPrescription"];
+    string remove_title = Localizer["RemovePrescription"];
+
+    string font = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        dir = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        dir = " direction:rtl; ";
+    }
+
+    <style>
+
+        /*.modal {
+            text-align: center;
+        }
+
+            .modal:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -4px;*/ /* Adjusts for spacing */
+        /*}
+
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }*/
+
+    </style>
+
+    <label id="deleteMedicineText" class="hidden">@Localizer["DeleteRecordBody"]</label>
+    <label id="otherAnalysisValue" class="hidden">@ViewBag.OtherAnalysis</label>
+
+    bool showHistory = !(bool)(ViewBag.ShowHistory ?? false);
+    string set_toolbar;
+    if (showHistory)
+    {
+        set_toolbar = "<div class='pull-left'>" +
+                          "<a href = '\\#' class='k-link k-button k-button-icon btnGrid' onclick='AddMedicine(event)' style='font-size:1.2rem; padding: 0.2rem 0.1rem; width: 10rem'><span class='fa fa-plus' style='margin:0.1rem'></span>Add Medicine</a>" +
+                      "</div>" +
+                      "<div class='pull-left'>" +
+                          "<a href = '\\#'  onclick='MedicinePrint(event)'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-print' style='margin:0.1rem'></span>Print</a>" +
+                      "</div>" +
+                      "<div class='pull-left'>" +
+                          "<a href = '\\#'  onclick='SendMedicine(event)'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-send' style='margin:0.1rem'></span>Send Medicine</a>" +
+                      "</div>" +
+                      "<div class='pull-left'>" +
+                          "<a href = '\\#'  onclick='MedicineList(event)'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-server' style='margin:0.1rem'></span>Medicine List</a>" +
+                      "</div>";
+    }
+    else
+    {
+
+        set_toolbar = "<div class='pull-left'>" +
+                          "<a href = '\\#'  onclick='MedicinePrint(event)'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-print' style='margin:0.1rem'></span>Print</a>" +
+                      "</div>" +
+                      "<div class='pull-left'>" +
+                          "<a href = '\\#'  onclick='SendMedicine(event)'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-send' style='margin:0.1rem'></span>Send Medicine</a>" +
+                      "</div>" +
+                      "<div class='pull-left'>" +
+                          "<a href = '\\#'  onclick='MedicineList(event)'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-server' style='margin:0.1rem'></span>Medicine List</a>" +
+                      "</div>";
+    }
+}
+
+
+<style>
+
+    .tabs .k-item .k-link {
+        color: white
+    }
+
+    .tabs .k-state-active .k-link {
+        color: black
+    }
+
+        .tabs .k-state-active .k-link:hover {
+            color: white
+        }
+
+    .k-pager-wrap .k-link {
+        color: black !important
+    }
+
+    .analysisButtons {
+        background-color: rgba(0, 0, 51,0.8);
+        border-radius: 1rem;
+        padding: 0.5rem;
+        transition: all 0.3s;
+        font-weight: 300 !important;
+    }
+
+        .analysisButtons:hover {
+            background-color: #34568b;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+    .btnGrid {
+        border-radius: 1rem;
+        border: none;
+        color: rgba(0,0,0,0.8) !important;
+        background-color: #0072b5;
+        font-size: 1.4rem;
+    }
+
+        .btnGrid:hover {
+            color: white;
+            background-color: #0081cc;
+        }
+</style>
+
+
+<div class="col-sm-12" style="padding:0">
+
+    @{
+        if (Model == Guid.Empty)
+        {
+            <h3 id="prescriptionVisit" class="hidden" data-prescriptionVisitId=""></h3>
+
+        }
+        else
+        {
+            <h3 id="prescriptionVisit" class="hidden" data-prescriptionVisitId="@Model"></h3>
+
+        }
+    }
+    <label id="serverVisitId" class="hidden"></label>
+
+
+    @(Html.Kendo().TabStrip()
+    .Name("tabstripPrescription")
+    .Animation(false)
+    .Items(tabstrip =>
+    {
+    tabstrip.Add().Text("Prescription")
+    .Selected(true)
+    .Content(@<text>
+
+        <script>
+            var medId;
+
+            function OnSelectMedicine(e) {
+                var DataItem = this.dataItem(e.item.index());
+                medId = DataItem.Guid;
+                let numMed = $('#NumMedicine').data("kendoNumericTextBox");
+
+                setTimeout(() => {
+                    numMed.focus();
+                })
+            }
+
+            function newNumKeypress(e) {
+                if (e.which === 13 || e.which === 9) {
+                    $('#ConsumeMedicine').focus();
+                }
+            }
+
+            function newConsumeKeypress(e) {
+                if (e.which === 13 || e.which === 9) {
+                    $('#ExplainMedicine').focus();
+                }
+            }
+
+            function newExplainKeypress(e) {
+                if (e.which === 13 || e.which === 9) {
+                    if ($("#updateBtn").hasClass('hidden'))
+                        AddMedicineVisit();
+                    else
+                        UpdateMedicine();
+                }
+            }
+
+            function AddMedicineVisit() {
+                $(".loader").removeClass("hidden");
+                try {
+
+                    let visitId = $("#prescriptionVisit").attr("data-prescriptionVisitId");
+                    let medicineId = medId;
+                    let num = $("#NumMedicine").val();
+                    let consume = $("#ConsumeMedicine").val();
+                    let explain = $("#ExplainMedicine").val();
+                    let numMed = $('#NumMedicine').data("kendoNumericTextBox");
+
+                    if (num === undefined || num === null || num === "") {
+                        num = "0";
+                    }
+
+                    let newPresc = {
+                        VisitId: visitId,
+                        MedicineId: medicineId,
+                        Num: num,
+                        ConsumptionInstruction: consume,
+                        Explanation: explain
+                    }
+
+                    $.ajax({
+                        url: '/Visit/AddMedicineToPrescription',
+                        type: "Post",
+                        data: { viewModel: newPresc },
+                        success: function (response) {
+                            $("#PrescriptionDetailGrid").find(".k-pager-refresh").click();
+                            numMed.value('');
+                            $('#ConsumeMedicine').val('');
+                            $('#ExplainMedicine').val('');
+                            $('#AutoMedicine').val('');
+                            medId = "";
+                            $('#AutoMedicine').focus();
+
+                            $(".loader").fadeIn("slow");
+                            $(".loader").addClass("hidden");
+                        }
+                    });
+
+                } catch (err) {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+
+            }
+        </script>
+
+        @if (showHistory)
+        {
+
+            <div class="col-sm-12" style="display: flex; align-items: flex-end; font-size: 1.4rem">
+                <div class="col-sm-3 pull-left">
+                    <h6 class="@font" style="font-size:1.6rem"> Medicine </h6>
+
+                    @(Html.Kendo().AutoComplete()
+                    .Name("AutoMedicine")
+                    .DataTextField("JoineryName")
+                    .Events(events => events.Select("OnSelectMedicine"))
+                    .Filter("contains")
+                    .HighlightFirst(true)
+                    .ClearButton(false)
+                    .HtmlAttributes(new { @id = "AutoMedicine", style = "width:100%", @data_checkEmpty = "Name2-box"})
+                    .DataSource(source =>
+                    {
+                        source.ServerFiltering(false);
+                        source.Read(read =>
+                        {
+                            read.Action("GetAllMedicine", "Medicine");
+                        })
+                        .ServerFiltering(false);
+                    })
+                    )
+
+                </div>
+
+                <div class="col-sm-2 pull-left">
+                    <h6 class="@font" style="font-size:1.6rem"> Number </h6>
+                    @(Html.Kendo().NumericTextBox<decimal>()
+                        .Name("NumMedicine")
+                        .HtmlAttributes(new { @id = "NumMedicine", style = "width: 100%", onkeypress = "newNumKeypress(event);" })
+                        )
+                </div>
+
+                <div class="col-sm-2 pull-left">
+                    <h6 class="@font" style="font-size:1.6rem"> Consume Instruction</h6>
+                    @(Html.Kendo().TextBox()
+                        .Name("ConsumeMedicine")
+                        .HtmlAttributes(new { @id = "ConsumeMedicine", style = "width:100%", onkeypress = "newConsumeKeypress(event);" })
+                        )
+                </div>
+
+                <div class="col-sm-3 pull-left">
+                    <h6 class="@font" style="font-size:1.6rem"> Explain </h6>
+                    @(Html.Kendo().TextBox()
+                        .Name("ExplainMedicine")
+                        .HtmlAttributes(new { @id = "ExplainMedicine", style = "width:100%", onkeypress = "newExplainKeypress(event);" })
+                        )
+                </div>
+
+                <h3 id="EditPreId" class="hidden"></h3>
+
+                <div id="updateBtn" class="col-sm-2 hidden" @*style="position:absolute;bottom:0;right:0"*@>
+                    <div class="col-sm-12">
+                        <a href='\\#' class='k-link k-button k-button-icon btnGrid' onclick='UpdateMedicine()' style='width:4rem'>
+                            <span>
+                                <i class='white fa fa-check-circle bigger-120'></i>
+                            </span>
+                        </a>
+
+                        <a href='\\#' class='k-link k-button k-button-icon btnGrid' onclick='CancelUpdateMedicine()' style=' width: 4rem'>
+                            <span>
+                                <i class='white fa fa-ban bigger-120'></i>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="btnAddContent" class="col-sm-2">
+                    @(Html.Kendo().Button()
+                    .Name("btn-add-AddMedicineVisit")
+                    .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;", type = "button", @class = "k-primary", onclick = "AddMedicineVisit()" })
+                    .Content(Localizer["Add"]))
+                </div>
+            </div>
+        }
+
+
+
+
+        <div class="col-sm-12 " style="padding:0;direction:ltr">
+            @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PrescrptionDetail.PrescriptionDetailViewModel>()
+                .Name("PrescriptionDetailGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(x => x.Index).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Title("").Width(20);
+                    columns.Bound(x => x.MedicineJoineryName).Title("Medicine Name").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Width(350);
+                    columns.Bound(x => x.Num).Title("Number").Width(50).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                    columns.Bound(x => x.ConsumptionInstruction).Width(150).Title("Consumption Instruction").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                    columns.Bound(x => x.Explanation).Width(300).Title("Explanation").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                    columns.Bound(x => x.ModifiedUserName).Title(Localizer["CreatedUser"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+
+                    if (showHistory)
+                    {
+                        columns.Bound("").Title(string.Empty).Width(30)
+                        .ClientTemplate(
+                            $@"<a class='tooltip-error grid-btn' onClick='DeletePrescriptionDetail(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                                <span class='red'>
+                                    <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                                </span>
+                            </a>
+                        ");
+
+                        columns.Bound("").Title(string.Empty).Width(30)
+                        .ClientTemplate(
+                            $@"<a class='tooltip-error grid-btn' onClick='EditPrescriptionDetail(this);' data-id='#=Guid#'  data-rel='tooltip' title='{edit_title}' data-original-title='Edit' data-medId='#=MedicineId#' data-name='#=MedicineJoineryName#' data-num='#=Num#' data-consume='#=ConsumptionInstruction#' data-explain='#=Explanation#'>
+                                <span class='green'>
+                                    <i class='ace-icon fa fa-pencil bigger-120'></i>
+                                </span>
+                            </a>
+                        ");
+                    }
+
+
+                    columns.Bound(x => x.Guid).Hidden();
+                    columns.Bound(x => x.MedicineId).Hidden();
+                    columns.Bound(x => x.VisitId).Hidden();
+                })
+                .ToolBar(toolbar =>
+                {
+                    toolbar.ClientTemplate(
+                        set_toolbar
+                    );
+                })
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Batch(true)
+                    .Model(model =>
+                    {
+                        model.Id(p => p.Guid);
+                    })
+                    .PageSize(5)
+                    //.Read(read => read.Action("GetAllVisitPrescriptionDetail", "Visit", new { Id = .Guid }))
+                    .Create("PrescriptionDetail_Create", "Visit")
+                    .Update("PrescriptionDetail_Update", "Visit")
+                    .Destroy("PrescriptionDetail_Destroy", "Visit")
+                )
+                .Pageable(pageable => pageable
+                .Input(true)
+                .Refresh(true)
+                .PageSizes(true)
+                .ButtonCount(5)
+                .Numeric(true)) // Enable paging
+                .Sortable()
+                .HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem" })
+                )
+        </div>
+
+    </text>);
+    if(HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") != "Hospital")
+    {
+            tabstrip.Add().Text("Analyses")
+    .Content(@<text>
+
+    <div class="col-sm-12" style="padding:0">
+            <script>
+                function OnSelectTest(e) {
+                    //var DataItem = this.dataItem(e.item.index());
+                    //testId = DataItem.Guid;
+                    setTimeout(() => {
+                        $('#ExplainTest').focus();
+                    })
+                }
+
+                function newTestExplainKeypress(e) {
+                    if (e.which === 13 || e.which === 9) {
+                        AddTestVisit();
+                    }
+                }
+
+                function AddTestVisit() {
+
+                    let visitId = $("#prescriptionVisit").attr("data-prescriptionVisitId");
+                    let testId = $("#Test").attr("data-Value");
+                    let expe = $('#ExplainTest').val();
+
+                    let newPrescTest = {
+                        VisitId: visitId,
+                        TestId: testId,
+                        Explanation: expe,
+                        AnalysisName: $('#AutoTest').val(),
+                        TestName: $('#AutoTest').val()
+                    }
+
+                    $.ajax({
+                        url: '/Visit/AddTestToPrescriptionTest',
+                        type: "Post",
+                        data: { test: newPrescTest },
+                        success: function (response) {
+                            $("#PrescriptionTestDetailGrid").find(".k-pager-refresh").click();
+                            $('#ExplainTest').val('');
+                            $('#AutoTest').val('');
+                            //testId = "";
+                            $('#AutoTest').focus();
+                        }
+                    });
+
+                }
+            </script>
+
+            @if (showHistory)
+            {
+                <div class="col-sm-12" style="display: flex; align-items: flex-end; font-size: 1.4rem">
+
+                    <div class="col-sm-4">
+                        <h6 class="@font" style="font-size:1.6rem"> Analysis </h6>
+                        @{
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("AutoTest")
+                            .DataTextField("Name")
+                            .Events(events => events.Select("OnSelectTest"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { @id = "AutoTest", style = "width:100%"})
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllTests", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            )
+
+                        }
+
+
+                    </div>
+
+                    <div class="col-sm-6 @font">
+                        <h6 class="@font" style="font-size:1.6rem;font-weight:900"> Explain </h6>
+                        @(Html.Kendo().TextBox()
+                            .Name("ExplainTest")
+                            .HtmlAttributes(new { @id = "ExplainTest", style = "width:100%", onkeypress = "newTestExplainKeypress(event);" })
+                            )
+                    </div>
+
+                    <div id="btnAddContent" class="col-sm-2">
+
+                        @(Html.Kendo().Button()
+                        .Name("btn-add-AddTestVisit")
+                        .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;", type = "button", @class = "k-primary", onclick = "AddTestVisit()" })
+                        .Content(Localizer["Add"]))
+
+                    </div>
+
+                </div>
+
+
+            }
+
+            <script>
+
+                let useAnalysisvariable = '@ViewBag.UseAnalysis';
+                let useAnalysis;
+
+                if (useAnalysisvariable === 'False') {
+                    useAnalysis = false;
+                }
+                else {
+                    useAnalysis = true;
+                }
+                //if (useAnalysis) {
+                //    $.ajax({
+                //        url: '/AnalysisItem/GetAllAnalysisItemForClinic',
+                //        type: "Post",
+                //        success: function (response) {
+
+                //            //CreateFastAccessTest(response);
+                //        }
+                //    });
+                //}
+                //else {
+
+                //    $.ajax({
+                //        url: '/BaseInfo/GetAllTests',
+                //        type: "Post",
+                //        success: function (response) {
+
+                //            //CreateFastAccessTest(response);
+                //        }
+                //    });
+                //}
+
+                //function CreateFastAccessTest(Analysis) {
+
+                //    let analysisItemButtons = "";
+
+                //    for (let i = 0; i < Analysis.length; i++) {
+                //        if (useAnalysis) {
+                //            if (Analysis[i].IsButton) {
+                //                analysisItemButtons = analysisItemButtons +
+                //                    "<div style='margin:1rem 0.5rem;display:inline-block'><a class='analysisButtons' style='padding:0.5rem' onclick='AddButtonToSelectedGrid(this)' data-Guid='" +
+                //                    Analysis[i].Guid + "' data-Type='Analysis Item' data-Name='" +
+                //                    Analysis[i].Name + "'>" +
+                //                    Analysis[i].Name + "</a></div>";
+                //            }
+                //        }
+                //        else {
+                //            analysisItemButtons = analysisItemButtons +
+                //                "<div style='margin:1rem 0.5rem;display:inline-block'><a class='analysisButtons' style='padding:0.5rem' onclick='AddButtonToSelectedGrid(this)' data-Guid='" +
+                //                Analysis[i].Guid + "' data-Type='Analysis Item' data-Name='" +
+                //                Analysis[i].Name + "'>" +
+                //                Analysis[i].Name + "</a></div>";
+                //        }
+
+                //    }
+
+                //    $('#fastAccessTests').append("<div class='col-sm-12' style=' padding: 0 ;height:8rem' >" + analysisItemButtons + "</div>");
+                //}
+
+            </script>
+
+            <div class="col-sm-12" style="padding:0">
+                @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PrescriptionTest.PrescriptionTestDetailViewModel>()
+                .Name("PrescriptionTestDetailGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                    //columns.Bound(x => x.TestName).Title("TestName").HtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#=TestName#").HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).EditorTemplateName("TestAutoComplete").Width(150);
+                    columns.Bound(x => x.TestName).Title("AnalysisName").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Width(150);
+                    //columns.Bound(x => x.Explanation).Title("Explanation").HtmlAttributes(new { @style = "text-align:center;", onkeypress = "TestExplainKeypress(event);" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Width(500);
+                    columns.Bound(x => x.Explanation).Title("Explanation").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Width(500);
+                    columns.Bound(x => x.ModifiedUserName).Title(Localizer["CreatedUser"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+
+                    if (showHistory)
+                    {
+                        columns.Bound("").Title(string.Empty).Width(30)
+                        .ClientTemplate(
+                            $@"<a class='tooltip-error grid-btn' onClick='DeletePrescriptionTestDetail(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                                <span class='red'>
+                                    <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                                </span>
+                            </a>
+                        ");
+                    }
+
+
+                    columns.Bound(x => x.Guid).Hidden();
+                    columns.Bound(x => x.TestId).Hidden();
+                    columns.Bound(x => x.VisitId).Hidden();
+                })
+                .ToolBar(toolbar =>
+                {
+                    toolbar.ClientTemplate(
+                    //"<div class='pull-left'>" +
+                    //    "<a href = '\\#' class='k-link k-button k-button-icon btnGrid "+ testVisibility + "' onclick='AddTest()' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-plus' style='margin:0.1rem'></span>Add Analysis</a>" +
+                    //"</div>" +
+                    "<div class='pull-left'>" +
+                        "<a href = '\\#' onclick='TestPrint()' class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-print' style='margin:0.1rem'></span>Print</a>" +
+                    "</div>" +
+                    "<div class='pull-left'>" +
+                        "<a href = '\\#'  onclick='SendAnalysis()'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-send' style='margin:0.1rem'></span>Send Analysis</a>" +
+                    "</div>" +
+                    "<div class='pull-left'>" +
+                        "<a href = '\\#'  onclick='AnalysisList()'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-server' style='margin:0.1rem'></span>Analysis List</a>" +
+                    "</div>"
+
+                );
+                })
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Batch(true)
+                    .Model(model =>
+                    {
+                        model.Id(p => p.Guid);
+
+                    })
+                    .PageSize(5)
+                    //.Read(read => read.Action("GetAllVisitPrescriptionTest", "Visit", new { Id = .Guid }))
+                    .Create("PrescriptionTest_Create", "Visit")
+                    .Update("PrescriptionTest_Update", "Visit")
+                    .Destroy("PrescriptionTest_Destroy", "Visit")
+                )
+                .Pageable(pageable => pageable
+                .Input(true)
+                .Refresh(true)
+                .PageSizes(true)
+                .ButtonCount(5)
+                .Numeric(true))
+                .Sortable()
+                .HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem" })
+                )
+            </div>
+        </div>
+
+
+
+    </text>);
+    }
+
+        if ((bool)ViewBag.OtherAnalysis)
+        {
+            tabstrip.Add().Text("Other Clinic Analyses")
+                        .Content(@<text>
+
+        <div class="col-sm-12" style="padding:0">
+            <script>
+
+                function sectionBound() {
+                    ChangeClinicSection();
+                }
+
+                function ChangeClinicSection() {
+
+
+                    setTimeout(() => {
+
+                        let clinicSectionId = $("#UserClinicSections").val();
+
+                        if (clinicSectionId !== null && clinicSectionId !== "") {
+                            $.ajax({
+                                type: "Post",
+                                data: { ClinicSectionId: clinicSectionId },
+                                url: "/Analysis/GetAllAnalysesByClinicSectionId",
+                                success: function (response) {
+
+                                    var allAnalysis = $("#AllAnalysis").data("kendoDropDownList");
+                                    allAnalysis.setDataSource(response);
+
+                                    $(".loader").fadeIn("slow");
+                                    $(".loader").addClass("hidden");
+
+                                }
+                            });
+
+                            $.ajax({
+                                type: "Post",
+                                data: { ClinicSectionId: clinicSectionId },
+                                url: "/AnalysisItem/GetAllAnalysisItemByClinicSectionId",
+                                success: function (response) {
+
+                                    var allAnalysis = $("#AllAnalysisItem").data("kendoDropDownList");
+                                    allAnalysis.setDataSource(response);
+
+                                    $(".loader").fadeIn("slow");
+                                    $(".loader").addClass("hidden");
+
+                                }
+                            });
+                        }
+
+                    })
+
+                }
+
+                function AddOtherAnalysis() {
+
+                    let visitId = $("#prescriptionVisit").attr("data-prescriptionVisitId");
+                    let clinicSectionId = $("#UserClinicSections").val();
+                    let analysisId = $("#AllAnalysis").val();
+                    let analysisItemId = $("#AllAnalysisItem").val();
+
+                    //let newPrescTest = {
+                    //    VisitId: visitId,
+                    //    AnalysisId: analysisId,
+                    //    AnalysisItemId: analysisItemId
+                    //}
+
+                    $.ajax({
+                        url: '/Visit/AddAnalysisToVisit',
+                        type: "Post",
+                        data: { VisitId: visitId, AnalysisId: analysisId, AnalysisItemId: analysisItemId, ClinicSectionId: clinicSectionId},
+                        success: function (response) {
+
+                            $("#PrescriptionOtherAnalysisGrid").find(".k-pager-refresh").click();
+
+                        }
+                    });
+                }
+
+                function analysisChange() {
+
+                    let drop = $("#AllAnalysisItem").data("kendoDropDownList");
+                    drop.value("");
+                }
+
+                function analysisItemChange() {
+                    let drop = $("#AllAnalysis").data("kendoDropDownList");
+                    drop.value("");
+
+                }
+
+
+            </script>
+
+            @if (showHistory)
+            {
+                <div class="col-sm-12" style="display: flex; align-items: flex-end; font-size: 1.4rem">
+
+                    <div class="col-sm-3">
+                        <h6 class="@font" style="font-size:1.6rem"> Clinic Name </h6>
+                        @{
+
+                            @(Html.Kendo().DropDownList()
+                                      .Name("UserClinicSections")
+                                      .DataTextField("Name")
+                                      .DataValueField("Guid")
+                                      .DataSource(source =>
+                                      {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetAllUserClinicSections", "ClinicSection");
+                                          })
+                                          .ServerFiltering(false);
+                                      })
+                                      .Events(e => e.DataBound("sectionBound"))
+                                      .HtmlAttributes(new { @id = "UserClinicSections", style = "width: 100%;",onchange = "ChangeClinicSection()" })
+                            )
+
+                        }
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <h6 class="@font" style="font-size:1.6rem"> Analyses </h6>
+                        @{
+
+                           @(Html.Kendo().DropDownList()
+                                      .Name("AllAnalysis")
+                                      .DataTextField("Name")
+                                      .DataValueField("Guid")
+                                      .Filter("contains")
+                                      .OptionLabel(" ")
+                                      //.DataSource(source =>
+                                      //  {
+                                      //    source.Read(read =>
+                                      //    {
+                                      //        read.Action("GetAllAnalysisAndAnalysisItem", "Analysis").Data("GetClinicSection");
+                                      //    })
+                                      //    .ServerFiltering(false);
+                                      //})
+                                      .HtmlAttributes(new { @id = "AllAnalysis", style = "width: 100%;",onchange = "analysisChange()" })
+                            )
+
+                        }
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <h6 class="@font" style="font-size:1.6rem"> Analysis Items</h6>
+                        @{
+
+                           @(Html.Kendo().DropDownList()
+                                      .Name("AllAnalysisItem")
+                                      .DataTextField("Name")
+                                      .DataValueField("Guid")
+                                      .Filter("contains")
+                                      .OptionLabel(" ")
+                                      //.DataSource(source =>
+                                      //  {
+                                      //    source.Read(read =>
+                                      //    {
+                                      //        read.Action("GetAllAnalysisAndAnalysisItem", "Analysis").Data("GetClinicSection");
+                                      //    })
+                                      //    .ServerFiltering(false);
+                                      //})
+                                      .HtmlAttributes(new { @id = "AllAnalysisItem", style = "width: 100%;", onchange = "analysisItemChange()" })
+                            )
+
+                        }
+
+                    </div>
+
+                    <div id="btnAddContent" class="col-sm-2">
+
+                        @(Html.Kendo().Button()
+                        .Name("btn-add-AddOtherAnalysis")
+                        .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;", type = "button", @class = "k-primary", onclick = "AddOtherAnalysis()" })
+                        .Content(Localizer["Add"]))
+
+                    </div>
+
+                </div>
+
+            }
+
+            <script>
+
+                let useAnalysisvariable = '@ViewBag.UseAnalysis';
+                let useAnalysis;
+
+                if (useAnalysisvariable === 'False') {
+                    useAnalysis = false;
+                }
+                else {
+                    useAnalysis = true;
+                }
+                //if (useAnalysis) {
+                //    $.ajax({
+                //        url: '/AnalysisItem/GetAllAnalysisItemForClinic',
+                //        type: "Post",
+                //        success: function (response) {
+
+                //            //CreateFastAccessTest(response);
+                //        }
+                //    });
+                //}
+                //else {
+
+                //    $.ajax({
+                //        url: '/BaseInfo/GetAllTests',
+                //        type: "Post",
+                //        success: function (response) {
+
+                //            //CreateFastAccessTest(response);
+                //        }
+                //    });
+                //}
+
+                //function CreateFastAccessTest(Analysis) {
+
+                //    let analysisItemButtons = "";
+
+                //    for (let i = 0; i < Analysis.length; i++) {
+                //        if (useAnalysis) {
+                //            if (Analysis[i].IsButton) {
+                //                analysisItemButtons = analysisItemButtons +
+                //                    "<div style='margin:1rem 0.5rem;display:inline-block'><a class='analysisButtons' style='padding:0.5rem' onclick='AddButtonToSelectedGrid(this)' data-Guid='" +
+                //                    Analysis[i].Guid + "' data-Type='Analysis Item' data-Name='" +
+                //                    Analysis[i].Name + "'>" +
+                //                    Analysis[i].Name + "</a></div>";
+                //            }
+                //        }
+                //        else {
+                //            analysisItemButtons = analysisItemButtons +
+                //                "<div style='margin:1rem 0.5rem;display:inline-block'><a class='analysisButtons' style='padding:0.5rem' onclick='AddButtonToSelectedGrid(this)' data-Guid='" +
+                //                Analysis[i].Guid + "' data-Type='Analysis Item' data-Name='" +
+                //                Analysis[i].Name + "'>" +
+                //                Analysis[i].Name + "</a></div>";
+                //        }
+
+                //    }
+
+                //    $('#fastAccessTests').append("<div class='col-sm-12' style=' padding: 0 ;height:8rem' >" + analysisItemButtons + "</div>");
+                //}
+
+            </script>
+
+            <div class="col-sm-12" style="padding:0">
+                @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PrescriptionTest.PrescriptionTestDetailViewModel>()
+                .Name("PrescriptionOtherAnalysisGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                    //columns.Bound(x => x.TestName).Title("TestName").HtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#=TestName#").HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).EditorTemplateName("TestAutoComplete").Width(150);
+                    columns.Bound(x => x.TestName).Title("AnalysisName").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                    //columns.Bound(x => x.Explanation).Title("Explanation").HtmlAttributes(new { @style = "text-align:center;", onkeypress = "TestExplainKeypress(event);" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Width(500);
+                    columns.Bound(x => x.ModifiedUserName).Title(Localizer["CreatedUser"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+
+                    if (showHistory)
+                    {
+                        columns.Bound("").Title(string.Empty).Width(30)
+                        .ClientTemplate(
+                            $@"<a class='tooltip-error grid-btn' onClick='DeletePrescriptionOtherAnalysis(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                                <span class='red'>
+                                    <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                                </span>
+                            </a>
+                        ");
+                    }
+
+
+                    columns.Bound(x => x.Guid).Hidden();
+                    columns.Bound(x => x.TestId).Hidden();
+                    columns.Bound(x => x.VisitId).Hidden();
+                })
+                //.ToolBar(toolbar =>
+                //{
+                //    toolbar.ClientTemplate(
+                //    //"<div class='pull-left'>" +
+                //    //    "<a href = '\\#' class='k-link k-button k-button-icon btnGrid "+ testVisibility + "' onclick='AddTest()' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-plus' style='margin:0.1rem'></span>Add Analysis</a>" +
+                //    //"</div>" +
+                //    //"<div class='pull-left'>" +
+                //    //    "<a href = '\\#' onclick='TestPrint()' class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-print' style='margin:0.1rem'></span>Print</a>" +
+                //    //"</div>" +
+                //    //"<div class='pull-left'>" +
+                //    //    "<a href = '\\#'  onclick='SendAnalysis()'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-send' style='margin:0.1rem'></span>Send Analysis</a>" +
+                //    //"</div>" +
+                //    //"<div class='pull-left'>" +
+                //    //    "<a href = '\\#'  onclick='AnalysisList()'   class='k-link k-button k-button-icon btnGrid' style='font-size:1.2rem;padding:0.2rem 0.1rem;width:10rem'><span class='fa fa-server' style='margin:0.1rem'></span>Analysis List</a>" +
+                //    //"</div>"
+
+                //);
+                //})
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Batch(true)
+                    .Model(model =>
+                    {
+                        model.Id(p => p.Guid);
+
+                    })
+                    .PageSize(5)
+                    //.Read(read => read.Action("GetAllVisitPrescriptionTest", "Visit", new { Id = .Guid }))
+                    .Create("PrescriptionTest_Create", "Visit")
+                    .Update("PrescriptionTest_Update", "Visit")
+                    .Destroy("PrescriptionTest_Destroy", "Visit")
+                )
+                .Pageable(pageable => pageable
+                .Input(true)
+                .Refresh(true)
+                .PageSizes(true)
+                .ButtonCount(5)
+                .Numeric(true))
+                .Sortable()
+                .HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem" })
+                )
+            </div>
+        </div>
+
+    </text>);
+                                                }
+
+
+    })
+
+    .HtmlAttributes(new { style="padding: 0.5rem 0;margin: 1rem 0", @class = "tabs" })
+
+)
+
+</div>
+
+<div id="my-modalTest-new" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="new-modalTest-header" class="smaller lighter blue no-margin">Add New Analysis</h3>
+            </div>
+
+            <div id="new-modalTest-body" class="modal-body" style="text-align:right">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-test-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-test-accept-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="NewMedicineModal" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false" style="z-index:999999;overflow:visible; @dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeNewMedicineModal()" aria-hidden="true">&times;</button>
+                <h3 id="NewMedicineModal-header" class="smaller lighter blue no-margin MyFont-Roboto-grid">Add New Medicine</h3>
+            </div>
+
+            <div id="NewMedicineModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-NewMedicineModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "AddNewMedicine()" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-NewMedicineModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeNewMedicineModal()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="SendMedicineModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["Warning"]
+                </h3>
+            </div>
+
+            <div id="SendMedicineModal-body" class="modal-body">
+                <span id="SendMedicineModal-txt">
+                    Do You Want To Send Medicine To Drugstore?
+                </span>
+
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_InsertWrong"]
+                </div>
+
+                <div id="ServerSomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["SomeThingWentWrongOnServer"]
+                </div>
+
+                <div id="VisitNotExists" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["VisitNotExists"]
+                </div>
+
+                <div id="EmptyMedicine" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["EmptyMedicine"]
+                </div>
+
+                <div id="CantConnectToServer" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["CantConnectToServer"]
+                </div>
+
+                <div id="EmptyMobileOrPatientOrDoctorName" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["EmptyMobileOrPatientOrDoctorName"]
+                </div>
+
+                <div id="InvalidMedicines" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["InvalidMedicines"]
+                </div>
+
+                <div id="UpdateNotAllowed" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["UpdateNotAllowed"]
+                </div>
+
+                <div id="NotFound" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["NotFound"]
+                </div>
+
+                <div id="EmptyPatientMobile" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["EmptyPatientMobile"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-SendMedicine-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-SendMedicine-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowMedicineListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="width:90%;margin:0px auto;">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeShowMedicineListModal()" style="float: right !important;" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-info blue '></i>
+                    Medicines List From Server
+                </h3>
+            </div>
+
+            <div id="ShowMedicineListModal-body" class="modal-body">
+
+
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowMedicineList-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeShowMedicineListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+
+
+<div id="SendAnalysisModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["Warning"]
+                </h3>
+            </div>
+
+            <div id="SendAnalysisModal-body" class="modal-body">
+                <span id="SendAnalysisModal-txt">
+                    Do You Want To Send Analysis To Laboratory?
+                </span>
+
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_InsertWrong"]
+                </div>
+
+                <div id="ServerSomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["SomeThingWentWrongOnServer"]
+                </div>
+
+                <div id="VisitNotExists" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["VisitNotExists"]
+                </div>
+
+                <div id="EmptyAnalysis" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["EmptyAnalysis"]
+                </div>
+
+                <div id="CantConnectToServer" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["CantConnectToServer"]
+                </div>
+
+                <div id="EmptyMobileOrPatientOrDoctorName" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["EmptyMobileOrPatientOrDoctorName"]
+                </div>
+
+                <div id="InvalidMedicines" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["InvalidMedicines"]
+                </div>
+
+                <div id="UpdateNotAllowed" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["UpdateNotAllowed"]
+                </div>
+
+                <div id="NotFound" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["NotFound"]
+                </div>
+
+                <div id="EmptyPatientMobile" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["EmptyPatientMobile"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-SendAnalysis-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-SendAnalysis-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowAnalysisListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="width:90%;margin:0px auto;">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeShowAnalysisListModal()" style="float: right !important;" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-info blue '></i>
+                    Analysis List From Server
+                </h3>
+            </div>
+
+            <div id="ShowAnalysisListModal-body" class="modal-body">
+
+
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowAnalysisList-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeShowAnalysisListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+@if (Model != Guid.Empty)
+{
+    <script>
+
+
+
+        $(document).ready(function () {
+            let id = '@Model';
+            $("#PrescriptionDetailGrid").data("kendoGrid").dataSource.transport.options.read.url = `/Visit/GetAllVisitPrescriptionDetail?Id=${id}`;
+            $("#PrescriptionDetailGrid .k-pager-refresh")[0].click();
+
+            $.ajax({
+                url: '/Reception/GetServerVisitNum',
+                    type: "Get",
+                    data: { visitId: id },
+                    success: function (response) {
+                        $("#serverVisitId").attr("data-id", response);
+                    }
+            });
+        });
+
+    </script>
+}
+
+<script src="~/Content/Js/Prescription.js"></script>

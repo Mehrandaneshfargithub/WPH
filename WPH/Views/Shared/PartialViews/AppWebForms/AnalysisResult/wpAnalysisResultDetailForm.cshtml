@@ -1,0 +1,682 @@
+﻿
+@model WPH.Models.CustomDataModels.AnalysisResultMaster.AnalysisResultMasterViewModel
+@using Microsoft.AspNetCore.Http
+@using System.Globalization;
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    CultureInfo cultures = new CultureInfo("en-US");
+    string font = "", text = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        text = " text-align:left; ";
+        dir = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        text = " text-align:right; ";
+        dir = " direction:rtl; ";
+    }
+
+
+}
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.Guid, new { id = "Guid" })
+@Html.HiddenFor(m => m.Id, new { id = "Id" })
+@Html.HiddenFor(m => m.CreatedUserId, new { id = "CreatedUserId" })
+@Html.HiddenFor(m => m.CreatedDate, new { id = "CreatedDate" })
+@Html.HiddenFor(m => m.PatientReception.PatientId, new { id = "PatientId" })
+@Html.HiddenFor(m => m.PatientReception.Patient.AddressId, new { id = "AddressId" })
+@Html.HiddenFor(m => m.PatientReception.DoctorId, new { id = "DoctorId" })
+@Html.HiddenFor(m => m.PrintedNum, new { id = "PrintedNum" })
+@Html.HiddenFor(m => m.ReceptionId, new { id = "PatientReceptionId" })
+@Html.HiddenFor(m => m.PatientReception.ReceptionNum, new { id = "InvoiceNumber" })
+@Html.HiddenFor(m => m.LastInvoiceNum, new { id = "LastInvoiceNum" })
+@Html.HiddenFor(m => m.FirstInvoiceNum, new { id = "FirstInvoiceNum" })
+@*@Html.HiddenFor(m => m.InvoiceDate, new { id = "InvoiceDate" })*@
+
+
+<style>
+
+    li span.k-link {
+        color: white !important;
+    }
+
+        li span.k-link:hover {
+            color: white !important;
+        }
+
+    li.k-state-active span.k-link {
+        color: black !important;
+    }
+
+        li.k-state-active span.k-link:hover {
+            color: white !important;
+        }
+
+
+
+    #AnalysisTab li span.analysis-name:hover {
+        color: white !important;
+    }
+</style>
+
+<h3 id="useTemp" class="hidden">@ViewBag.useTemplate</h3>
+
+
+<div class="row @font " style="@dir">
+
+
+    <div class="col-sm-12" style="margin:1rem 0">
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a class="k-primary MyFont-Sarchia-grid" style="padding:0.8rem;font-weight:400" onclick="OkAndExit()">@Localizer["Ok"] @Localizer["And"] @Localizer["Exit"]</a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a class="k-primary MyFont-Sarchia-grid" style="padding:0.8rem;font-weight:400" onclick="Exit()">@Localizer["Exit"]</a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a class="k-primary MyFont-Sarchia-grid" style="padding:0.8rem;font-weight:400" onclick="AnalysisResultReport()">@Localizer["Print"]</a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem;margin-right:2rem">
+
+            <a id="btnLast" class="k-primary" style="padding: 0.8rem;
+        font-weight: 400
+    " onclick="GoToCustomReception('Last')"><i class="fa fa-angle-double-right bigger-130"></i></a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left: 1rem">
+
+            <a id="btnNext" class="k-primary" style=" padding: 0.8rem; font-weight: 400" onclick="GoToCustomReception('Next')"><i class="fa fa-angle-right bigger-130"></i></a>
+
+        </div>
+
+
+
+        <div class="pull-right" style="margin-left:1rem;border:solid ;transform:translateY(-20%)">
+
+            @(Html.Kendo().TextBox()
+                    .Name("ReceptionNumber")
+                    .HtmlAttributes(new { id = "ReceptionNumber" })
+            )
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a id="btnPrevius" class="k-primary" style="padding:0.8rem;font-weight:400" onclick="GoToCustomReception('Pre')"><i class="fa fa-angle-left bigger-130"></i></a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a id="btnFirst" class="k-primary" style="padding:0.8rem;font-weight:400" onclick="GoToCustomReception('First')"><i class="fa fa-angle-double-left bigger-130"></i></a>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-xs-12 shadow-border" style="margin:0.5rem 0">
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Date"] @Localizer["Reception"]</label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().TextBox()
+                            .Name("PatientReceptionInvoiceDate")
+                            .Readonly(true)
+                            .Value(Model.PatientReception.ReceptionDate.Value.ToString("dd/MM/yyyy", cultures))
+                            .HtmlAttributes(new { style = "width: 100%", @id = "PatientReceptionInvoiceDate" })
+                    )
+
+
+                </span>
+
+            </label>
+
+        </div>
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Date"] @Localizer["AnalysisResult"]</label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().TextBox()
+                            .Name("InvoiceDate")
+                            .Readonly(true)
+                            .Value(Model.InvoiceDate.Value.ToString("dd/MM/yyyy", cultures))
+                            .HtmlAttributes(new { style = "width: 100%", @id = "InvoiceDate" })
+                    )
+
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["InvoiceNum"]</label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().TextBox()
+                            .Name("PatientReception.InvoiceNum")
+                            .Readonly(true)
+                            .Value(Model.PatientReception.ReceptionNum)
+                            .HtmlAttributes(new { style = "width: 100%", @id = "InvoiceNum" })
+                    )
+
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["PatientName"]: </label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().TextBox()
+                            .Name("PatientName")
+                            .Readonly(true)
+                            .Value(Model.PatientReception.Patient.UserName)
+                            .HtmlAttributes(new { style = "width: 100%", @id = "PatientName" })
+                    )
+
+
+                </span>
+                <span id="Name2-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                </span>
+            </label>
+
+        </div>
+
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Mobile"]: </label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().TextBox()
+                            .Name("PatientPhoneNumber")
+                            .Readonly(true)
+                            .Value(Model.PatientReception.Patient.User.PhoneNumber)
+                            .HtmlAttributes(new { style = "width: 100%", @id = "PatientPhoneNumber" })
+                    )
+
+
+                </span>
+                <span id="Name2-box" class="emptybox hidden" data-isEssential="true" style="color: red;">
+                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                </span>
+            </label>
+
+        </div>
+
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Age"]: </label>
+                <span class="block input-icon input-icon-right hidden" onkeydown="">
+
+                    @(Html.Kendo().DatePicker()
+                            .Name("PatientDateOfBirth")
+                            .Value(Model.PatientReception.Patient.DateOfBirth)
+                            .HtmlAttributes(new { style = "width: 100%", @id = "PatientDateOfBirth", @class = "hidden" })
+                    )
+
+                </span>
+
+
+                <span style="width:25%">
+                    <label for="form-field-8">@Localizer["Year"]: </label>
+                    @(Html.Kendo().TextBox()
+                        .Name("PatientReception.Patient.Year")
+                        .Readonly(true)
+
+                        .HtmlAttributes(new { onchange = "ReserveInsertAge(this)", id = "Year", style = "width: 25%", onkeypress = "return OnlyNumberKey(event)" })
+                    )
+                </span>
+
+
+
+                <span style="width:25%">
+
+                    <label for="form-field-8">@Localizer["Month"]: </label>
+
+                    @(Html.Kendo().TextBox()
+                        .Name("PatientReception.Patient.Month")
+                        .Readonly(true)
+
+                        .HtmlAttributes(new { onchange = "ReserveInsertAge(this)", id = "Month", style = "width: 25%", onkeypress = "return OnlyNumberKey(event)" })
+                    )
+
+                </span>
+
+
+
+
+            </label>
+
+        </div>
+
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Gender"]: </label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().DropDownList()
+                                      .Name("PatientGenderId")
+                                      .DataTextField("Name")
+                                      .DataValueField("Id")
+                                      .Enable(false)
+                                      .DataSource(source =>
+                                        {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetAllGenders", "BaseInfo");
+                                          })
+                                          .ServerFiltering(false);
+                                      })
+                                      .HtmlAttributes(new { @id = "PatientGenderId", style = "width: 100%;" })
+                    )
+
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+
+
+
+        <div class="col-sm-3">
+
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Name"] @Localizer["Doctor"]: </label>
+                <span class="block input-icon input-icon-right " onkeydown="">
+
+                    @(Html.Kendo().TextBox()
+                            .Name("DoctorName")
+                            .Readonly(true)
+                            .Value(Model.PatientReception.DoctorUserName)
+                            .HtmlAttributes(new { style = "width: 100%", @id = "DoctorName" })
+                    )
+
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+
+
+        <div class="col-sm-12">
+
+            <div class="col-sm-1" style="padding:2rem 0">
+
+                <script>
+
+                    function useTempelateChange() {
+
+                        if ($("#TempelateSection").hasClass("hidden"))
+                            $("#useTemp").text("true");
+                        else {
+                            $("#useTemp").text("false");
+                        }
+
+                        $("#TempelateSection").toggleClass("hidden");
+                        $("#TempelateSection2").toggleClass("hidden");
+                        $('#EditorTab').toggleClass("hidden");
+                        $('#ExplanationTab').toggleClass("hidden");
+
+                    }
+
+                </script>
+
+
+
+                @(Html.Kendo().CheckBox()
+                            .Name("UseTemplateCheckbox")
+                            .Label("Use Template")
+                            .HtmlAttributes(new { @class = "kendoCheckbox", onchange = "useTempelateChange()" }))
+
+
+
+            </div>
+
+        </div>
+
+        @*@if (ViewBag.useTemplate == "true")
+            {*@
+        <div class="col-sm-12">
+            <div id="TempelateSection" class="col-sm-3 hidden">
+
+                <script>
+
+                    function selectTemplate(e) {
+
+                        let id = e.dataItem.Guid;
+
+                        $.ajax({
+                            type: "Post",
+                            data: { Id: id },
+                            url: "/AnalysisResultTemplate/GetTemplate",
+                            success: function (response) {
+
+                                let editor = $("#Explanation").data("kendoEditor");
+                                editor.value(response.Value);
+                                let font = $("input.k-fontSize").attr("aria-owns");
+                                let ul = $("#" + font).children().eq(4).click();
+
+                            }
+                        });
+
+                    }
+
+                    $("#template").on('focus', function (e) {
+
+                        let doctorAuto = $("#template").data("kendoAutoComplete");
+                        let value = doctorAuto.value();
+                        doctorAuto.search(value);
+                    });
+
+                </script>
+
+                <label class="block clearfix">
+                    <label for="form-field-8">@Localizer["AnalysisTemplate"]</label>
+                    <span class="block input-icon input-icon-right " onkeydown="">
+
+                        @(Html.Kendo().AutoComplete()
+                              .Name("template")
+                              .DataTextField("Name")
+                              .Events(events => events.Select("selectTemplate"))
+                              .Filter("contains")
+                              .HighlightFirst(true)
+                              .ClearButton(false)
+                              .HtmlAttributes(new { style = "width: 100%;" })
+                              .DataSource(source =>
+                              {
+                                  source.Read(read =>
+                                  {
+                                      read.Action("GetAllTemplate", "AnalysisResultTemplate");
+                                  })
+                                  .ServerFiltering(false);
+                              })
+
+                            )
+
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <div id="TempelateSection2" class="col-sm-3 hidden">
+
+                <label class="block clearfix">
+                    <label for="form-field-8" style="visibility:hidden"> save template </label>
+                    <span class="block input-icon input-icon-right " onkeydown="">
+
+                        <a href="#" class="k-primary MyFont-Sarchia" style="padding:0.3rem 0.3rem;font-weight:400" onclick="SaveTemplate()">@Localizer["Save"] @Localizer["Template"]</a>
+
+
+                    </span>
+
+                </label>
+
+
+
+                <script>
+
+                    function SaveTemplate() {
+
+                        bootbox.prompt("Insert Template Name:", function (result) {
+                            if (result === "" || result === undefined || result === null || result === " ") {
+                                return;
+                            }
+                            else {
+
+                                let Name = result;
+                                let editor = $("#editor").data("kendoEditor");
+                                let value = editor.value();
+                                let clinicSectionId = $("#vClinicSectionId").val();
+                                var token = $(':input:hidden[name*="RequestVerificationToken"]');
+                                $.ajax({
+                                    type: "Post",
+                                    data: {
+                                        __RequestVerificationToken: token.attr('value'),
+                                        symptom: { Name: Name, Value: value, ClinicSectionId: clinicSectionId }
+                                    },
+                                    url: "/AnalysisResultTemplate/AddOrUpdate",
+                                    success: function (response) {
+
+                                        let temps = $("#template").data("kendoAutoComplete");
+                                        temps.dataSource.read();
+
+                                    }
+                                });
+
+
+
+                            }
+                        });
+
+                    }
+
+
+                </script>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="col-xs-12 shadow-border demo-section k-content"
+         style="margin:0.5rem 0;@text">
+        <h4 class="MyFont-Sarchia-grid" style="margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px dotted;font-size:1.5rem;color:black"> Analyses </h4>
+        <div class="col-xs-12 pull-left" id="AnalysisTab" style="width: 100%;direction: ltr;height:50vh"></div>
+    </div>
+
+    <div class="col-xs-12 pull-left hidden" id="EditorTab" style="width: 100%; direction: ltr; border-top: 1px solid; padding-top: 0.5rem ">
+
+
+        @{
+            var editorValue = "";
+            try
+            {
+                editorValue = Model.Description;
+            }
+            catch (Exception) { }
+        }
+
+        @(Html.Kendo().Editor()
+        .Name("editor")
+        .Encoded(false)
+        .HtmlAttributes(new { style = "width: 100%;height:400px", aria_label = "editor", id = "Explanation" })
+        .Value(editorValue)
+        .Tools(tools => tools
+                .Clear()
+                .Bold()
+                .Italic()
+                .Underline()
+                .JustifyLeft()
+                .JustifyCenter()
+                .JustifyRight()
+                .InsertUnorderedList()
+                .InsertOrderedList()
+                .Outdent()
+                .Indent()
+                .FontName()
+                .FontSize()
+                .ForeColor()
+                .BackColor()
+
+        )
+
+)
+    </div>
+
+
+    <div id="ExplanationTab" class="col-sm-12 shadow-border" style="margin:0.5rem 0">
+
+        <label class="block clearfix">
+            <label for="form-field-8">@Localizer["Explanation"]</label>
+            <span class="block input-icon input-icon-right">
+
+                @(Html.Kendo().TextArea()
+                            .Name("Description")
+                            .Rows(2)
+                            .MaxLength(200)
+                            .HtmlAttributes(new { @id = "Explanation2", style = "width: 100%" })
+                            .Value(Model.Description)
+                        )
+
+            </span>
+
+        </label>
+    </div>
+
+    <div class="col-sm-12" style="margin:1rem 0">
+
+        <div class="pull-right" style="margin-left: 1rem">
+
+            <a href="#" id="okAndExit" class="k-primary MyFont-Sarchia-grid" style="padding:0.8rem;font-weight:400" onclick="OkAndExit()">@Localizer["Ok"] @Localizer["And"] @Localizer["Exit"]</a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a href="#" id="btnExit" class="k-primary MyFont-Sarchia-grid" style="padding:0.8rem;font-weight:400" onclick="Exit()">@Localizer["Exit"]</a>
+
+        </div>
+
+        <div class="pull-right" style="margin-left:1rem">
+
+            <a href="#" id="btnPrint" class="k-primary MyFont-Sarchia-grid" style="padding:0.8rem;font-weight:400" onclick="AnalysisResultReport()">@Localizer["Print"]</a>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<div id="PatientReceptionReceivedModal" class="modal fade MyFont-Sarchia-grid" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content col-xs-12">
+            <div class="modal-header col-xs-12">
+                <button type="button" class="close" onclick="closePatientReceptionReceivedModal()" aria-hidden="true">&times;</button>
+                <h3 id="PatientReceptionReceivedModal-header" class="smaller lighter blue no-margin MyFont-Roboto-grid">Received</h3>
+            </div>
+
+            <div id="PatientReceptionReceivedModal-body" class="modal-body col-xs-12">
+
+            </div>
+
+            <div class="modal-footer col-xs-12">
+                @(Html.Kendo().Button()
+                    .Name("btn-PatientReceptionReceived-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewPatientReceptionReceived()" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-PatientReceptionReceived-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closePatientReceptionReceivedModal()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+
+    .radius-border {
+        border: solid 1px rgba(0,0,0,0.3);
+        border-radius: 1rem;
+    }
+
+    .k-primary:hover {
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .k-primary a:hover {
+        cursor: pointer;
+        text-decoration: none;
+    }
+</style>
+
+
+<h3 class="hidden" id="lblPrint"> @Localizer["Print"] </h3>
+<h3 class="hidden" id="lblExit"> @Localizer["Exit"] </h3>
+<h3 class="hidden" id="lblRecieve"> @Localizer["Recieve"] </h3>
+<h3 class="hidden" id="lblThisPatient"> @Localizer["ThisPatientIsDebtorDoYouWantToGetMoneyOrPrintResult"] </h3>
+<script>
+    var receptionAnalysis = @Html.Raw(Json.Serialize(Model.PatientReception.PatientReceptionAnalyses));
+    var analysisResult = @Html.Raw(Json.Serialize(Model.AnalysisResults));
+
+    var gender = @Html.Raw(Json.Serialize(Model.PatientReception.Patient.UserGenderName));
+    var ageInterval = @Html.Raw(Json.Serialize(Model.PatientReception.AgeInterval));
+
+    var remainAmount = parseFloat('@Model.PatientReception.Remained');
+
+    var ThisPatientIsDebtor = $("#lblThisPatient").text() ;
+    var currencyType = '@Model.PatientReception.BaseCurrencyName';
+
+    var lblPrint = $("#lblPrint").text();
+    var lblcancel = $("#lblExit").text();
+    var lblRecieve = $("#lblRecieve").text();
+
+    function load(ctx,width,height,canvas,img) {
+            console.log("Image Onload");
+
+            ctx.drawImage(img, 0, 0, width, height);
+            ctx.rotate(90 * Math.PI / 180);
+           // dataUrl.push(canvas.toDataURL()); //attempt to save base64 string to server using this var
+        dataUrl = canvas.toDataURL();
+
+    }
+
+</script>
+
+<script src="~/Content/Js/AnalysisResultDetail.js"></script>

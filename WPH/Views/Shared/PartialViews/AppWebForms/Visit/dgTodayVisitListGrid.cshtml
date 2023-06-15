@@ -1,0 +1,109 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div class="col-sm-12" style="padding:0">
+
+    @(Html.Kendo().Grid<WPH.Models.CustomDataModels.Visit.VisitViewModel>()
+            .Name("KendoTodayVisitList")
+            .Columns(columns =>
+            {
+                columns.Bound(x => x.VisitNum).Filterable(false).Width(20).Title("Visit Number").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.ReserveDetail.Patient.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(100).Title("Patient Name").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.StatusName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(100).Title("Status").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                //columns.Bound(x => x.Age).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(100).Title("Age").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                //columns.Bound(x => x.Amount).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(100).Title("Paid").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                if (ViewBag.useform)
+                {
+                    columns.Bound(x => x.ReserveDetail.Patient.FormNumber).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(100).Title("File Number").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                }
+                else
+                {
+                    columns.Bound(x => x.ReserveDetail.Patient.FileNum).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(100).Title("File Number").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                }
+                //columns.Bound(x => x.ReserveDetail.).Filterable(false).Width(100).Title("Visit Time").ClientTemplate("#= kendo.format('{0:00}:{1:00}', VisitTime.Hours, VisitTime.Minutes) #").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                // columns.Bound(x => x.BloodPressureDIA).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(50).Title("Blood PressureDIA").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                //columns.Bound(x => x.BloodPressureSYS).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(50).Title("Blood PressureSYS").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                //columns.Bound(x => x.BodyTemperature).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(50).Title("Body Temperature").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                //columns.Bound(x => x.Height).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(50).Title("Height").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                //columns.Bound(x => x.Weight).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(50).Title("Weight").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound("").Title(string.Empty).Width(30)
+                    .ClientTemplate(
+                    @"<a class='tooltip-error grid-btn' onClick='chooseVisit(#=VisitNum#);' data-id='#=ReserveDetailId#' data-rel='tooltip' data-name='#=ReserveDetail.Patient.Name#' >
+                        <span class='blue'>
+                            <i class='ace-icon fa fa-arrow-circle-right bigger-120'></i>
+                        </span>
+                    </a>
+                    ");
+
+                columns.Bound(x => x.ReserveDetail.Patient.Guid).Hidden();
+                columns.Bound(x => x.Guid).Hidden();
+                //columns.Bound(x => x.Amount).Hidden();
+                //columns.Bound(x => x.AmountCorrencyId).Hidden();
+
+
+
+
+            })
+            .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .ServerOperation(false)
+                    .Sort(x=>x.Add("VisitNum").Ascending())
+                    .Model(model =>
+                    {
+                        model.Id(p => p.ReserveDetail.Patient.Guid);
+                    })
+                    .PageSize(5)
+                    .Read(read => read.Action("GetAllTodayVisits", "Visit"))
+                    )
+                            .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+                            .Pageable(pageable => pageable
+                            .Input(true)
+                            .Refresh(true)
+                            .PageSizes(true)
+                            .ButtonCount(5)
+                            .Numeric(true)) // Enable paging
+                            .Sortable()
+                            .HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" })
+                    )
+
+</div>
+
+
+<ul id="messages">
+</ul>
+
+
+
+
+<script>
+
+
+    //window.addEventListener("DOMContentLoaded", contentLoaded, false);
+
+
+
+    //function contentLoaded() {
+    //    var source = new EventSource('/Visit/Message');
+    //    //var ul = $("#messages");
+    //    source.onmessage = function (e) {
+
+    //        var li = document.createElement("li");
+    //        var returnedItem = e.data;
+    //        li.textContent = returnedItem;
+    //        $("#messages").append(li);
+    //    }
+    //};
+
+
+    function chooseVisit(visitNum) {
+        $('#VisitList-Modal').modal('hide');
+        $(".modal-backdrop:last").remove();
+        $('#VisitList-Modal-body').empty();
+
+        changeVisit(visitNum);
+    }
+
+
+</script>

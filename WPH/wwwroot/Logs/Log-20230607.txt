@@ -1,0 +1,281 @@
+2023-06-07T07:55:54.2452940+03:30  [INF] Worker AnalysisItem at: 06/07/2023 07:55:54 +03:30 (68555833)
+2023-06-07T07:55:54.4238881+03:30  [INF] Worker Analysis at: 06/07/2023 07:55:54 +03:30 (7b79526c)
+2023-06-07T07:55:54.4562837+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T07:55:54.5638515+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 07:55:54 +03:30 (75e3aab0)
+2023-06-07T07:55:55.5913906+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T07:55:55.5942737+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T07:55:55.5972402+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T07:55:55.6824213+03:30 800000e0-0004-fb00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T07:55:56.9848058+03:30 800000e0-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T07:55:56.9910194+03:30 800000e0-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T07:55:56.9950789+03:30 800000e0-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T07:55:56.9985729+03:30 800000e0-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T07:58:07.9807167+03:30 80000195-0002-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T07:58:17.5473287+03:30 800001f6-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T08:04:06.0555591+03:30 800001fd-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T08:05:06.3559001+03:30 8000019c-0000-fc00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-07T08:05:51.4498477+03:30 800001b7-0005-f900-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T08:05:57.6355926+03:30 800001c0-0005-f900-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T08:49:31.5720632+03:30 8000025f-0000-fb00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-07T08:49:32.1310288+03:30 8000025f-0000-fb00-b63f-84710c7967bb [ERR] Failed executing DbCommand ("42"ms) [Parameters=["@p26='?' (DbType = Guid), @p27='?' (DbType = Guid), @p28='?' (Size = 250), @p29='?', @p30='?' (DbType = Guid), @p31='?', @p32='?' (DbType = Guid), @p33='?' (DbType = DateTime), @p34='?' (Size = 50), @p35='?' (Size = 50), @p36='?', @p37='?' (DbType = Guid), @p38='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""SET NOCOUNT ON;
+INSERT INTO [ReserveDetail] ([Guid], [DoctorId], [Explanation], [LastVisit], [MasterId], [OldVisit], [PatientId], [ReserveDate], [ReserveEndTime], [ReserveStartTime], [ReservedTime], [SecretaryId], [StatusId])
+VALUES (@p26, @p27, @p28, @p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38);
+SELECT [Id]
+FROM [ReserveDetail]
+WHERE @@ROWCOUNT = 1 AND [Guid] = @p26;" (627a98df)
+2023-06-07T08:49:32.2913118+03:30 8000025f-0000-fb00-b63f-84710c7967bb [ERR] An exception occurred in the database while saving changes for context type '"DataLayer.EntityModels.WASContext"'."
+""Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while updating the entries. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): The INSERT statement conflicted with the FOREIGN KEY constraint \"FK_ReserveDetail_Doctor\". The conflict occurred in database \"WPHNew2\", table \"dbo.Doctor\", column 'GUID'.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.Execute(IRelationalConnection connection)
+ClientConnectionId:554caba1-e237-45af-aee6-a664c5061eb5
+Error Number:547,State:0,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.Execute(IRelationalConnection connection)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.Execute(IEnumerable`1 commandBatches, IRelationalConnection connection)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChanges(IList`1 entries)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChanges(IList`1 entriesToSave)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChanges(DbContext _, Boolean acceptAllChangesOnSuccess)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChanges(Boolean acceptAllChangesOnSuccess)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChanges(Boolean acceptAllChangesOnSuccess)" (170f029e)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while updating the entries. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): The INSERT statement conflicted with the FOREIGN KEY constraint "FK_ReserveDetail_Doctor". The conflict occurred in database "WPHNew2", table "dbo.Doctor", column 'GUID'.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.Execute(IRelationalConnection connection)
+ClientConnectionId:554caba1-e237-45af-aee6-a664c5061eb5
+Error Number:547,State:0,Class:16
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.Execute(IRelationalConnection connection)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.Execute(IEnumerable`1 commandBatches, IRelationalConnection connection)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChanges(IList`1 entries)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChanges(IList`1 entriesToSave)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChanges(DbContext _, Boolean acceptAllChangesOnSuccess)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChanges(Boolean acceptAllChangesOnSuccess)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChanges(Boolean acceptAllChangesOnSuccess)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChanges()
+   at DataLayer.Repositories.Infrastructure.ReserveDetailRepository.AddNewReserveDetail(ReserveDetail res, Boolean newPatient) in C:\Users\Mehran\source\repos\Clinic\WAS\DataLayer\Repositories\Infrastructure\ReserveDetailRepository.cs:line 152
+2023-06-07T08:49:32.5963969+03:30 8000025f-0000-fb00-b63f-84710c7967bb [INF] Controller: Reserves	 Action: AddOrUpdate	 Message: An error occurred while updating the entries. See the inner exception for details. (7ac9846e)
+2023-06-07T08:49:32.8248984+03:30 8000025f-0000-fb00-b63f-84710c7967bb [ERR] An unhandled exception has occurred while executing the request. (48a46595)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while updating the entries. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): The INSERT statement conflicted with the FOREIGN KEY constraint "FK_ReserveDetail_Doctor". The conflict occurred in database "WPHNew2", table "dbo.Doctor", column 'GUID'.
+The statement has been terminated.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.Execute(IRelationalConnection connection)
+ClientConnectionId:554caba1-e237-45af-aee6-a664c5061eb5
+Error Number:547,State:0,Class:16
+   --- End of inner exception stack trace ---
+   at WPH.Controllers.Visit.ReservesController.AddOrUpdate(ReserveDetailViewModel reserveDetailViewModel)
+   at lambda_method3821(Closure , Object )
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|24_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.ResponseCompression.ResponseCompressionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+2023-06-07T08:50:00.8540315+03:30 80000195-0005-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T08:50:13.3904701+03:30 8000021a-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T08:54:05.4004291+03:30 80000261-0000-fb00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-07T08:54:06.3975828+03:30 80000263-0000-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T08:57:06.4865220+03:30 8000012e-0007-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T14:43:46.6250363+03:30  [INF] Worker AnalysisItem at: 06/07/2023 14:43:46 +03:30 (68555833)
+2023-06-07T14:43:46.7890150+03:30  [INF] Worker Analysis at: 06/07/2023 14:43:46 +03:30 (7b79526c)
+2023-06-07T14:43:46.8455312+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T14:43:47.1127328+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 14:43:47 +03:30 (75e3aab0)
+2023-06-07T14:43:48.0302752+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T14:43:48.0332948+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T14:43:48.0360222+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T14:43:48.1319967+03:30 80000104-0004-f900-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T14:43:49.7490205+03:30 80000104-0004-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T14:43:49.7526069+03:30 80000104-0004-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T14:43:49.7556230+03:30 80000104-0004-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T14:43:49.7589074+03:30 80000104-0004-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T16:55:22.8183828+03:30  [INF] Worker AnalysisItem at: 06/07/2023 16:55:22 +03:30 (68555833)
+2023-06-07T16:55:23.0867034+03:30  [INF] Worker Analysis at: 06/07/2023 16:55:23 +03:30 (7b79526c)
+2023-06-07T16:55:23.1764408+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T16:55:23.3823420+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 16:55:23 +03:30 (75e3aab0)
+2023-06-07T16:55:25.9852894+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T16:55:25.9887391+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T16:55:25.9921050+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T16:55:26.1155471+03:30 800002d5-0003-fb00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T16:55:27.5133457+03:30 800002d5-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T16:55:27.5177703+03:30 800002d5-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T16:55:27.5213028+03:30 800002d5-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T16:55:27.5244868+03:30 800002d5-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T16:55:50.5008844+03:30 800001f2-0006-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T16:56:06.1861173+03:30 8000027b-0007-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T16:56:13.7248519+03:30 80000258-0005-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T16:56:34.0204122+03:30 8000011d-0006-fb00-b63f-84710c7967bb [INF] Controller: Dashboard	 Action: GetAllStoreInCome	 Message: The LINQ expression 'DbSet<SaleInvoiceDetail>()
+    .LeftJoin(
+        inner: DbSet<SaleInvoice>(), 
+        outerKeySelector: s => EF.Property<Nullable<Guid>>(s, "SaleInvoiceId"), 
+        innerKeySelector: s0 => EF.Property<Nullable<Guid>>(s0, "Guid"), 
+        resultSelector: (o, i) => new TransparentIdentifier<SaleInvoiceDetail, SaleInvoice>(
+            Outer = o, 
+            Inner = i
+        ))
+    .Where(s => s.Inner.ClinicSectionId == __clinicSectionId_0)
+    .LeftJoin(
+        inner: DbSet<BaseInfoGeneral>(), 
+        outerKeySelector: s => EF.Property<Nullable<int>>(s.Outer, "CurrencyId"), 
+        innerKeySelector: b => EF.Property<Nullable<int>>(b, "Id"), 
+        resultSelector: (o, i) => new TransparentIdentifier<TransparentIdentifier<SaleInvoiceDetail, SaleInvoice>, BaseInfoGeneral>(
+            Outer = o, 
+            Inner = i
+        ))
+    .GroupBy(
+        keySelector: s => new { 
+            Name = s.Inner.Name, 
+            Date = s.Outer.Inner.InvoiceDate.GetValueOrDefault().Date
+         }, 
+        elementSelector: s => s.Outer.Outer)' could not be translated. Additional information: Translation of method 'System.Nullable<System.DateTime>.GetValueOrDefault' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information.
+Translation of method 'System.Nullable<System.DateTime>.GetValueOrDefault' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information. (f978bbfb)
+2023-06-07T16:56:36.9752161+03:30 8000011e-0006-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T16:57:40.4872689+03:30 80000155-0007-fb00-b63f-84710c7967bb [INF] Controller: Dashboard	 Action: GetAllStoreInCome	 Message: The LINQ expression 'DbSet<SaleInvoiceDetail>()
+    .LeftJoin(
+        inner: DbSet<SaleInvoice>(), 
+        outerKeySelector: s => EF.Property<Nullable<Guid>>(s, "SaleInvoiceId"), 
+        innerKeySelector: s0 => EF.Property<Nullable<Guid>>(s0, "Guid"), 
+        resultSelector: (o, i) => new TransparentIdentifier<SaleInvoiceDetail, SaleInvoice>(
+            Outer = o, 
+            Inner = i
+        ))
+    .Where(s => s.Inner.ClinicSectionId == __clinicSectionId_0)
+    .LeftJoin(
+        inner: DbSet<BaseInfoGeneral>(), 
+        outerKeySelector: s => EF.Property<Nullable<int>>(s.Outer, "CurrencyId"), 
+        innerKeySelector: b => EF.Property<Nullable<int>>(b, "Id"), 
+        resultSelector: (o, i) => new TransparentIdentifier<TransparentIdentifier<SaleInvoiceDetail, SaleInvoice>, BaseInfoGeneral>(
+            Outer = o, 
+            Inner = i
+        ))
+    .GroupBy(
+        keySelector: s => new { 
+            Name = s.Inner.Name, 
+            Date = s.Outer.Inner.InvoiceDate.GetValueOrDefault().Date
+         }, 
+        elementSelector: s => s.Outer.Outer)' could not be translated. Additional information: Translation of method 'System.Nullable<System.DateTime>.GetValueOrDefault' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information.
+Translation of method 'System.Nullable<System.DateTime>.GetValueOrDefault' failed. If this method can be mapped to your custom function, see https://go.microsoft.com/fwlink/?linkid=2132413 for more information. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information. (f978bbfb)
+2023-06-07T16:57:43.8690229+03:30 80000156-0007-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:01:19.1485717+03:30  [INF] Worker AnalysisItem at: 06/07/2023 17:01:19 +03:30 (68555833)
+2023-06-07T17:01:19.3598941+03:30  [INF] Worker Analysis at: 06/07/2023 17:01:19 +03:30 (7b79526c)
+2023-06-07T17:01:19.4236556+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T17:01:19.6057451+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 17:01:19 +03:30 (75e3aab0)
+2023-06-07T17:01:21.3857645+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T17:01:21.3914187+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T17:01:21.4295779+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T17:01:21.5751537+03:30 800001e4-0002-fd00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T17:01:24.8723223+03:30 800001e4-0002-fd00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:01:24.9088010+03:30 800001e4-0002-fd00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:01:24.9213298+03:30 800001e4-0002-fd00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:01:24.9548414+03:30 800001e4-0002-fd00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:01:33.7863993+03:30 80000165-0007-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:01:40.1601179+03:30 80000012-0007-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:05:46.9406451+03:30 8000031b-0007-fc00-b63f-84710c7967bb [INF] Controller: Dashboard	 Action: GetAllStoreInCome	 Message: Collection was modified; enumeration operation may not execute. (9e4eda47)
+2023-06-07T17:05:50.7281431+03:30 800002d7-0005-ff00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:09:36.0284186+03:30 800002a2-0007-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:11:04.9945871+03:30 800001cc-0005-f900-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:11:34.2876631+03:30 80000152-0006-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:13:18.3355111+03:30  [INF] Worker AnalysisItem at: 06/07/2023 17:13:18 +03:30 (68555833)
+2023-06-07T17:13:18.4800540+03:30  [INF] Worker Analysis at: 06/07/2023 17:13:18 +03:30 (7b79526c)
+2023-06-07T17:13:18.5146268+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T17:13:18.6224327+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 17:13:18 +03:30 (75e3aab0)
+2023-06-07T17:13:19.6180463+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T17:13:19.6216534+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T17:13:19.6250913+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T17:13:19.7330234+03:30 800000c4-0000-fa00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T17:13:21.1099426+03:30 800000c4-0000-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:13:21.1140143+03:30 800000c4-0000-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:13:21.1179615+03:30 800000c4-0000-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:13:21.1217458+03:30 800000c4-0000-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:13:25.2583032+03:30 800000c9-0000-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:13:33.8672589+03:30 80000223-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:15:07.3952286+03:30 8000022e-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:15:49.1012938+03:30 800001e5-0005-f900-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:17:47.5763133+03:30 800002c4-0007-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:20:04.5590070+03:30 8000029f-0005-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:21:34.4335921+03:30 80000246-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:26:07.2988965+03:30 800002a9-0005-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:26:39.3248590+03:30 800002de-0006-ff00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:27:10.0792531+03:30 80000216-0002-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:28:26.9352157+03:30 8000033a-0007-fc00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:29:36.2254877+03:30 8000016c-0006-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:30:54.9269338+03:30  [INF] Worker AnalysisItem at: 06/07/2023 17:30:54 +03:30 (68555833)
+2023-06-07T17:30:55.1859166+03:30  [INF] Worker Analysis at: 06/07/2023 17:30:55 +03:30 (7b79526c)
+2023-06-07T17:30:55.2584647+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T17:30:55.4583853+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 17:30:55 +03:30 (75e3aab0)
+2023-06-07T17:30:56.6384632+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T17:30:56.6422551+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T17:30:56.6465379+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T17:30:56.7678317+03:30 800002c9-0005-fa00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T17:30:58.8520371+03:30 800002c9-0005-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:30:58.8563088+03:30 800002c9-0005-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:30:58.8609114+03:30 800002c9-0005-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:30:58.8658392+03:30 800002c9-0005-fa00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:31:05.3894713+03:30 8000017f-0006-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:31:11.9354301+03:30 8000034b-0007-fc00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:34:41.6146347+03:30 800000e1-0000-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:37:19.1345826+03:30 8000024f-0006-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:39:18.6283799+03:30 800002fe-0005-ff00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:40:19.4120568+03:30  [INF] Worker AnalysisItem at: 06/07/2023 17:40:19 +03:30 (68555833)
+2023-06-07T17:40:19.6436271+03:30  [INF] Worker Analysis at: 06/07/2023 17:40:19 +03:30 (7b79526c)
+2023-06-07T17:40:19.7040717+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-07T17:40:19.8826553+03:30  [INF] Worker GroupAnalysis at: 06/07/2023 17:40:19 +03:30 (75e3aab0)
+2023-06-07T17:40:21.1784136+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-07T17:40:21.1831048+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-07T17:40:21.1879832+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-07T17:40:21.3060769+03:30 80000211-0005-f900-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-07T17:40:23.3675586+03:30 80000211-0005-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:40:23.3720440+03:30 80000211-0005-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:40:23.3770091+03:30 80000211-0005-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:40:23.3815133+03:30 80000211-0005-f900-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-07T17:40:32.2126255+03:30 80000036-0006-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-07T17:40:38.8148064+03:30 80000300-0006-ff00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)

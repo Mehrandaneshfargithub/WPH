@@ -1,0 +1,161 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div style=" width: 100%;">
+
+    <div style="clear:both;">
+
+        @(Html.Kendo().Grid<WPH.Models.ReturnPurchaseInvoiceDetail.ReturnPurchaseInvoiceDetailSelectViewModel>()
+        .Name("purchaseHistoryKendoGrid")
+        .Columns(columns =>
+        {
+
+            if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+            {
+
+                columns.Bound("").Title("").Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= CheckBox_Databound(Guid,TransferDetailId,RemainingNum,PurchasePrice,Currency,InvoiceNum,InvoiceDateTxt)#");
+
+                columns.Bound(x => x.Consideration).Title(Localizer["Consideration"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.RemainingNum).Title(Localizer["Rem"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.SellingPriceCurrency).Title(Localizer["SalePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.TotalAfterDiscount).Title(Localizer["TotalAfterDiscount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= TotalAfterDiscount_Databound(TotalAfterDiscount,Currency)#");
+                columns.Bound(x => x.Discount).Title(Localizer["Discount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= Discount_Databound(Discount,Currency)#");
+                columns.Bound(x => x.Total).Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= TotalCurrency_Databound(Total,Currency)#");
+                columns.Bound(x => x.PurchaseCurrency).Title(Localizer["PurchasePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.FreeNum).Format("{0:#,#.##}").Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.Num).Format("{0:#,#.##}").Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.ExpireDate).Title(Localizer["ExpDate"]).Format("{0: dd/MM/yyyy}").Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.BujNumber).Title(Localizer["BujNumber"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.MainInvoiceNum).Title(Localizer["MainInvoiceNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.InvoiceDate).Title(Localizer["Date"]).Format("{0: dd/MM/yyyy}").Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.InvoiceNum).Title(Localizer["InvoiceNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.ReturnType).Title(Localizer["Type"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.InvoiceDateTxt).Hidden();
+                columns.Bound(x => x.PurchasePrice).Hidden();
+                columns.Bound(x => x.Currency).Hidden();
+                columns.Bound(x => x.TransferDetailId).Hidden();
+                columns.Bound(x => x.Guid).Hidden();
+            }
+            else
+            {
+                columns.Bound(x => x.Guid).Hidden();
+                columns.Bound(x => x.TransferDetailId).Hidden();
+                columns.Bound(x => x.PurchasePrice).Hidden();
+                columns.Bound(x => x.Currency).Hidden();
+                columns.Bound(x => x.InvoiceDateTxt).Hidden();
+                columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.ReturnType).Title(Localizer["Type"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.InvoiceNum).Title(Localizer["InvoiceNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.InvoiceDate).Title(Localizer["Date"]).Format("{0: dd/MM/yyyy}").Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.MainInvoiceNum).Title(Localizer["MainInvoiceNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.BujNumber).Title(Localizer["BujNumber"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.ExpireDate).Title(Localizer["ExpDate"]).Format("{0: dd/MM/yyyy}").Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.Num).Format("{0:#,#.##}").Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.FreeNum).Format("{0:#,#.##}").Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.PurchaseCurrency).Title(Localizer["PurchasePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.Total).Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= TotalCurrency_Databound(Total,Currency)#");
+                columns.Bound(x => x.Discount).Title(Localizer["Discount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= Discount_Databound(Discount,Currency)#");
+                columns.Bound(x => x.TotalAfterDiscount).Title(Localizer["TotalAfterDiscount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= TotalAfterDiscount_Databound(TotalAfterDiscount,Currency)#");
+                columns.Bound(x => x.SellingPriceCurrency).Title(Localizer["SalePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.RemainingNum).Title(Localizer["Rem"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                columns.Bound(x => x.Consideration).Title(Localizer["Consideration"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+                columns.Bound("").Title("").Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= CheckBox_Databound(Guid,TransferDetailId,RemainingNum,PurchasePrice,Currency,InvoiceNum,InvoiceDateTxt,ReturnType)#");
+
+            }
+        })
+
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            .Model(model =>
+            {
+                model.Id(p => p.Index);
+            })
+            .PageSize(10)
+            .Read(read => read.Action("GetDetailsForDamage", "DamageDetail").Data("GetParametersForSelectDamage"))
+            )
+            .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+            .Pageable(pageable => pageable
+            .Input(true)
+            .Refresh(true)
+            .PageSizes(true)
+            .ButtonCount(5)
+            .Numeric(true)) // Enable paging
+            .Sortable().HtmlAttributes(new { @style = "direction:ltr;" }) // Enable sorting
+        )
+    </div>
+</div>
+
+
+<script>
+
+    function TotalCurrency_Databound(Total, CurrencyName) {
+
+        if (Total == 0)
+            return 0;
+
+        return `<div style="white-space: nowrap;margin: 0px 2px;"> ${CurrencyName} ${parseFloat(Total).toLocaleString('en')} </div>`;
+    }
+
+    function Discount_Databound(Discount, CurrencyName) {
+
+        if (Discount == 0)
+            return 0;
+
+        return `<div style="white-space: nowrap;margin: 0px 2px;"> ${CurrencyName} ${parseFloat(Discount).toLocaleString('en')} </div>`;
+    }
+
+    function TotalAfterDiscount_Databound(TotalAfterDiscount, CurrencyName) {
+
+        if (TotalAfterDiscount == 0)
+            return 0;
+
+        return `<div style="white-space: nowrap;"> ${CurrencyName} ${parseFloat(TotalAfterDiscount).toLocaleString('en')} </div>`;
+    }
+
+    function SelectDamageChange(element) {
+
+
+        if (element.checked == true) {
+            let id = element.dataset.id;
+            let transfer = element.dataset.transfer;
+            
+            $(".select_damage").each(function () {
+
+                let _id = $(this).attr("data-id");
+                let _transfer = $(this).attr("data-transfer");
+
+                if (!(id == _id && transfer == _transfer)) {
+                    $(this).removeAttr("checked");
+                }
+
+            });
+
+        } else {
+
+            $(".select_damage").removeAttr("checked");
+        }
+    }
+
+    function CheckBox_Databound(Guid, TransferDetailId, RemainingNum, PurchasePrice, Currency, InvoiceNum, InvoiceDate, ReturnType) {
+
+        return `<div style=''> <input type="checkbox" class="k-checkbox select_damage" style="" data-txt="currency:${Currency} | ${ReturnType}:${InvoiceNum} | ${InvoiceDate}" data-currency="${Currency}"  data-rem="${RemainingNum}" data-price="${PurchasePrice}" data-id="${Guid}" data-transfer="${TransferDetailId}" onchange="SelectDamageChange(this)" /> </div>`;
+    }
+
+    $(document).ready(function () {
+
+        //$("#purchaseHistoryKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+        //    $("#purchaseHistoryKendoGrid").find("tr.k-state-selected td a.edit").click();
+
+        //});
+
+    })
+
+</script>

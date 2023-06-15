@@ -1,0 +1,367 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<script>
+
+    $('#my-modal-new').on('hidden.bs.modal', function (e) {
+        $('#my-modal-new #ERROR_SomeThingWentWrong').addClass('hidden');
+    })
+
+
+    $('#my-modal-edit').on('hidden.bs.modal', function (e) {
+        $('#my-modal-edit #ERROR_SomeThingWentWrong').addClass('hidden');
+    })
+
+    $('#my-modal-delete').on('hidden.bs.modal', function (e) {
+        $('#ERROR_ThisRecordHasDependencyOnItInAnotherEntity').addClass('hidden');
+        $('#InvoiceInUse').addClass('hidden');
+        $('#ERROR_SomeThingWentWrong').addClass('hidden');
+    })
+
+</script>
+
+@{
+    string font = "", dir = "", icon = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        dir = "";
+        icon = " input-icon-right ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        dir = " direction:rtl; ";
+        icon = " input-icon-left ";
+    }
+}
+
+<div id="my-modal-new" class="modal fade @font" data-keyboard="false" data-backdrop="static" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeMyNewModal()" aria-hidden="true">&times;</button>
+                <h3 id="new-modal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="new-modal-body" class="modal-body">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                .Name("btn-new-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-add")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeMyNewModal()" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="my-modal-edit" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeMyEditModal()" aria-hidden="true">&times;</button>
+                <h3 id="edit-modal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["Edit"]
+                </h3>
+            </div>
+
+            <div id="edit-modal-body" class="modal-body">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-update-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-update")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeMyEditModal()" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<div id="my-modal-withPass-delete" class="modal fade bd-example-modal-lg @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="delete-modal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div style="margin-top:10px;">
+                    <label class="block clearfix">
+                        <span class="block input-icon @icon">
+                            <input id="DeletePassword" disabled="disabled" type="password" class="form-control" lang="en" placeholder="@Localizer["Password"]" />
+                            <i class="ace-icon fa fa-lock"></i>
+                        </span>
+                    </label>
+                    <span id="DeletePassword-box" class="emptybox hidden" data-isEssential="true" style="color:red;font-size: 11px;">
+                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                    </span>
+                </div>
+            </div>
+
+            <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+        
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div id="Wrong_Pass" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["WrongPass"]
+            </div>
+
+            <div class="modal-footer">
+                @Html.AntiForgeryToken()
+
+                @(Html.Kendo().Button()
+                .Name("btn-delete-withPass-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-update")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<div id="my-modal-delete" class="modal fade bd-example-modal-lg @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="delete-modal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+
+                <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["InvoiceInUse"]
+                </div>
+                
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                @Html.AntiForgeryToken()
+
+                @(Html.Kendo().Button()
+                .Name("btn-delete-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-update")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<!-- print modal-->
+<div id="my-modal-send" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="send-modal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="send-modal-body" class="modal-body">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-send-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-update")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+<div id="my-modal-PatientVariables" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content" style="direction:ltr;width:80vw">
+            <div class="modal-header">
+                <button type="button" class="close" aria-hidden="true" data-dismiss="modal">&times;</button>
+                <h3 id="PatientVariables-modal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="PatientVariables-modal-body" class="modal-body" style="direction:ltr">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-PatientVariables-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", @data_patientid = "", @data_dismiss = "modal" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-PatientVariables-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+<div id="PatientVariableNewModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="PatientVariableNewModalClose()" aria-hidden="true">&times;</button>
+                <h3 id="PatientVariableNewModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="PatientVariableNewModal-body" class="modal-body">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-PatientVariableNew-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", @data_patientid = "" })
+                .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-PatientVariableNew-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "PatientVariableNewModalClose()" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+
+<div id="ReportsModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog" style="direction:ltr">
+        <div class="modal-content" style="direction:ltr">
+            <div class="modal-header" style="direction:ltr">
+                <button type="button" class="close" aria-hidden="true" data-dismiss="modal">&times;</button>
+                <h3 id="ReportsModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["AnalysisResultReport"]
+                </h3>
+            </div>
+
+            <div id="ReportsModal-body" class="modal-body" style="direction:ltr">
+
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                    .Name("btn-ReportsModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-ReportsModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(@Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<script src="~/Content/Js/Grid.js"></script>

@@ -1,0 +1,139 @@
+﻿@*@using Stimulsoft.Report.Mvc*@
+
+@*@Html.Stimulsoft().StiMvcDesigner(
+                                    new StiMvcDesignerOptions()
+                                        {
+                                        Actions =
+                                            {
+                                                GetReport = "GetVisitPrescriptionWithMedicinesReport",
+                                                PreviewReport = "PreviewVisitPrescriptionWithMedicinesReport",
+                                                DesignerEvent = "DesignerEvent"
+                                            }
+                                        })*@
+
+
+@*@Html.Stimulsoft().StiMvcViewer(
+                                    new StiMvcViewerOptions()
+                                    {
+
+                                        Server =
+                                        {
+                                            CacheMode = Stimulsoft.Report.Web.StiServerCacheMode.None
+                                        },
+
+                                        Actions =
+                                            {
+                                                GetReport = "GetVisitPrescriptionWithMedicinesReport",
+                                                ViewerEvent = "ViewerEvent",
+                                                PrintReport = "PrintMedicinesReport",
+                                                ExportReport = "ExportMedicinesReport",
+                                                 
+
+                                            },
+                                        Toolbar =
+                                        {
+                                            PrintDestination = Stimulsoft.Report.Web.StiPrintDestination.Default,
+
+                                        },
+                                        Exports =
+
+                                        {
+
+                                            DefaultSettings =
+
+                                            {
+
+                                                ExportToPdf =
+
+                                                {
+
+                                                    ImageQuality = 0.75f,
+
+                                                    ImageFormat = Stimulsoft.Report.Export.StiImageFormat.Color
+
+                                                },
+
+                                                ExportToHtml =
+
+                                                {
+
+                                                    ExportMode = Stimulsoft.Report.Export.StiHtmlExportMode.Div,
+
+                                                    UseEmbeddedImages = true
+
+                                                }
+                                                ,
+                                                ExportToImage =
+                                                {
+                                                    CutEdges = true,
+                                                    ImageFormat = Stimulsoft.Report.Export.StiImageFormat.Color,
+                                                    ImageType = Stimulsoft.Report.Export.StiImageType.Jpeg,
+                                                    ImageResolution = 500
+                                                }
+
+                                            },
+                                            ShowExportDialog = false,
+                                            ShowExportToDocument = false,
+
+                                            ShowExportToPdf = false,
+
+                                            ShowExportToXps = false,
+
+                                            ShowExportToPowerPoint = false,
+
+                                            ShowExportToHtml = false,
+
+                                            ShowExportToHtml5 = false,
+
+                                            ShowExportToMht = false,
+
+                                            ShowExportToText = false,
+
+                                            ShowExportToRtf = false,
+
+                                            ShowExportToWord2007 = false,
+
+                                            ShowExportToOpenDocumentWriter = false,
+
+                                            ShowExportToExcel = false,
+
+                                            ShowExportToExcelXml = false,
+
+                                            ShowExportToExcel2007 = false,
+
+                                            ShowExportToOpenDocumentCalc = false,
+
+                                            ShowExportToCsv = false,
+
+                                            ShowExportToDbf = false,
+
+                                            ShowExportToXml = false,
+
+                                            ShowExportToDif = false,
+
+                                            ShowExportToSylk = false,
+
+                                            ShowExportToImageBmp = false,
+
+                                            ShowExportToImageGif = false,
+
+                                            ShowExportToImageJpeg = true,
+
+                                            ShowExportToImagePcx = false,
+
+                                            ShowExportToImagePng = false,
+
+                                            ShowExportToImageTiff = false,
+
+                                            ShowExportToImageMetafile = false,
+
+                                            ShowExportToImageSvg = false,
+
+                                            ShowExportToImageSvgz = false
+
+                                        }
+                                        //Appearance =
+                                        //{
+                                        //    FullScreenMode = true
+                                        //}
+                                    })*@

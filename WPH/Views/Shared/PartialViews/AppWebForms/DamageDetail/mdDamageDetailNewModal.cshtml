@@ -1,0 +1,417 @@
+﻿@model WPH.Models.DamageDetail.DamageDetailViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", pull_rev = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " direction:rtl; ";
+    }
+
+}
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.Guid, new { id = "DetailGuid" })
+
+@Html.HiddenFor(m => m.NumTxt)
+@Html.HiddenFor(m => m.FreeNumTxt)
+@Html.HiddenFor(m => m.DiscountTxt)
+@Html.HiddenFor(m => m.PriceTxt)
+<input type="hidden" id="FixMaxRem" />
+<input type="hidden" id="FixMaxFreeRem" />
+
+<div class="row @font" style="@dir">
+
+    <script>
+
+        function FilterProductItems(e) {
+            e.preventDefault();
+
+            var txt = e.filter.value;
+            var filter_list = FilterProductLists(product_list, txt);
+
+            $("#ProductId").data("kendoDropDownList").dataSource.data(filter_list);
+        }
+
+        function ProductIdChange(e) {
+            ShowDamageDetailListModal();
+        }
+
+    </script>
+
+    <div class="@pull col-sm-12 ">
+
+        <form id="DamageDetailForm">
+            <fieldset>
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Product"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DropDownList()
+                                    .Name("ProductId")
+                                    .DataTextField("FullName")
+                                    .DataValueField("Guid")
+                                    .Filter("contains")
+                                    .OptionLabel(" ")
+                                    .Events(x => x.Filtering("FilterProductItems").Change("ProductIdChange"))
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetLimitedTotalProductsName", "Product", new { productId = Model.ProductId }); 
+                                        })
+                                        .ServerFiltering(false);
+                                    })
+                                    .Value(Model.ProductId?.ToString())
+                                    .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Product-box" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-6">
+                            @Html.HiddenFor(m => m.PurchaseInvoiceDetailId)
+                            @Html.HiddenFor(m => m.TransferDetailId)
+                            @Html.HiddenFor(m => m.CurrencyName)
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["DamageDetail"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                    .Name("DamageDetailTxt")
+                                    .Value(Model.DamageDetailTxt)
+                                    .Enable(false)
+                                    .HtmlAttributes(new { style = "width: 100%"})
+                                    )
+                                </span>
+                            </label>
+
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <span id="Product-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Number"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("Num")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(1)
+                                    .SelectOnFocus(true)
+                                    //.Value(Model.Num ?? 1)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Num-box" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["FreeNum"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("FreeNum")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    //.Value(Model.FreeNum ?? 0)
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <span id="Num-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-12">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Price"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("Price")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    //.Value(Model.Price)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Price-box" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["TotalPrice"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("TotalPrice")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    .Value(0)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "TotalPrice-box" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <span id="Price-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span id="TotalPrice-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-12">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">% @Localizer["Discount"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("Discount")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .Max(100)
+                                    .SelectOnFocus(true)
+                                    .Value(0)
+                                    .HtmlAttributes(new { style = "width: 100%", @id = "DetailDiscount" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8"># @Localizer["Discount"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("DiscountSharp")
+                                    .Culture("en-US")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .SelectOnFocus(true)
+                                    //.Value(Model.Discount ?? 0)
+                                    .HtmlAttributes(new { style = "width: 100%", @id = "DiscountSharp" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 space-0"></div>
+
+            </fieldset>
+        </form>
+
+
+
+    </div>
+
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    var product_list = [];
+    var updated = false;
+
+    $(document).ready(function () {
+
+        $('#FixMaxRem').val($("#NumTxt").val());
+        $('#FixMaxFreeRem').val($("#FreeNumTxt").val());
+
+        $('#Num').data("kendoNumericTextBox").value($("#NumTxt").val());
+        $('#FreeNum').data("kendoNumericTextBox").value($("#FreeNumTxt").val());
+        $('#Price').data("kendoNumericTextBox").value($("#PriceTxt").val());
+        $('#DiscountSharp').data("kendoNumericTextBox").value($("#DiscountTxt").val());
+
+
+        GetAllTotalProductList().done(function (data) {
+
+            product_list = data;
+        });
+
+        setTimeout(function () {
+            $('#ProductId').data("kendoDropDownList").focus();
+        }, 200);
+
+        SetWholePrice();
+        SetDetailDiscount();
+    });
+
+    $("#ProductId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Num').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Num").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#FreeNum').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Num").on("focus", function (e) {
+        $('#Num').select();
+    });
+
+    $("#Num").focusout(function () {
+        SetWholePrice();
+    });
+
+    function SetWholePrice() {
+        var count = $('#Num').val();
+        var whole = $('#Price').val();
+        var price = whole * count;
+
+        if (price) {
+            var total = $('#TotalPrice').data("kendoNumericTextBox");
+            total.value(price);
+        }
+    }
+
+    $("#FreeNum").on("focus", function (e) {
+        $('#FreeNum').select();
+    });
+
+    $("#FreeNum").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Price').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Price").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#TotalPrice').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Price").on("focus", function (e) {
+        $('#Price').select();
+    });
+
+    $("#Price").focusout(function () {
+        SetWholePrice();
+    });
+
+    $("#TotalPrice").on("focus", function (e) {
+        $('#TotalPrice').select();
+    });
+
+    $("#TotalPrice").focusout(function () {
+        var count = $('#Num').val();
+        var whole = $('#TotalPrice').val();
+        var price = whole / count;
+
+        if (price) {
+            var purchase = $('#Price').data("kendoNumericTextBox");
+            purchase.value(price);
+        }
+    });
+
+    $("#TotalPrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#DetailDiscount').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#DetailDiscount").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#DiscountSharp').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#DetailDiscount").on("focus", function (e) {
+        $('#DetailDiscount').select();
+    });
+
+    $("#DetailDiscount").focusout(function () {
+
+        let wholepur = $('#TotalPrice').data("kendoNumericTextBox").value();
+        if (wholepur > 0) {
+            let dis = $('#DetailDiscount').data("kendoNumericTextBox").value();
+            let amount = (dis * wholepur) / 100;
+            $('#DiscountSharp').data("kendoNumericTextBox").value(amount);
+        }
+
+    });
+
+    $("#DiscountSharp").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-AddDamageDetailModal-okAndNew').focus();
+        }
+    });
+
+    $("#DiscountSharp").on("focus", function (e) {
+        $('#DiscountSharp').select();
+    });
+
+    $("#DiscountSharp").focusout(function () {
+        SetDetailDiscount();
+    });
+
+    function SetDetailDiscount() {
+        let wholepur = $('#TotalPrice').data("kendoNumericTextBox").value();
+        if (wholepur > 0) {
+            let dis = $('#DiscountSharp').data("kendoNumericTextBox").value();
+            let amount = (100 * dis) / wholepur;
+            $('#DetailDiscount').data("kendoNumericTextBox").value(amount);
+        }
+    }
+
+</script>

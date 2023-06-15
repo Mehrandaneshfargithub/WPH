@@ -1,0 +1,16 @@
+﻿<div class="main-content" >
+    <div class="main-content-inner" >
+        @{
+            if (ViewBag.TwoSideBar == "True")
+            {
+                @*@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_sideBar2.cshtml")*@
+            }
+            else if (ViewBag.TwoSideBar == "False")
+            {
+                @await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_SearchBar.cshtml")
+            }
+        }
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_pageContent.cshtml")
+    </div>
+</div><!-- /.main-content -->
+

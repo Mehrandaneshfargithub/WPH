@@ -1,0 +1,514 @@
+﻿@model IEnumerable<WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel>
+@using WPH.Models.CustomDataModels.UserManagment
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<style>
+
+    #settingsPageContainer:before {
+        display: none;
+    }
+
+    .chooseLang {
+        font-size: 1.7rem;
+        border: #33BBFF solid 2px;
+        border-radius: 1rem;
+        margin: 0px 5px;
+        padding: 2px 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .chooseLang:hover {
+            background-color: #33BBFF;
+            transition: all 0.3s;
+            color: white;
+        }
+
+    .bootboxLan {
+        border-radius: 1rem;
+        font-weight: bold;
+    }
+
+    .bootbox .modal-content {
+        border-radius: 1rem;
+    }
+
+    .modal-title {
+        font-family: "Roboto";
+    }
+
+
+    ul.submenu li{
+        text-align:left;
+    }
+
+</style>
+
+@{
+    string font = "", left = "", text_align = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        left = " left: 50px; ";
+        text_align = "  ";
+        direction = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        left = " left: -160px; ";
+        text_align = " text-align:right; ";
+        direction = " direction:rtl; ";
+    }
+
+}
+
+<h3 id="lang" class="hidden">@HttpContextAccessor.HttpContext.Session.GetString("culture")</h3>
+
+<script>
+
+    function showLanguages() {
+
+        bootbox.dialog({
+            title: 'Choose Language',
+            //className:'bootboxLan MyFont-Roboto-grid ',
+            message: '<div style="display:flex;justify-content: space-evenly"><div class="chooseLang" name="en">English</div><div class= "chooseLang" name="ku" > کوردی</div><div class="chooseLang" name="ar-IQ">العربیة</div></div>'
+                                });
+
+
+        //var dis = $("#settingsLang").attr("data-lang");
+        //if (dis == "none") {
+
+        //    $("#settingsLang").css("display", "flex");
+        //    $("#settingsLang").attr("data-lang", "flex");
+
+        //} else {
+
+        //    $("#settingsLang").css("display", "none");
+        //    $("#settingsLang").attr("data-lang", "none");
+
+        //}
+
+        $('.chooseLang').on("click", function (e) {
+        var language = $(this).attr('name');
+
+        $.ajax({
+            type: "Post",
+            url: "/UserHandler/chooseLanguage",
+            data: { language: language },
+            success: function (response) {
+                window.location.href = "/ApplicationHandler/Index?clinicSectionId=@HttpContextAccessor.HttpContext.Session.GetString("ClinicSectionId")";
+            }
+        });
+    });
+    }
+
+
+</script>
+
+<div id="ChooseClinicSectionModal" class="modal fade modal-xl @font" data-backdrop="static" data-keyboard="false" style="@direction" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="ChooseClinicSectionModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["Select"] @Localizer["Section"]
+                </h3>
+            </div>
+
+            <div id="ChooseClinicSectionModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="EditCurrentUserModal" class="modal fade modal-xl @font" data-backdrop="static" data-keyboard="false" style="@direction" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="">
+                <button type="button" class="close" onclick="closeEditCurrentUserModal()" aria-hidden="true">&times;</button>
+                <h3 id="EditCurrentUserModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["User"] - @Localizer["Edit"]
+                </h3>
+            </div>
+
+            <div id="EditCurrentUserModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-EditCurrentUserModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "EditCurrentUserModalAccept()" })
+                    .Content(@Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-EditCurrentUserModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeEditCurrentUserModal()" })
+                    .Content(@Localizer["Exit"]))
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="sidebar" class="sidebar h-sidebar navbar-collapse collapse ace-save-state rtl" data-sidebar="true" data-sidebar-scroll="true" data-sidebar-hover="true" >
+
+
+    <div class="sidebar-shortcuts " id="sidebar-shortcuts">
+        <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+
+            @*<div id="settingsPageContainer" class="sidebar-shortcuts-large" style="display:flex; position: relative; border: 0px; left: 0px; width: 100%; margin: 0px;">
+                <button id="settings-page" onclick="showLanguages()" class="btn btn-danger">
+                    <i class="ace-icon fa fa-cogs"></i>
+                </button>
+
+                <div id="settingsLang" data-lang="none" style=" position: absolute; @left display:none;line-height: 24px;padding: 1px;transition: 0.5s;">
+                    <div class="chooseLang" name="en">English</div>
+                    <div class="chooseLang" name="ku">کوردی</div>
+                    <div class="chooseLang" name="ar-IQ">العربیه</div>
+                </div>
+            </div>*@
+
+            <button id="settings-page" onclick="showLanguages()" class="btn btn-danger">
+                <i class="ace-icon fa fa-cogs"></i>
+            </button>
+
+            <button class="btn btn-info" onclick="EditCurrentUser()">
+                <i class="ace-icon fa fa-pencil"></i>
+            </button>
+
+            @{
+                if (ViewBag.FullAccess == "ClinicAdmin")
+                {
+                    <button class="btn btn-success" onclick="changeClinicSection()">
+                        <i class="ace-icon fa fa-exchange"></i>
+                    </button>
+
+                    <button class="btn btn-warning " onclick="goToClinicAdmin()">
+                        <i class="ace-icon fa fa-power-off"></i>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-success disabled">
+                        <i class="ace-icon fa fa-exchange"></i>
+                    </button>
+
+                    <button class="btn btn-warning disabled">
+                        <i class="ace-icon fa fa-power-off"></i>
+                    </button>
+                }
+            }
+
+
+        </div>
+
+        <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+
+            <span class="btn btn-success"></span>
+
+            <span class="btn btn-info"></span>
+
+            <span class="btn btn-warning"></span>
+
+            <span class="btn btn-danger"></span>
+        </div>
+    </div><!-- /.sidebar-shortcuts -->
+
+    <ul style="top:0px;background-color:rgba(0, 0, 74,0.9)" class=" nav nav-list @font ">
+
+        @{
+
+            foreach (var item in Model)
+            {
+                if (item.Parent == 0 && item.Active == true)
+                {
+                    subSystemChildrenGenerator(Model, item, ViewBag.Highlight, ViewBag.Hover);
+                }
+
+            }
+        }
+
+    </ul><!-- /.nav-list -->
+
+    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+        <i id="sidebar-toggle-icon" style="color:white" class="ace-icon fa fa-angle-double-up ace-save-state sidebar-toggle-icon-vertical" data-icon1="ace-icon fa fa-angle-double-up" data-icon2="ace-icon fa fa-angle-double-down"></i>
+    </div>
+</div>
+
+
+@{
+    void subSystemChildrenGenerator(IEnumerable<WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel>
+    Model, WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel item, string highlight, string hover)
+    {
+        var childrens = Model.Where(x => x.Parent == item.Id).ToList();
+
+        if (childrens.Count != 0 && item.Active == true)
+        {
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none " onclick="expandsubmenus(this)">
+                <a href="#" class="dropdown-toggle" style="background-color: rgba(0, 0, 79,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa @item.Icon " style="font-size:20px"></i>
+                    <span class="menu-text"> @item.ShowName </span>
+                    <b class="arrow fa fa-angle-down"></b>
+                </a>
+
+                <b class="arrow"></b>
+
+                <ul class="submenu" style="border-width: 1px; background-color: rgba(0, 0, 74,0.9) ">
+
+                    @foreach (var child in childrens)
+                    {
+                        SubSystemViewModel tempItem = new SubSystemViewModel();
+                        tempItem.Id = child.Id; tempItem.ShowName = child.ShowName; tempItem.Priority = child.Priority; tempItem.Parent = child.Parent; tempItem.Name = child.Name; tempItem.Link = child.Link; tempItem.Icon = child.Icon; tempItem.Active = child.Active;
+
+                        subSystemChildrenGenerator(Model, tempItem, highlight, hover);
+
+                    }
+                </ul>
+            </li>
+
+
+        }
+        else if (childrens.Count == 0 && item.Active == true)
+        {
+
+            <li class=" hover childMenu" style="background-color: rgba(0, 0, 74,0.9); border: none">
+                <a href="#" onclick="goToThisLink('@item.Link')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa @item.Icon"></i>
+                    <span class="menu-text"> @item.ShowName </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+        }
+    }
+
+}
+
+@{
+    void subSystemChildrenGeneratorHorizontal(IEnumerable<WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel>
+Model, WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel item, string highlight, string hover)
+    {
+        var childrens = Model.Where(x => x.Parent == item.Id).ToList();
+
+        if (childrens.Count != 0 && item.Active == true)
+        {
+            <li class="hover sideItem">
+                <a href="#" class="dropdown-toggle">
+                    <i class="menu-icon fa @item.Icon"></i>
+                    <span class="menu-text"> @item.ShowName </span>
+
+                    <b class="arrow fa fa-angle-down"></b>
+                </a>
+
+                <b class="arrow"></b>
+
+                <ul class="submenu">
+
+                    @foreach (var child in childrens)
+                    {
+                        WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel tempItem = new WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel();
+                        tempItem.Id = child.Id; tempItem.ShowName = child.ShowName; tempItem.Priority = child.Priority; tempItem.Parent = child.Parent; tempItem.Name = child.Name; tempItem.Link = child.Link; tempItem.Icon = child.Icon; tempItem.Active = child.Active;
+
+                        subSystemChildrenGeneratorHorizontal(Model, tempItem, highlight, hover);
+
+                    }
+                </ul>
+            </li>
+
+
+        }
+        else if (childrens.Count == 0 && item.Active == true)
+        {
+
+            <li class="hover sideItem">
+                <a href="#" onclick="goToThisLink('@item.Link')">
+                    <i class="menu-icon fa @item.Icon"></i>
+                    <span class="menu-text"> @item.ShowName </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+        }
+    }
+}
+
+
+
+<script>
+
+    window.onresize = function (event) {
+
+        let lang = $("#lang").text();
+
+        let width = $(window).width();
+        if (width < 992 || lang == "en")
+            $(".childMenu").css('text-align', 'left');
+        else 
+            $(".childMenu").css('text-align', 'right');
+    };
+
+    $(document).ready(() => {
+
+
+        let lang = $("#lang").text();
+
+        let width = $(window).width();
+        if (width < 992 || lang == "en")
+            $(".childMenu").css('text-align', 'left');
+        else
+            $(".childMenu").css('text-align', 'right');
+
+    })
+
+
+    var main_div = document.getElementById("sidebar-shortcuts");
+
+    var Observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (!main_div.classList.contains("hover-show")) {
+
+                $("#settingsLang").css("display", "none");
+                $("#settingsLang").attr("data-lang", "none");
+
+            }
+        });
+    });
+
+    Observer.observe(main_div, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+
+    
+    function goToThisLink(link) {
+        if (link === null || link === "NULL" || link === "" || link === undefined) {
+            return;
+        }
+
+        $(".loader").removeClass("hidden");
+        $(".sideItem").removeClass("active");
+        $(this).addClass("active");
+        $('.page-content').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+            if ($("#sidebar").hasClass('in')) {
+                $("#sidebar").removeClass('in');
+                $("#sidebar").css('height', '1px');
+                $("#sidebar").attr('aria-expanded', 'false');
+            }
+
+            $('#sidebar li').removeClass('open');
+
+            //$('#js').load('/InterfaceSettings/loadJsLight');
+        });
+
+    }
+
+    function closeEditCurrentUserModal() {
+
+        $('#EditCurrentUserModal-body').empty();
+        $("#EditCurrentUserModal").modal('toggle');
+
+    }
+
+    function EditCurrentUser() {
+
+        $(".loader").removeClass("hidden");
+        $("#EditCurrentUserModal").modal('toggle');
+
+        var link = "/UserManagment/GetCurrentUser";
+        $('#EditCurrentUserModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditCurrentUserModalAccept() {
+
+        $("#UserName-Exist").addClass('hidden');
+        $("#incorrectPass").addClass('hidden');
+        $("#incorrectPass2").addClass('hidden');
+
+        var isEmmpty = true;
+
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+
+                if ($('[data-checkEmpty="' + empty + '"]').val() !== undefined) {
+                    let text = $('[data-checkEmpty="' + empty + '"]').val()/*.replace(/ /g, '')*/;
+                    if (text === "") {
+                        $(this).removeClass('hidden');
+                        isEmmpty = false;
+                        return;
+                    }
+                }
+
+            }
+        });
+
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        $(".loader").removeClass("hidden");
+        let data = $("#EditCurrentUserForm").serialize();
+        $.ajax({
+            type: "Post",
+            data: data,
+            url: "/UserManagment/EditCurrentUser",
+            success: function (res) {
+
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+
+                if (res === "ValueIsRepeated") {
+                    $("#UserName-Exist").removeClass('hidden');
+
+                    return;
+                }
+                if (res === "NotEqual") {
+                    $("#incorrectPass").removeClass('hidden');
+
+                    return;
+                }
+                if (res === "OldPassError") {
+                    $("#incorrectPass2").removeClass('hidden');
+
+                    return;
+                }
+
+                setTimeout(() => {
+                    $('#EditCurrentUserModal-body').empty();
+                    $("#EditCurrentUserModal").modal('toggle');
+
+
+                    alert("your UserName And Password Changed Succesfully")
+                },100);
+
+
+            },
+        });
+
+    }
+
+</script>

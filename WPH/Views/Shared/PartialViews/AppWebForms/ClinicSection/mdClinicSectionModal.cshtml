@@ -1,0 +1,55 @@
+﻿@model WPH.Models.CustomDataModels.ClinicSection.ClinicSectionViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewClinicSectionOrUserForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.Guid)
+                    @Html.HiddenFor(x => x.ClinicId)
+                    
+                    @Html.HiddenFor(x => x.NameHolder)
+
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new {@id="Name2", style = "width: 100%", @data_checkEmpty = "Name2-box" })
+                            )
+                        </span>
+                        <span id="Name2-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            ThisFieldIsEmptyPleaseFillIt
+                        </span>
+                        <span id="Name2-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            TheNameIsDuplicatedPleaseTryAnotherName
+                        </span>
+                    </label>
+
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+
+<script>
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name2").focus();
+        }, 200);
+
+    });
+
+</script>

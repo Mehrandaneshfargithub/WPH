@@ -1,0 +1,407 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<style>
+
+    .day-class {
+        border: dashed rgba(0,0,0,0.4) 1px;
+        border-radius: 1rem;
+        background-color: rgba(0, 114, 181,0.5);
+        padding: 1rem;
+    }
+
+    .day-holiday-class {
+        border: dashed rgba(0,0,0,0.4) 1px;
+        border-radius: 1rem;
+        background-color: rgba(230, 0, 57,0.5);
+        padding: 1rem;
+    }
+
+    .day-class-parent {
+        padding: 1rem;
+    }
+
+    .day-class-parent-opacity {
+        opacity: 0.5;
+    }
+
+    
+</style>
+
+<div class="row page-header @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                @:MyFont-Roboto-grid
+                                                                                } else {
+                                                                                @:MyFont-Sarchia-grid
+                                                                                    }  ">
+    <div class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture")!= "en") {
+        @:pull-right
+    }
+    else {
+    @:pull-left
+    } ">
+        <h1 class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                @:MyFont-Roboto-grid
+                                                                                } else {
+                                                                                @:MyFont-Sarchia-grid
+                                                                                    } " style="font-size: 2.3rem">
+            @Localizer["ClinicCalendar"]
+        </h1>
+
+    </div>
+
+</div>
+
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div class="row MyFont-Roboto-grid" style="margin-top:2rem">
+
+    <div class="col-xs-12 col-sm-3">
+        @(Html.Kendo().DropDownList()
+                                  .Name("periods")
+
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  .BindTo(@ViewBag.periods)
+                                  .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+        )
+    </div>
+
+
+
+    <div id="DateFromDiv" class="col-xs-12 col-sm-4 hidden">
+
+        <div class="col-xs-4 " style="text-align:left">
+
+            <h5>@Localizer["From"] @Localizer["Date"]</h5>
+
+        </div>
+
+        <div class="col-xs-8">
+            <input id="DateFrom" value="@DateTime.Now.Date" title="datepicker" style="width: 100%;font-size:1.5rem" />
+            @*@(Html.Kendo().DatePicker()
+                                      .Name("DateFrom")
+                                      .Value(DateTime.Now)
+                                      .Format("dd/MM/yyyy")
+                                      .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem" })
+                )*@
+
+        </div>
+    </div>
+
+    <div id="DateToDiv" class="col-xs-12 col-sm-4 hidden">
+
+        <div class="col-xs-4" style="text-align:left">
+
+            <h5>@Localizer["To"] @Localizer["Date"]</h5>
+
+        </div>
+
+        <div class="col-xs-8">
+
+            <input id="DateTo" value="@DateTime.Now.Date" title="datepicker" style="width: 100%;font-size:1.5rem" />
+            @*@(Html.Kendo().DatePicker()
+                                          .Name("DateTo")
+                                          .Value(DateTime.Now)
+                                          .Format("dd/MM/yyyy")
+                                          .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem" })
+                )*@
+        </div>
+
+    </div>
+
+    <div id="SearchBtnDiv" class="col-xs-1 hidden">
+
+        @(Html.Kendo().Button()
+            .Name("btn-search-Time")
+            .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary pull-right", onclick = "btnSearchClick()" })
+            .Content("<i class='fa fa-search'></i>"))
+
+    </div>
+
+
+</div>
+
+
+
+<div id="calendarDays" class="row MyFont-Roboto-grid" style="margin:2rem 0;border-bottom:solid 1px">
+
+    
+
+
+
+</div>
+
+<div class="row MyFont-Roboto-grid">
+
+    @(Html.Kendo().Button()
+            .Name("btn-accept-Time")
+            .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary pull-right", onclick = "btnAcceptTime()" })
+            .Content(Localizer["Ok"]))
+
+
+
+</div>
+
+
+<script>
+
+
+
+
+    $(document).ready(function () {
+
+        $("#DateFrom").kendoDatePicker({
+
+            format: "dd/MM/yyyy"
+
+        });
+
+        $("#DateTo").kendoDatePicker({
+
+            format: "dd/MM/yyyy"
+
+        });
+
+
+        //$("[name = startTime]").kendoDropDownList();
+
+        //$("[name = endTime]").kendoDropDownList();
+
+        //$("[name = visitInterval]").kendoDropDownList();
+
+        let period = $("#periods").data("kendoDropDownList");
+
+        period.value(2);
+        PeriodsChange();
+
+    })
+
+
+
+    function PeriodsChange() {
+
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        var fromTo = $("#FromTo").text();
+
+        if (periodValue === fromTo) {
+            $("#DateFromDiv").removeClass("hidden");
+            $("#DateToDiv").removeClass("hidden");
+            $("#SearchBtnDiv").removeClass("hidden");
+
+        }
+
+        else {
+            $("#DateFromDiv").addClass("hidden");
+            $("#DateToDiv").addClass("hidden");
+            $("#SearchBtnDiv").addClass("hidden");
+            btnSearchClick();
+        }
+
+    }
+
+    function btnSearchClick() {
+
+        let period = $("#periods").data("kendoDropDownList");
+
+        let periodValue = period.value();
+        var DateFrom = $("#DateFrom").val();
+        var DateTo = $("#DateTo").val();
+
+        $.ajax({
+            type: "Post",
+            data: { PeriodId: periodValue, DateFrom: DateFrom, DateTo: DateTo},
+            url: "/ClinicCalendar/GetDays",
+            success: function (response) {
+                CreateDays(response);
+            }
+        });
+
+    }
+
+
+    function CreateDays(days) {
+
+        $("#calendarDays").empty();
+
+        const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        
+
+        let start = "";
+        let end = "";
+
+        for (let i = 7; i <= 23; i++) {
+            start = start + "<option value=" + i + ">" + i + "</option>"
+        }
+
+        for (let i = 8; i <= 24; i++) {
+            end = end + "<option value=" + i + ">" + i + "</option>"
+        }
+
+        
+
+        for (let i = 0; i < days.length; i++) {
+
+
+
+            let d = new Date(days[i].Date);
+
+            let day = weekday[d.getDay()];
+
+            let dat = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+
+            let startTime = days[i].StartTime.Hours;
+            let endTime = days[i].EndTime.Hours;
+            let round = days[i].RoundTime;
+            let dayId = days[i].Guid;
+
+            let check = "";
+
+            let classDay;
+
+            let interval = '<div class="row"><div class="col-xs-6 pull-left" style="text-align:right"><p> Interval: </p></div><div class="col-xs-6"><select id="interval_' + i + '" class="visitInterval" name="visitInterval" style="width:100%;text-align:right" data-value=' + round + '><option value=5>5m</option>' +
+                '<option value = 10 > 10m</option>' +
+                '<option value=15 > 15m</option >' +
+                '<option value=20 > 20m</option >' +
+                '<option value=30 > 30m</option >' +
+                '<option value=60 > 1h</option >' +
+                '<option value=120 > 2h</option >' +
+                '</select ></div></div>';
+
+            if (day === "Friday") {
+                check = '<input type="checkbox" class="k-checkbox" onchange = "checkboxChecked(this)">';
+                classDay = "day-holiday-class";
+
+            }
+            else {
+                check = '<input type="checkbox" class="k-checkbox" checked="checked" onchange = "checkboxChecked(this)">';
+                classDay = "day-class";
+            }
+
+
+            $("#calendarDays").append('<div class="day-class-parent day-class-parent-opacity col-sm-4 col-md-3 col-lg-2" ><div class="'+ classDay + '" >' +
+
+                '<div class="col-sm-12" style="margin-bottom:1rem;border-bottom:solid 1px;padding-bottom:0.5rem">'+
+                    '<div class= "col-xs-2" >' +
+                        check +
+                    '</div >' +
+                    '<div class="col-xs-10">'+
+                        '<div style = "text-align: center;padding-bottom:0.3rem" > <h3 class="MyFont-Roboto-grid" style="font-size:1.7rem">' + day + '</h3></div > ' +
+                        '<div style="text-align: center;"><h3 class="MyFont-Roboto-grid dateOfDay">' + ' (' + dat + ')' + '</h3></div>' +
+                '<div class="hidden dayId">' + dayId + '</div>' +
+                    '</div >'+
+                '</div > '+
+                
+                '<div class="row"><div class="col-xs-6 pull-left" style="text-align:right"><p> Start Time: </p></div><div  class="col-xs-6"><select id="start_' + i + '" class="startTime" name="startTime" style="width:100%;text-align:right" data-value=' + startTime + ' >' + start +'</select></div></div>' +
+                '<div class="row"><div class="col-xs-6 pull-left" style="text-align:right"><p> End Time: </p></div><div  class="col-xs-6"><select id="end_' + i + '" class="endTime" name="endTime" style="width:100%;text-align:right" data-value=' + endTime + ' >' + end +'</select></div></div>' +
+                interval +
+                '</div ></div > ');
+
+           
+
+            $("#start_" + i).kendoDropDownList();
+
+            $("#end_" + i).kendoDropDownList();
+
+            $("#interval_" + i).kendoDropDownList();
+
+            let allStarts = $("#start_" + i).data("kendoDropDownList");
+            allStarts.value(startTime);
+
+            let allEnds = $("#end_" + i).data("kendoDropDownList");
+            allEnds.value(endTime);
+
+            let allRounds = $("#interval_" + i).data("kendoDropDownList");
+            allRounds.value(round);
+
+            
+
+        }
+
+
+        let allStarts = $("span.startTime");
+        
+        for (let i = 0; i < allStarts.length; i++) {
+
+            let allEnds = $(allStarts[i]).children().first().text();
+
+        }
+
+        
+        checkboxes();
+    }
+
+
+    function checkboxChecked(ele) {
+
+        $(ele).parent().parent().parent().parent().toggleClass('parentChecked');
+        $(ele).parent().parent().parent().parent().toggleClass('day-class-parent-opacity');
+
+    }
+
+
+    function checkboxes() {
+
+        let allCheckboxes = $(".k-checkbox:checked");
+        for (let i = 0; i < allCheckboxes.length; i++) {
+            $(allCheckboxes[i]).parent().parent().parent().parent().toggleClass('parentChecked');
+            $(allCheckboxes[i]).parent().parent().parent().parent().toggleClass('day-class-parent-opacity');
+        }
+        
+
+    }
+
+
+
+    function btnAcceptTime() {
+
+        let allDays = [];
+
+        let allStarts = $(".parentChecked span.startTime");
+        let allEnds = $(".parentChecked span.endTime");
+        let allIntervals = $(".parentChecked span.visitInterval");
+        let allDates = $(".parentChecked .dateOfDay");
+        let allIds = $(".parentChecked .dayId");
+
+        for (let i = 0; i < allStarts.length; i++) {
+
+            let guid = $(allIds[i]).text();
+
+            let date = $(allDates[i]).text();
+            date = date.replace(' ', '');
+            date = date.replace('(', '');
+            date = date.replace(')', '');
+            date = date.replace('/', ':');
+            date = date.replace('/', ':');
+
+            let start = $(allStarts[i]).children().first().text();
+            let end = $(allEnds[i]).children().first().text();
+            let interval = $(allIntervals[i]).children().first().text();
+            
+            interval = interval.replace('m', '');
+            interval = interval.replace('h', '');
+            allDays.push({ Guid: guid, Date: date, StartTime: start, EndTime: end, Interval: interval });
+        }
+
+        let period = $("#periods").data("kendoDropDownList");
+
+        let periodValue = period.value();
+        var DateFrom = $("#DateFrom").val();
+        var DateTo = $("#DateTo").val();
+
+        $.ajax({
+            type: "Post",
+            data: { AllDays: allDays, PeriodId: periodValue, DateFrom: DateFrom, DateTo: DateTo },
+            url: "/ClinicCalendar/SaveDays",
+            success: function (response) {
+                alert("Your Changes Saved!");
+            }
+        });
+
+    }
+
+</script>

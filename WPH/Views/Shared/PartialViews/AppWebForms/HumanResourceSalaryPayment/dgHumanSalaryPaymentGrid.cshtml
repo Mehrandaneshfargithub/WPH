@@ -1,0 +1,121 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+
+    string edit_title = Localizer["EditPay"];
+    string remove_title = Localizer["RemovePay"];
+}
+
+<div class="row">
+    @(Html.Kendo().Grid<WPH.Models.HumanResourceSalaryPayment.HumanResourceSalaryPaymentViewModel>()
+    .Name("kendoSalaryPaymentGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeleteSalaryPayment)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='DeletePayment(this);' data-id='#=Guid#' data-type='Salary' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditSalaryPayment)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditPayment(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.CreatedDate).Title(Localizer["Date"]).Format("{0: dd/MM/yyyy}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Amount).Format("{0:n0}").Title(Localizer["Amount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(30);
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.CurrencyId).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.CurrencyId).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(30);
+            columns.Bound(x => x.Amount).Format("{0:n0}").Title(Localizer["Amount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.CreatedDate).Title(Localizer["Date"]).Format("{0: dd/MM/yyyy}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            if ((bool)ViewBag.AccessEditSalaryPayment)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditPayment(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeleteSalaryPayment)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='DeletePayment(this);' data-id='#=Guid#' data-type='Salary' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+        }
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .ServerOperation(false)
+    .Model(model =>
+    {
+        model.Id(p => p.Guid);
+    })
+    .PageSize(10)
+    .Read(read => read.Action("GetAllPaymentSalary", "HumanResourceSalaryPayment", new { humanSalaryId = Model }))
+    )
+    .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+    .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+    .Pageable(pageable => pageable
+    .Input(true)
+    .Refresh(true)
+    .PageSizes(true)
+    .Numeric(true)) // Enable paging
+    .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#kendoSalaryPaymentGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoSalaryPaymentGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+</script>

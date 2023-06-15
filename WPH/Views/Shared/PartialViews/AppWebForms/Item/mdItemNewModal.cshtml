@@ -1,0 +1,147 @@
+﻿@model WPH.Models.Item.ItemViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewItemForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.NameHolder)
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                        @*<input type="hidden" name="FirstNameInput" id="First-Name" value="@ViewBag.FirstNameTranslated" />*@
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["ItemType"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("ItemTypeName")
+                            .DataTextField("Name")
+                            //.Events(events => events.Select("OnPatientSelectInEmergencyReception"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { style = "width:100%;", @data_checkEmpty = "ItemType-box" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllItemTypes", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.ItemTypeName)
+                            )
+
+                        </span>
+                        <span id="ItemType-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Section"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("SectionName")
+                            .DataTextField("Name")
+                            //.Events(events => events.Select("OnPatientSelectInEmergencyReception"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllBaseInfosByBaseInfoTypeName", "BaseInfo", new { TypeName = "Section" });
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.SectionName)
+                            )
+
+                        </span>
+                        
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+
+    });
+
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#Name").select();
+    });
+
+    $('#Name').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#ItemTypeName').data("kendoAutoComplete").focus();
+        }
+    });
+
+    $("#ItemTypeName").on('focus', function (e) {
+
+        let inputAuto = $("#ItemTypeName").data("kendoAutoComplete");
+        let value = inputAuto.value();
+        inputAuto.search(value);
+    });
+
+    $("#SectionName").on('focus', function (e) {
+
+        let inputAuto = $("#SectionName").data("kendoAutoComplete");
+        let value = inputAuto.value();
+        inputAuto.search(value);
+    });
+
+    $("#ItemTypeName").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#SectionName').data("kendoAutoComplete").focus();
+        }
+    });
+
+    $("#SectionName").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-addItem-accept').focus();
+        }
+    });
+
+   
+</script>

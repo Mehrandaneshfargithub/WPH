@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="utf-8" />
+    @*<title>Trifay Hataw</title>*@
+    <title>@ViewBag.ClinicSectionName</title>
+
+    <meta name="description" content="overview &amp; stats" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+
+    <link rel="stylesheet" href="~/Content/assets/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/print.min.css" />
+    @*<link rel="stylesheet" href="~/Content/assets/font-awesome/4.5.0/css/font-awesome.min.css" />*@
+    <link rel="stylesheet" href="~/Content/assets/font-awesome/6/css/all.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/bootstrap-multiselect.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/bootstrap-duallistbox.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/ace.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/select2.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/ace-skins.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/ace-rtl.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/ui.jqgrid.min.css" />
+    <link rel="stylesheet" href="~/Content/gijgo/combined/gijgo.min.css" />
+    <link rel="stylesheet" href="~/Content/assets/css/CustomStyleForApplicationHandler.css" />
+    <link rel="stylesheet" href="~/Content/kendo/css/kendo.bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/kendo/css/kendo.common.min.css" />
+
+    <script src="~/Content/assets/js/jquery-2.1.4.min.js"></script>
+    <script src="~/Content/kendo/Js/kendo.all.min.js"></script>
+    <script src="~/Content/kendo/Js/kendo.aspnetmvc.min.js"></script>
+    <script src="~/Content/assets/js/bootstrap.min.js"></script>
+    <script src="~/Content/assets/js/ace-elements.min.js"></script>
+    <script src="~/Content/assets/js/ace.min.js"></script>
+    <script src="~/Content/Js/UserHandler.js"></script>
+    <script src="~/Content/Js/ChangeLanguageFunction.js"></script>
+    <script async src="~/Content/assets/js/print.min.js"></script>
+    <script src="~/Content/Js/loadPages.js"></script>
+    <script src="~/Content/Js/Functions.js"></script>
+    <script src="~/Content/assets/js/gijgo.min.js"></script>
+    <script src="~/Content/assets/js/select2.min.js"></script>
+    <script src="~/Content/assets/js/jquery.raty.min.js"></script>
+    <script src="~/Content/assets/js/jquery-typeahead.js"></script>
+    <script src="~/Content/assets/js/bootstrap-multiselect.min.js"></script>
+    <script src="~/Content/assets/js/jquery.bootstrap-duallistbox.min.js"></script>
+    <script src="~/Content/assets/js/bootbox.js"></script>
+    @*<script src="~/Content/assets/font-awesome/6/js/all.min.js"></script>*@
+
+
+</head>
+
+<body class="MyFont-Sarchia-grid calibri  @ViewBag.Color @if (ViewBag.Color == "skin-3") {
+                                @:no-skin
+                            } ">
+
+
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Navigation.cshtml")
+
+
+    @RenderBody()
+
+
+    
+    
+</body>
+</html>

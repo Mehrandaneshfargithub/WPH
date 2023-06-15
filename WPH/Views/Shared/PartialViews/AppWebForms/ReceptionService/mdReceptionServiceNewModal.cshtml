@@ -1,0 +1,233 @@
+﻿@model WPH.Models.ReceptionService.ReceptionServiceViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<script>
+    function SelectTabPay(e) {
+        var div = $("#pay-tabstrip").find("> div.k-state-active")[0];
+        var id = div.getAttribute("id");
+        $("#" + id + " .emptybox").addClass("hidden");
+    }
+</script>
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main" style="padding:0px !important;">
+            <form id="addNewReceptionServiceForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @(Html.Kendo().TabStrip()
+                    .Name("pay-tabstrip")
+                    .Events(events => events
+                        .Activate("SelectTabPay")
+                    )
+                    .Animation( anim =>
+                    {
+                        anim.Enable(false);
+
+                        //anim.Open(config =>
+                        //{
+                        //    config.Fade(FadeDirection.In);
+                        //    config.Duration(AnimationDuration.Fast);
+                        //});
+                    })
+                    .Items(tabstrip =>
+                    {
+                    tabstrip.Add().Text($"{Localizer["ReciveMoney"]}")
+                    .Content(@<text>
+                        <div class="tab-content" id="recive-money" style="width:70%;margin: 0px auto;padding: 20px;">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["PayerName"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                    .Name("PayerName")
+                                    //.Value(Model.PayerName)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Name-box" })
+                                    )
+                                </span>
+                                <span id="Name-box" class="emptybox hidden" @if (ViewBag.InvoiceNumAndPayerNameRequired) {
+                                    @: data-isEssential="true" 
+                                      }  style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["ReceivedAmount"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("ReceivedAmount")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    //.Value(Model.ReceivedAmount)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Price-box" }))
+                                </span>
+                                <span id="Price-box" class="emptybox hidden" data-isEssential="true"  style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["InvoiceNum"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                        .Name("ReceptionInvoiceNum")
+                                        .Value(Model.ReceptionInvoiceNum)
+                                        .HtmlAttributes(new { id = "ReceivedReceptionInvoiceNum", style = "width: 100%", @data_checkEmpty = "ReceivedInvoiceNum-box" })
+                                    )
+                                </span>
+                                <span id="ReceivedInvoiceNum-box" class="emptybox hidden" @if (ViewBag.InvoiceNumAndPayerNameRequired) {
+                                    @: data-isEssential="true" 
+                                      } style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+
+                            </label>
+
+                            @if (ViewBag.useDollar)
+                            {
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Currency"]</label>
+                                    <span class="block input-icon input-icon-right ">
+
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ReciveCurrencyId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .DataSource(source =>
+                                        {
+                                        source.Read(read =>
+                                        {
+                                        read.Action("GetAllCurrencies", "BaseInfo");
+                                        })
+                                        .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    </text>);
+
+                    tabstrip.Add().Text($"{Localizer["ReturnMoney"]}")
+                    .Content(@<text>
+                        <div class="tab-content" id="return-money" style="width:70%;margin: 0px auto;padding: 20px;">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["ReciverName"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                    .Name("ReciverName")
+                                    //.Value(Model.PayerName)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Name-box2" })
+                                    )
+                                </span>
+                                <span id="Name-box2" class="emptybox hidden" @if (ViewBag.InvoiceNumAndPayerNameRequired) {
+                                    @: data-isEssential="true" 
+                                      } style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["ReturnedAmount"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("ReturnedAmount")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    //.Value(Model.ReceivedAmount)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Price-box2" }))
+                                </span>
+                                <span id="Price-box2" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["InvoiceNum"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                        .Name("ReceptionInvoiceNum")
+                                        .Value(Model.ReceptionInvoiceNum)
+                                        .HtmlAttributes(new { id = "ReturnedReceptionInvoiceNum", style = "width: 100%", @data_checkEmpty = "ReturnedInvoiceNum-box" })
+                                    )
+                                </span>
+                                <span id="ReturnedInvoiceNum-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+
+                            </label>
+
+                            @if (ViewBag.useDollar)
+                            {
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Currency"]</label>
+                                    <span class="block input-icon input-icon-right ">
+
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ReturnCurrencyId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .DataSource(source =>
+                                        {
+                                        source.Read(read =>
+                                        {
+                                        read.Action("GetAllCurrencies", "BaseInfo");
+                                        })
+                                        .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                    </text>);
+
+                    })
+                    .HtmlAttributes(new {style = "background-color: #EFF3F8 !important;"})
+                    .SelectedIndex(0)
+                    )
+
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<style>
+    #pay-tabstrip > ul {
+        display: flex;
+        margin-right: 0px;
+    }
+
+        #pay-tabstrip > ul li {
+            flex: 1;
+            text-align: center;
+        }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+    });
+
+
+    $('#PayerName').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#PayerName").select();
+    });
+
+    $('#PayerName').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            e.preventDefault();
+
+            $('#btn-addRoomBed-accept').focus();
+        }
+    });
+</script>

@@ -1,0 +1,31 @@
+﻿@*@using Stimulsoft.Report.Mvc
+
+
+
+
+@Html.Stimulsoft().StiMvcViewer(
+                                    new StiMvcViewerOptions()
+                                    {
+                                         Server =
+                                        {
+                                            CacheMode = Stimulsoft.Report.Web.StiServerCacheMode.None
+                                        },
+
+                                        Actions =
+                                            {
+                                                GetReport = "GetVisitPrescriptionTestReport",
+                                                ViewerEvent = "ViewerEvent",
+                                                PrintReport = "PrintTestReport",
+                                                ExportReport = "ExportTestReport"
+                                            },
+
+                                        Toolbar =
+                                        {
+                                            PrintDestination = Stimulsoft.Report.Web.StiPrintDestination.Default,
+
+                                        }
+                                        //Appearance =
+                                        //{
+                                        //    FullScreenMode = true
+                                        //}
+                                    })*@

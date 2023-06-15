@@ -1,0 +1,126 @@
+﻿@font-face {
+    font-family: "Merriweather";
+    src: url("/Content/assets/fonts/Merriweather-Italic.ttf");
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("/Content/assets/fonts/Roboto-MediumItalic.ttf");
+}
+
+/*@font-face {
+    font-family: "Orbitron";
+    src: url("/Content/assets/fonts/Orbitron-Regular.ttf");
+}*/
+
+@font-face {
+    font-family: "Sarchia_Baran";
+    src: url("/Content/assets/fonts/ScheherazadeNew-Bold.ttf");
+}
+
+
+.MyFont-Merriweather-header {
+    font-family: "Merriweather";
+    font-weight: 900;
+    font-size: medium;
+}
+
+
+.MyFont-Merriweather-grid {
+    font-family: "Merriweather";
+    font-weight: 700;
+    font-size: small;
+}
+
+
+
+.MyFont-Roboto-header {
+    font-family: "Roboto";
+    font-weight: 900;
+    font-size: medium;
+}
+
+
+.MyFont-Roboto-grid {
+    font-family: "Roboto";
+    font-weight: 700;
+    font-size: small;
+}
+
+.MyFont-Sarchia-grid {
+    font-family: "Sarchia_Baran";
+    font-size: small;
+}
+
+.MyFont-Sarchia {
+    font-family: "Sarchia_Baran";
+    
+}
+
+
+
+body {
+    padding: 0;
+    margin: 0;
+    background-color:white;
+}
+
+.btn-login {
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+    border-radius: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-login:hover {
+    text-decoration:none;
+}
+
+.btn-turn {
+    padding: 0.5rem 1rem;
+    font-size: 1.4rem;
+    border: solid 1px rgb(0, 114, 181);
+    border-radius: 1rem;
+    background-color: white;
+    color: rgb(0, 114, 181);
+    transition: all 0.3s;
+    width:fit-content;
+}
+
+
+
+    .btn-turn:hover {
+        text-decoration: none;
+        box-shadow: 1px 1px 10px 3px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+.btn-turn-active {
+    padding: 0.5rem 1rem;
+    font-size: 1.4rem;
+    border: solid 1px rgb(0, 114, 181);
+    border-radius: 1rem;
+    background-color: rgb(0, 114, 181);
+    color: white;
+    transition: all 0.3s;
+    width: fit-content;
+}
+
+.btn-turn-disable {
+    padding: 0.5rem 1rem;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+    border: solid 1px black;
+    background-color: grey;
+    color: white;
+    width: fit-content;
+}
+
+    .btn-turn-disable:hover {
+        cursor:not-allowed;
+    }
+
+    .turn-parent{
+        padding:0.5rem;
+    }

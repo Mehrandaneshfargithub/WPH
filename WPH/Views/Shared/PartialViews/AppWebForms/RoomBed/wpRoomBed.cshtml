@@ -1,0 +1,674 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newRoomBedText" class="hidden">@Localizer["New"] @Localizer["RoomBed"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newRoomBedText" class="hidden">@Localizer["RoomBed"] @Localizer["New"]</h3>
+    }
+    <h3 id="editRoomBedText" class="hidden">@Localizer["Edit"] @Localizer["RoomBed"]</h3>
+}
+
+
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["RoomBed"]
+        </h1>
+
+    </div>
+    <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+        @if ((bool)ViewBag.AccessNewRoomBed)
+        {
+            @if (Model == Guid.Empty)
+            {
+                <a class="btn btn-secondary" href="#" style="padding:0.2rem">
+                    @Localizer["New"]
+                    <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-danger" onClick="AddRoomBed(this,'@Model')" href="#" style="padding:0.2rem">
+                    @Localizer["New"]
+                    <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                </a>
+            }
+        }
+    </div>
+
+
+</div><!-- /.page-header -->
+<!-- Modal -->
+<div id="AddRoomBedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="position:fixed;left: 0;right: 0;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddRoomBedModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddRoomBedModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddRoomBedModal-body" class="modal-body" style="width:60rem">
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ERROR_FullCapacity" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_FullCapacity"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addRoomBed-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewRoomBed()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addRoomBed-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddRoomBedModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<div id="AddPatientBedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="width:80%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddPatientBedModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddPatientBedModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["Reception"]
+                </h3>
+            </div>
+
+            <div id="AddPatientBedModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_NotSelected" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ReceptionNotSelected"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addPatientBed-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewPatientBed()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addPatientBed-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddPatientBedModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<div id="ConfirmUpdateBedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeConfirmUpdateBedModal()" aria-hidden="true">&times;</button>
+
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["Warning"]
+                </h3>
+            </div>
+
+            <div id="ConfirmUpdateBedModal-body" class="modal-body">
+                @Localizer["UpdateBedWithPatient"]
+
+            </div>
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-confirmUpdateBed-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "confirmUpdateBed()" })
+                .Content(Localizer["Yes"]))
+                @(Html.Kendo().Button()
+                .Name("btn-confirmUpdateBed-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeConfirmUpdateBedModal()" })
+                .Content(Localizer["No"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<div id="DeleteRoomBedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteRoomBedModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteRoomBed-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteRoomBed-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<!-- Grid -->
+<div class="row Grid-Content @font" style="margin-top:49px;">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/RoomBed/dgRoomBedGrid.cshtml", Model)
+</div>
+
+
+
+<div id="ConfirmAddPatientBedModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeConfirmAddPatientBedModal()" aria-hidden="true">&times;</button>
+
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["Warning"]
+                </h3>
+            </div>
+
+            <div id="ConfirmAddPatientBedModal-body" class="modal-body">
+                <span id="ChangePatientBed" class="hidden">@Localizer["ChangePatientBed"]</span>
+                <span id="ChangeBedPatient" class="hidden">@Localizer["ChangeBedPatient"]</span>
+                <span id="SwapPatientsBeds" class="hidden">@Localizer["SwapPatientsBeds"]</span>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-confirmAddPatientBed-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "confirmAddPatientBed()" })
+                .Content(Localizer["Yes"]))
+                @(Html.Kendo().Button()
+                .Name("btn-confirmAddPatientBed-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeConfirmAddPatientBedModal()" })
+                .Content(Localizer["No"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<script>
+    var old_reception_value = 'null';
+    var set_reception_value = 'null';
+    var old_roomBed_value = 'null';
+    var set_roomBed_value = 'null';
+
+    function RoomBedDeleteFunction(element) {
+
+        $("#DeleteRoomBedModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteRoomBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteRoomBedModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteRoomBed-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-deleteRoomBed-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteRoomBedModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteRoomBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/RoomBed/Remove";
+
+        var GridRefreshLink = "/RoomBed/RefreshGrid";
+        if (!IfUserCheckPass(GridRefreshLink)) {
+            $('#btn-deleteRoomBed-accept').removeAttr("disabled");
+            return;
+        }
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteRoomBed-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteRoomBedModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    IfReserve(response, GridRefreshLink);
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#roomBedKendoGrid .k-pager-refresh")[0].click();
+                    $("#roomKendoGrid .k-pager-refresh")[0].click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteRoomBedModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#DeleteRoomBedModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function AddRoomBed(element, guid) {
+        $("#AddRoomBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomBedModal #Name-Exist").addClass("hidden");
+        $("#AddRoomBedModal #Code-Exist").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_FullCapacity").addClass("hidden");
+
+        var link = "/RoomBed/AddAndNewModal?RoomId=" + guid;
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newRoomBedText").text();
+
+        $('#AddRoomBedModal-header').text(header);
+        $('#AddRoomBedModal').modal('toggle');
+        $('#AddRoomBedModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditRoomBed(element) {
+        $("#AddRoomBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomBedModal #Name-Exist").addClass("hidden");
+        $("#AddRoomBedModal #Code-Exist").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_FullCapacity").addClass("hidden");
+
+        $('#AddRoomBedModal').modal('toggle');
+        let header = $("#editRoomBedText").text();
+        $('#AddRoomBedModal-header').text(header);
+        var link = "/RoomBed/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddRoomBedModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+
+    }
+
+
+    function addNewRoomBed() {
+        $("#AddRoomBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomBedModal #Name-Exist").addClass("hidden");
+        $("#AddRoomBedModal #Code-Exist").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_FullCapacity").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddRoomBedModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        var link = "/RoomBed/AddOrUpdate";
+
+        var data = $("#addNewRoomBedForm").serialize();
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response === "AreYouSure") {
+
+                    $(".loader").removeClass("hidden");
+                    $('#ConfirmUpdateBedModal').modal('toggle');
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === 0) {
+                    $("#AddRoomBedModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ValueIsRepeated") {
+
+                    $('#AddRoomBedModal #Name-Exist').removeClass('hidden');
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "CodeIsRepeated") {
+
+                    $('#AddRoomBedModal #Code-Exist').removeClass('hidden');
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "FullCapacity") {
+                    $("#AddRoomBedModal #ERROR_FullCapacity").removeClass("hidden");
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_Data") {
+                    $("#AddRoomBedModal #ERROR_Data").removeClass("hidden");
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#AddRoomBedModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    $('#AddRoomBedModal-body').empty();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                    $("#roomBedKendoGrid .k-pager-refresh")[0].click();
+                    $("#roomKendoGrid .k-pager-refresh")[0].click();
+                    $("#receptionRoomBedKendoGrid .k-pager-refresh")[0].click();
+                }
+            }
+        });
+    }
+
+    function confirmUpdateBed() {
+
+        $("#AddPatientBedModal #ERROR_NotSelected").addClass("hidden");
+        $("#AddPatientBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomBedModal #Name-Exist").addClass("hidden");
+        $("#AddRoomBedModal #Code-Exist").addClass("hidden");
+        $("#AddRoomBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        closeConfirmUpdateBedModal();
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddRoomBedModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        var link = "/RoomBed/ConfirmUpdate";
+
+        var data = $("#addNewRoomBedForm").serialize();
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response === "SomeThingWentWrong") {
+
+                    $("#AddRoomBedModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "CodeIsRepeated") {
+
+                    $('#AddRoomBedModal #Code-Exist').removeClass('hidden');
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ValueIsRepeated") {
+
+                    $('#Name-Exist').removeClass('hidden');
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_Data") {
+                    $("#AddRoomBedModal #ERROR_Data").removeClass("hidden");
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#AddRoomBedModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    $('#AddRoomBedModal-body').empty();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                    $("#roomBedKendoGrid .k-pager-refresh")[0].click();
+                    $("#roomKendoGrid .k-pager-refresh")[0].click();
+                    $("#receptionRoomBedKendoGrid .k-pager-refresh")[0].click();
+                }
+            }
+        });
+    }
+
+    function closeAddRoomBedModal() {
+
+        $('#AddRoomBedModal').modal('hide');
+        $('#AddRoomBedModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+    function closeConfirmUpdateBedModal() {
+
+        $('#ConfirmUpdateBedModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+
+    }
+
+
+    function SetPatientBed(element) {
+
+        $("#AddPatientBedModal #ERROR_NotSelected").addClass("hidden");
+        $("#AddPatientBedModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        old_reception_value = $(element).attr('data-receptionId');
+        set_roomBed_value = $(element).attr('data-id');
+        var select_bed = document.getElementById('RoomBedId');
+
+        if (select_bed == null) {
+            $('#AddPatientBedModal').modal('toggle');
+            var room_id = $(element).attr('data-room');
+            var link = "/Reception/SelectModal?RoomId=";
+            $(".loader").removeClass("hidden");
+            $('#AddPatientBedModal-body').load(link + room_id + '', function () {
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+
+            });
+        } else {
+            document.getElementById('TempRoomBedId').value = set_roomBed_value;
+            temp_room_bed_id = set_roomBed_value;
+            temp_reception_value = old_reception_value;
+
+            $("#btn-selectRoomBed-accept").click();
+            var x = document.getElementById("snackbar");
+            x.className = "show";
+            setTimeout(function () { x.className = x.className.replace("show", ""); }, 2000);
+        }
+    }
+
+    function addNewPatientBed() {
+
+        $("#ConfirmAddPatientBedModal #ChangePatientBed").addClass("hidden");
+        $("#ConfirmAddPatientBedModal #ChangeBedPatient").addClass("hidden");
+        $("#ConfirmAddPatientBedModal #SwapPatientsBeds").addClass("hidden");
+
+
+        if (set_reception_value == 'null') {
+            $("#AddPatientBedModal #ERROR_NotSelected").removeClass("hidden");
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+            return;
+        }
+
+        if ((old_reception_value == 'null') && (old_roomBed_value != 'null')) {
+            $(".loader").removeClass("hidden");
+            $("#ConfirmAddPatientBedModal #ChangePatientBed").removeClass("hidden");
+            $('#ConfirmAddPatientBedModal').modal('toggle');
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+            return;
+        }
+
+        if ((old_reception_value != 'null') && (old_roomBed_value == 'null')) {
+            $(".loader").removeClass("hidden");
+            $("#ConfirmAddPatientBedModal #ChangeBedPatient").removeClass("hidden");
+            $('#ConfirmAddPatientBedModal').modal('toggle');
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+            return;
+        }
+
+        if ((old_reception_value != 'null') && (old_roomBed_value != 'null')) {
+            $(".loader").removeClass("hidden");
+            $("#ConfirmAddPatientBedModal #SwapPatientsBeds").removeClass("hidden");
+            $('#ConfirmAddPatientBedModal').modal('toggle');
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+            return;
+        }
+
+        confirmAddPatientBed();
+    }
+
+    function confirmAddPatientBed() {
+        closeConfirmAddPatientBedModal();
+
+        var link = "/RoomBed/SetPatientRoomBed";
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                'OldReceptionValue': old_reception_value, 'SetReceptionValue': set_reception_value,
+                'OldRoomBedValue': old_roomBed_value, 'SetRoomBedValue': set_roomBed_value
+            },
+            success: function (response) {
+                if (response === "SomeThingWentWrong") {
+
+                    $("#AddPatientBedModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    closeAddPatientBedModal();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                    $("#roomKendoGrid .k-pager-refresh")[0].click();
+                    $("#roomBedKendoGrid .k-pager-refresh")[0].click();
+                    $("#receptionRoomBedKendoGrid .k-pager-refresh")[0].click();
+                }
+            }
+        });
+    }
+
+    function closeAddPatientBedModal() {
+
+        $('#AddPatientBedModal').modal('hide');
+        $('#AddPatientBedModal-body').empty();
+        $(".modal-backdrop:last").remove();
+        old_reception_value = 'null';
+        set_reception_value = 'null';
+        old_roomBed_value = 'null';
+        set_roomBed_value = 'null';
+    }
+
+    function closeConfirmAddPatientBedModal() {
+
+        $('#ConfirmAddPatientBedModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+
+    }
+</script>

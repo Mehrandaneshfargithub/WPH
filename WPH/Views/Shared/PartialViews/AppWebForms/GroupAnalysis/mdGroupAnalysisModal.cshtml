@@ -1,0 +1,279 @@
+﻿@model WPH.Models.CustomDataModels.GroupAnalysis.GroupAnalysisViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid, new { id = "Guid" })
+                    @Html.HiddenFor(m => m.Id, new { id = "Id" })
+                    @Html.HiddenFor(m => m.CreatedUserId)
+                    @Html.HiddenFor(m => m.CreatedDate)
+                    @Html.HiddenFor(m => m.Priority)
+                    @Html.HiddenFor(m => m.IsButton)
+
+                    <label class="block clearfix">
+                        <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Name"] @Localizer["GroupAnalysis"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { @class = "keypress", style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="NameExist hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Section"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("ClinicSectionId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Guid")
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllLabAndXRayClinicSectionsForUser", "ClinicSection");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "ClinicSection-box" })
+                            )
+                        </span>
+                        <span id="ClinicSection-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Code"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Code")
+                            .Value(Model.Code)
+                            .HtmlAttributes(new { @class = "keypress", style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Abbreviation"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Abbreviation")
+                            .Value(Model.Abbreviation)
+                            .HtmlAttributes(new { @class = "keypress", style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["AnalysisNote"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Note")
+                                .Value(Model.Note)
+                                .HtmlAttributes(new { @class = "keypress", style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="hidden" for="form-field-8">@Localizer["Active"]: </label>
+                    @(Html.Kendo().CheckBoxFor(x => x.IsActive)
+                            .Name("IsActive")
+                            .Checked(true)
+                            .HtmlAttributes(new { @class = "kendoCheckbox hidden", style = "font-size:5rem;margin-bottom: 5px;" })
+                            )
+                    <label class="block clearfix">
+                        <label for="form-field-8"># @Localizer["Discount"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("Discount")
+                                .Min(0)
+                                .Max(10000000)
+                                .Value(Model.Discount)
+                                .HtmlAttributes(new { style = "width: 100%", title = "Discount" })
+                            )
+                        </span>
+
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Type"] @Localizer["Currency"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("DiscountCurrencyId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  //.Filter("contains")
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllCurrencies", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%;", onchange = "CurrencyCh()" })
+                            )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    var Discount;
+    var decimals = @Html.Raw(Json.Serialize(Model.AllDecimalAmount));
+    var dinarDecimal;
+    var dollarDecimal;
+    var euroDecimal;
+    var pondDecimal;
+    var format;
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+
+        var discountcurrency = $("#DiscountCurrencyId").data("kendoDropDownList");
+        discountcurrency.value(@ViewBag.CurrencyTypeId);
+        for (let i = 0; i < decimals.length; i++) {
+            if (decimals[i].ClinicSectionSettingSName === "DinarDecimalAmount")
+                dinarDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "DollarDecimalAmount" )
+                dollarDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "EuroDecimalAmount" )
+                euroDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "PondDecimalAmount" )
+                pondDecimal = parseInt(decimals[i].SValue);
+        }
+
+        Discount = $("#Discount").data("kendoNumericTextBox");
+        CurrencyCh();
+    });
+
+    function CurrencyCh() {
+
+        var currency = $("#DiscountCurrencyId").data("kendoDropDownList");
+        //let text = currency.text();
+
+        if (currency.text() === "IQD")
+            format = "n" + dinarDecimal;
+        else if (currency.text() === "$")
+                    format = "n" + dollarDecimal;
+        else if (currency.text() === "€")
+                    format = "n" + euroDecimal;
+        else if (currency.text() === "£")
+                    format = "n" + pondDecimal;
+
+
+        let priceBox = $("#Discount").data("kendoNumericTextBox");
+        priceBox.setOptions({ format: format });
+
+        priceBox.focus();
+    }
+
+
+    $('#Name').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            var section = $("#ClinicSectionId").data("kendoDropDownList");
+            section.focus();
+        }
+    });
+
+    $('#ClinicSectionId').parent().keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+
+            $('#Code').focus();
+        }
+    });
+
+    $('#Name').focus(function (e) {
+        $('#Name').select();
+    });
+
+    $('#Code').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Abbreviation').focus();
+        }
+    });
+
+    $('#Code').focus(function (e) {
+        $('#Code').select();
+    });
+
+    $('#Abbreviation').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Note').focus();
+        }
+    });
+
+    $('#Abbreviation').focus(function (e) {
+        $('#Abbreviation').select();
+    });
+
+
+    $('#Note').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            Discount.focus();
+        }
+    });
+
+    $('#Note').focus(function (e) {
+        $('#Note').select();
+    });
+
+    $('#Discount').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let DiscountCurrencyId = $("#DiscountCurrencyId").data("kendoDropDownList");
+            DiscountCurrencyId.focus();
+            DiscountCurrencyId.open();
+        }
+    });
+
+    $('#Discount').focus(function (e) {
+        var input = $(this);
+        setTimeout(function () {
+            input.select();
+        });
+    });
+
+    $('#DiscountCurrencyId').parent().keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#btn-GroupAnalysisModal-accept').focus();
+        }
+    });
+
+
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+    });
+
+    function CurrencyChange() {
+
+        Discount.focus();
+
+    }
+
+
+</script>

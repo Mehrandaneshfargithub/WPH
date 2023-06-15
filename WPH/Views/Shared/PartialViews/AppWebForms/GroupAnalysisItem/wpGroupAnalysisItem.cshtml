@@ -1,0 +1,240 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        dir = " ";
+    }
+    else
+    {
+        dir = " direction:rtl; ";
+    }
+
+}
+
+<input class="hidden" type="text" id="groupanalysisid" data-Value="@ViewBag.GroupAnalysisFirstId" />
+<div class="space-10"></div>
+<div class="row Grid-Content">
+    <div class="row">
+        <div class="col-md-2" style="margin-top: 2px;">
+            <div class="row">
+                <div class="col-md-12">
+                    <span>@Localizer["Analysis"]</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10">
+                    @(Html.Kendo().DropDownList()
+                    .Name("analysis")
+                    .DataTextField("Name")
+                    .DataValueField("Guid")
+                    .Events(e =>
+                    {
+                        e.Select("onSelectAnalysisForGroupAnalysisPage");
+                    })
+                    .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetAllAnalysesWithoutInGroupAnalysis", "Analysis").Data("GetGroupAnalysisIdInGroupAnalysisItemPage");
+                          })
+                          .ServerFiltering(false);
+                      })
+                  .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem" })
+                    )
+                </div>
+                <div class="col-md-2" style="padding:0px">
+                    <a id="add-Analysis" class="k-primary pull-right" style="display: inline-block;" href="#">
+                        <i class="fa fa-angle-double-left" style="font-size: 20px;padding: 0px 15px;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/GroupAnalysisItem/dgGroupAnalysis_AnalysisGrid.cshtml")
+        </div>
+    </div>
+    <div class="row" style="margin-top:5px">
+        <div class="col-md-11 col-sm-11">
+        </div>
+        <div class="col-md-1 col-sm-1">
+            <a id="DeleteAllAnalysis" class="btn btn-xs btn-danger pull-right" style="display: inline-block;" href="#">
+                @Localizer["Delete"] @Localizer["All"]
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row Grid-Content">
+    <div class="row" style="margin-left: 0px;margin-right: 0px;">
+        <div class="col-md-2" style="margin-top: 2px;">
+
+            <div class="row" style="margin-top:3px">
+                <div class="col-md-12">
+                    <span>@Localizer["AnalysisItems"]</span>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-10">
+            <div class="row">
+                @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/GroupAnalysisItem/dgGroupAnalysisItemGrid.cshtml")
+            </div>
+            <div class="row" style="margin-top:5px;margin-left: 0px;margin-right: 0px">
+                <div class="col-md-11 col-sm-11">
+                </div>
+                <div class="col-md-1 col-sm-1">
+                    <a id="DeleteAll" class="btn btn-xs btn-danger pull-right" style="display: inline-block;" href="#">
+                        @Localizer["Delete"] @Localizer["All"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input class="hidden" type="text" id="analysisid" data-Value="@ViewBag.AnalysisFirstItem" />
+<input class="hidden" type="text" id="analysisidForAnalysisItem" data-Value="@ViewBag.AnalysisFirstItem" />
+<input class="hidden" type="text" id="analysisitemid" data-Value="" />
+
+<div id="GroupAnalysisModal" class="modal fade" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeGroupAnalysisModal()" aria-hidden="true">&times;</button>
+                <h3 id="GroupAnalysisModal-header" class="smaller lighter blue no-margin">@Localizer["New"]</h3>
+            </div>
+
+            <div id="GroupAnalysisModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-GroupAnalysisModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "groupAnalysisClick()" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-GroupAnalysisModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeGroupAnalysisModal()" })
+                    .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="GroupAnalysisItemModal" class="modal fade" tabindex="-1" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeGroupAnalysisItemModal()" aria-hidden="true">&times;</button>
+                <h3 id="GroupAnalysisItemModal-header" class="smaller lighter blue no-margin">@Localizer["New"]</h3>
+            </div>
+
+            <div id="GroupAnalysisItemModal-body" class="modal-body" style="width:70rem">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-newGroupAnalysisItem-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick= "analysisItemClick()" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-GroupAnalysisItemModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeGroupAnalysisItemModal()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="GroupAnalysisItem-modal-delete" class="modal fade bd-example-modal-lg" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller'><i class='ace-icon fa fa-exclamation-triangle red'></i>@Localizer["DeleteRecordHeader"]</h3>
+            </div>
+
+            <div id="delete-modal-body" class="modal-body">
+                <div class="label label-warning label-white middle" style="font-size:1.5rem;height:40px;">
+                    <i class="ace-icon fa fa-exclamation-triangle bigger-120"></i>
+                    @Localizer["DeleteRecordBody"]
+                </div>
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="label label-danger label-white middle hidden" style="font-size:small;height:40px;">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="label label-danger label-white middle hidden" style="font-size:small;height:40px;">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                @Html.AntiForgeryToken()
+
+                @(Html.Kendo().Button()
+                .Name("btn-delete-accept-GroupAnalysisItem")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-update")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="GroupAnalysis_Analysis-modal-delete" class="modal fade bd-example-modal-lg" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller'><i class='ace-icon fa fa-exclamation-triangle red'></i>@Localizer["DeleteRecordHeader"]</h3>
+            </div>
+
+            <div id="delete-modal-body" class="modal-body">
+                <div class="label label-warning label-white middle" style="font-size:1.5rem;height:40px;">
+                    <i class="ace-icon fa fa-exclamation-triangle bigger-120"></i>
+                    @Localizer["DeleteRecordBody"]
+                </div>
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="label label-danger label-white middle hidden" style="font-size:small;height:40px;">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="label label-danger label-white middle hidden" style="font-size:small;height:40px;">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                @Html.AntiForgeryToken()
+
+                @(Html.Kendo().Button()
+                .Name("btn-delete-accept-GroupAnalysis_Analysis")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-update")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+

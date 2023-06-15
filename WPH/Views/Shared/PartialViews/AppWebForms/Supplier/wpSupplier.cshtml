@@ -1,0 +1,261 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newSupplierText" class="hidden">@Localizer["New"] @Localizer["Supplier"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newSupplierText" class="hidden">@Localizer["Supplier"] @Localizer["New"]</h3>
+    }
+
+    <h3 id="editSupplierText" class="hidden">@Localizer["Edit"] @Localizer["Supplier"]</h3>
+}
+
+<style>
+
+
+    @@media (max-width:767px) {
+        .modal-dialog {
+            width: 70vw;
+            margin: 30px auto
+        }
+
+        .modal-content {
+            -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,.5)
+        }
+
+        .modal-sm {
+            width: 300px
+        }
+
+        #AddSupplierModal-body {
+            width: 90vw;
+        }
+    }
+
+    @@media (min-width:768px) {
+        #AddSupplierModal-body {
+            width: 60vw;
+        }
+    }
+</style>
+<div class="row page-header ">
+
+    <div class="@pull ">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Suppliers"]
+        </h1>
+
+    </div>
+
+    @if ((bool)ViewBag.AccessNewSupplier)
+    {
+        <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddSupplier(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+</div><!-- /.page-header -->
+<!-- Modal -->
+<div id="AddSupplierModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddSupplierModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddSupplierModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddSupplierModal-body" class="modal-body" >
+
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addSupplier-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addSupplier-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddSupplierModal()" })
+                .Content(Localizer["Exit"]))
+
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Supplier/dgSupplierGrid.cshtml")
+</div>
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+
+<script>
+
+    function AddSupplier(element) {
+        $("#AddSupplierModal #ERROR_Data").addClass("hidden");
+        $("#AddSupplierModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddSupplierModal #Mobile-wrong").addClass("hidden");
+
+        var link = "/Supplier/AddNewModal";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newSupplierText").text();
+
+        $('#AddSupplierModal-header').text(header);
+        $('#AddSupplierModal').modal('toggle');
+        $('#AddSupplierModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditSupplier(element) {
+        $("#AddSupplierModal #ERROR_Data").addClass("hidden");
+        $("#AddSupplierModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddSupplierModal #Mobile-wrong").addClass("hidden");
+
+        $('#AddSupplierModal').modal('toggle');
+        let header = $("#editSupplierText").text();
+        $('#AddSupplierModal-header').text(header);
+        var link = "/Supplier/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddSupplierModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+
+    }
+
+
+    $('#btn-addSupplier-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddSupplierModal #ERROR_Data").addClass("hidden");
+        $("#AddSupplierModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddSupplierModal #Mobile-wrong").addClass("hidden");
+
+        var mobile = $("#AddSupplierModal #Mobile-wrong");
+        if (mobile) {
+            mobile.addClass("hidden");
+
+            if ($('[validate-mobile="Mobile-wrong"]').val() !== undefined) {
+                let text = $('[validate-mobile="Mobile-wrong"]').val();
+                if (text != "" & text.trim().length < 8) {
+                    mobile.removeClass("hidden");
+                    $('#btn-addSupplier-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        }
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-addSupplier-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Supplier/AddOrUpdate";
+        var data = $("#addNewSupplierForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-addSupplier-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#Name-Exist').removeClass('hidden');
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddSupplierModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "WrongMobile") {
+
+                        $("#AddSupplierModal #Mobile-wrong").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddSupplierModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddSupplierModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $(".k-pager-refresh")[0].click();
+                    }
+                } else {
+
+                    $("#AddSupplierModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAddSupplierModal() {
+
+        $('#AddSupplierModal').modal('hide');
+        $('#AddSupplierModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+</script>

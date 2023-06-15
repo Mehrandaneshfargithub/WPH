@@ -1,0 +1,108 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string edit_title = Localizer["EditDiscount"];
+    string remove_title = Localizer["RemoveDiscount"];
+}
+
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.ReturnSaleInvoiceDiscount.ReturnSaleInvoiceDiscountViewModel>()
+    .Name("kendoDiscountGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+
+            columns.Bound("").Title(" ").Width(10).HeaderHtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-error grid-btn' onClick='GridDeleteDiscountFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete' data-toggle='modal'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(" ").Width(10).HeaderHtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn edit' onClick='EditDiscount(this)' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                    <span class='green'>
+                        <i class='ace-icon fa fa-pencil bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound(x => x.Description).Filterable(false).Width(300).Title(Localizer["Description"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.CurrencyName).Filterable(false).Title(Localizer["Currency"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Amount).Format("{0:#,#.##}").Filterable(false).Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(10).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Guid).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(10).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Amount).Format("{0:#,#.##}").Filterable(false).Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.CurrencyName).Filterable(false).Title(Localizer["Currency"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Description).Filterable(false).Width(300).Title(Localizer["Description"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound("").Title(" ").Width(10).HeaderHtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn edit' onClick='EditDiscount(this)' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                    <span class='green'>
+                        <i class='ace-icon fa fa-pencil bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(" ").Width(10).HeaderHtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                $@"<a class='tooltip-error grid-btn' onClick='GridDeleteDiscountFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete' data-toggle='modal'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                    </a>
+            ");
+
+        }
+
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax().ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAll", "ReturnSaleInvoiceDiscount",new { returnSaleInvoiceId = Model }))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;font-size:1.3rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#kendoDiscountGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoDiscountGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+    })
+
+</script>

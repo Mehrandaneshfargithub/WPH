@@ -1,0 +1,108 @@
+﻿@model WPH.Models.CustomDataModels.Cost.CostViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewCostForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.PurchaseInvoiceId)
+                    <input type="hidden" id="PriceTxt" value="@Model.PriceTxt" />
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Amount"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                            .Name("PriceTxt")
+                            .Culture("en-US")
+                            .Format("#.##")
+                            .Min(0)
+                            //.Value(Model.Price)
+                            .HtmlAttributes(new { style = "width: 100%", title = "Price", @data_checkEmpty = "Price-box", @id = "CostPrice" })
+                            )
+                        </span>
+                        <span id="Price-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Currency"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("CurrencyId")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllCurrencies", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.CurrencyId.ToString())
+                            .HtmlAttributes(new { style = "width: 100%;", @id = "CostCurrencyId" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Description"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Explanation")
+                            .Value(Model.Explanation)
+                            .HtmlAttributes(new { style = "width: 100%", @id = "CostExplanation" })
+                            )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#CostPrice').data("kendoNumericTextBox").value($("#PriceTxt").val());
+
+        setTimeout(function () {
+            let amount = $('#CostPrice').data("kendoNumericTextBox");
+            amount.focus();
+        }, 20);
+
+    });
+
+    $("#CostPrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            let date = $("#CostCurrencyId").data("kendoDropDownList");
+            date.focus();
+        }
+    });
+
+    $("#CostCurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $("#CostExplanation").focus();
+        }
+    });
+
+    $('#CostExplanation').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+
+            $('#btn-CostModal-accept').focus();
+
+        }
+    });
+
+
+</script>

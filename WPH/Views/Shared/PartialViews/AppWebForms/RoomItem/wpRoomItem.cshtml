@@ -1,0 +1,472 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newRoomItemText" class="hidden">@Localizer["New"] @Localizer["RoomItem"]</h3>
+        <h3 id="newItemText" class="hidden">@Localizer["New"] @Localizer["Items"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newRoomItemText" class="hidden">@Localizer["RoomItem"] @Localizer["New"]</h3>
+        <h3 id="newItemText" class="hidden">@Localizer["Items"] @Localizer["New"]</h3>
+    }
+    <h3 id="editRoomItemText" class="hidden">@Localizer["Edit"] @Localizer["RoomItem"]</h3>
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Items"]
+        </h1>
+
+    </div>
+    <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+        @if ((bool)ViewBag.AccessNewRoomItem)
+        {
+            @if (Model == Guid.Empty)
+            {
+                <a class="btn btn-secondary" href="#" style="padding:0.2rem">
+                    @Localizer["New"]
+                    <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-danger" onClick="AddRoomItem(this,'@Model')" href="#" style="padding:0.2rem">
+                    @Localizer["New"]
+                    <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                </a>
+            }
+        }
+
+    </div>
+
+
+</div><!-- /.page-header -->
+<!-- Modal -->
+<div id="AddRoomItemModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="position:fixed;left: 0;right: 0;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddRoomItemModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddRoomItemModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddRoomItemModal-body" class="modal-body" style="width:60rem">
+
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addRoomItem-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewRoomItem()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-addRoomItem-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddRoomItemModal()" })
+                    .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteRoomItemModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteRoomItemModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteRoomItem-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteRoomItem-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/RoomItem/dgRoomItemGrid.cshtml", Model)
+</div>
+
+
+
+<div id="AddItemModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddItemModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddItemModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="AddItemModal-body" class="modal-body" style="width:60rem">
+            </div>
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addItem-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewItem()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addItem-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAddItemModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+    function AddItem() {
+        $("#AddItemModal #ERROR_Data").addClass("hidden");
+        $("#AddItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/Item/AddAndNewModal";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newItemText").text();
+
+        $('#AddItemModal-header').text(header);
+        $('#AddItemModal').modal('toggle');
+        $('#AddItemModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function closeAddItemModal() {
+
+        $('#AddItemModal').modal('hide');
+        $('#AddItemModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+    function addNewItem() {
+        $("#AddItemModal #ERROR_Data").addClass("hidden");
+        $("#AddItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddItemModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddItemModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        var link = "/Item/AddOrUpdate";
+
+        var data = $("#addNewItemForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#AddItemModal #Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddItemModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddItemModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddItemModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        $("#ItemId").data("kendoDropDownList").dataSource.read();
+                        let pr = $("#ItemId").data("kendoDropDownList");
+                        pr.bind("dataBound", function () {
+                            pr.value(response);
+                        });
+
+                    }
+                } else {
+
+                    $("#AddItemModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    }
+
+
+    function RoomItemDeleteFunction(element) {
+
+        $("#DeleteRoomItemModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteRoomItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteRoomItemModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteRoomItem-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-deleteRoomItem-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteRoomItemModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteRoomItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/RoomItem/Remove";
+
+        var GridRefreshLink = "/RoomItem/RefreshGrid";
+        if (!IfUserCheckPass(GridRefreshLink)) {
+            $('#btn-deleteRoomItem-accept').removeAttr("disabled");
+            return;
+        }
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteRoomItem-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteRoomItemModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    IfReserve(response, GridRefreshLink);
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#roomItemKendoGrid .k-pager-refresh")[0].click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteRoomItemModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#DeleteRoomItemModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function AddRoomItem(element, guid) {
+
+        $("#AddRoomItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomItemModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomItemModal #Name-Exist").addClass("hidden");
+        $("#AddRoomItemModal #Code-Exist").addClass("hidden");
+
+        var link = "/RoomItem/AddAndNewModal?RoomId=" + guid;
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newRoomItemText").text();
+
+        $('#AddRoomItemModal-header').text(header);
+        $('#AddRoomItemModal').modal('toggle');
+        $('#AddRoomItemModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditRoomItem(element) {
+        $("#AddRoomItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomItemModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomItemModal #Name-Exist").addClass("hidden");
+        $("#AddRoomItemModal #Code-Exist").addClass("hidden");
+
+        $('#AddRoomItemModal').modal('toggle');
+        let header = $("#editRoomItemText").text();
+        $('#AddRoomItemModal-header').text(header);
+        var link = "/RoomItem/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddRoomItemModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+
+    }
+
+
+    function addNewRoomItem() {
+        $("#AddRoomItemModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddRoomItemModal #ERROR_Data").addClass("hidden");
+        $("#AddRoomItemModal #Name-Exist").addClass("hidden");
+        $("#AddRoomItemModal #Code-Exist").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/RoomItem/AddOrUpdate";
+
+        var data = $("#addNewRoomItemForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#AddRoomItemModal #Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "CodeIsRepeated") {
+
+                        $('#AddRoomItemModal #Code-Exist').removeClass('hidden');
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ERROR_Data") {
+
+                        $('#AddRoomItemModal #ERROR_Data').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else {
+
+                        $('#AddRoomItemModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddRoomItemModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#roomItemKendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $('#AddRoomItemModal #ERROR_SomeThingWentWrong').removeClass('hidden');
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    }
+
+    function closeAddRoomItemModal() {
+
+        $('#AddRoomItemModal').modal('hide');
+        $('#AddRoomItemModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+</script>

@@ -1,0 +1,304 @@
+﻿@model WPH.Models.CustomDataModels.Cost.CostViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid, new { id = "Guid" })
+                    @Html.HiddenFor(m => m.Id, new { id = "Id" })
+                    @Html.HiddenFor(m => m.InvoiceNum)
+                    @Html.HiddenFor(m => m.SaleInvoiceId)
+                    @Html.HiddenFor(m => m.PurchaseInvoiceId)
+                    @*@Html.HiddenFor(m => m.ClinicSectionId, new { id = "ClinicSectionId" })*@
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Section"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("ClinicSectionId")
+                            .DataTextField("Name")
+                            .DataValueField("Guid")
+                            .Value(Model.ClinicSectionId.ToString())
+                            //.Filter("contains")
+                            .DataSource(source =>
+                            {
+                            source.Read(read =>
+                            {
+                            read.Action("GetAllClinicSectionsForUserWithParent", "ClinicSection");
+                            })
+                            .ServerFiltering(false);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+                        </span>
+                    </label>
+
+
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["CostType"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("CostTypeName")
+                            .DataTextField("Name")
+                            //.Events(events => events.Select("OnPatientSelectInEmergencyReception"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { style = "width:100%;", @data_checkEmpty = "Name-box" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllCostTypes", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.CostTypeName)
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Date"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DatePicker()
+                            .Name("KendoCostDate")
+                            .Value(Model.CostDate)
+                            .Max(DateTime.Now)
+                            .Format("dd/MM/yyyy")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", @data_checkEmpty = "Date-box", onchange = "dateTimePickerWorkWithSpace(this)" })
+                            )
+                            <input id="CostDate" class="hidden" title="datepicker" style="width: 100%;font-size:1.5rem" type="date" />
+                        </span>
+                        <span id="Date-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    @{
+                        var hid = true;
+                        var val = "";
+                        if (ViewBag.useDollar == "false")
+                        {
+
+                            hid = false;
+                            val = "11";
+                        }
+                    }
+
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Currency"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("CurrencyId")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            //.Enable(hid)
+                            //.Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllCurrencies", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(val)
+                            .HtmlAttributes(new { style = "width: 100%;", onchange = "CurrencyChange()" })
+                            )
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Amount"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                            .Name("Price")
+                            .Min(0)
+                            .Max(10000000)
+                            .Value(Model.Price)
+                            .HtmlAttributes(new { style = "width: 100%", title = "Price", @data_checkEmpty = "Price-box" })
+                            )
+
+                        </span>
+                        <span id="Price-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Explanation"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().TextBox()
+                            .Name("Explanation")
+                            .Value(Model.Explanation)
+                            .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </span>
+
+                    </label>
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+ 
+<script>
+
+    var Price;
+    var decimals = @Html.Raw(Json.Serialize(Model.AllDecimalAmount));
+    var dinarDecimal;
+    var dollarDecimal;
+    var euroDecimal;
+    var pondDecimal;
+    var format;
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            let type = $('#CostTypeName').data("kendoAutoComplete");
+            type.focus();
+
+            let section = $('#ClinicSectionId').data("kendoDropDownList");
+            section.value($('#sections').val());
+        }, 500);
+
+    @*var currency = $("#CurrencyId").data("kendoDropDownList");
+        currency.value(@ViewBag.CurrencyTypeId);*@
+
+        //currency.bind("dataBound", currencyDataBound);
+
+        var costDate = $("#KendoCostDate").data("kendoDatePicker");
+
+        var Date = costDate.value();
+
+        let cMonth = Date.getMonth() + 1;
+        let cDay = Date.getDate();
+
+        if (cMonth < 10)
+            cMonth = "0" + cMonth;
+
+        if (cDay < 10)
+            cDay = "0" + cDay;
+
+
+        let from = Date.getFullYear() + "-" + cMonth + "-" + cDay;
+
+        $("#CostDate").val(from);
+
+
+        Price = $("#Price").data("kendoNumericTextBox");
+
+
+        for (let i = 0; i < decimals.length; i++) {
+            if (decimals[i].ClinicSectionSettingSName === "DinarDecimalAmount")
+                dinarDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "DollarDecimalAmount" )
+                dollarDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "EuroDecimalAmount" )
+                euroDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "PondDecimalAmount" )
+                pondDecimal = parseInt(decimals[i].SValue);
+        }
+        //CreatePriceBox();
+
+    });
+
+
+    $("#CostTypeName").on("keypress", function(e){
+        if (e.which === 13 ) {
+            let date = $("#KendoCostDate").data("kendoDatePicker");
+            date.element.focus();
+        }
+    });
+
+    $("#CostTypeName").on("focus", function (e) {
+        let type = $('#CostTypeName').data("kendoAutoComplete");
+        let value = type.value();
+        type.search(value);
+    });
+
+
+    $('#KendoCostDate').keypress(function (e) {
+            if (e.which === 13 || e.which === 9) {
+               //let type = $('#CurrencyId').data("kendoDropDownList");
+               // type.focus();
+               // type.open();
+                let priceBox = $("#Price").data("kendoNumericTextBox");
+                //priceBox.setOptions({ format: format });
+
+                priceBox.focus();
+            }
+    });
+
+
+    $('#KendoCostDate').focus(function (e) {
+            let date = $("#KendoCostDate").data("kendoDatePicker");
+            date.element.select();
+    });
+
+
+    $("#CurrencyId").parent().on("keypress", function(e){
+        if (e.which === 13 ) {
+            let priceBox = $("#Price").data("kendoNumericTextBox");
+            priceBox.setOptions({ format: format });
+
+            priceBox.focus();
+        }
+    });
+
+
+    function CurrencyChange() {
+
+        var currency = $("#CurrencyId").data("kendoDropDownList");
+        //let text = currency.text();
+
+        if (currency.text() === "IQD")
+            format = "n" + dinarDecimal;
+        else if (currency.text() === "$")
+                    format = "n" + dollarDecimal;
+        else if (currency.text() === "€")
+                    format = "n" + euroDecimal;
+        else if (currency.text() === "£")
+                    format = "n" + pondDecimal;
+
+
+        let priceBox = $("#Price").data("kendoNumericTextBox");
+        priceBox.setOptions({ format: format });
+
+        priceBox.focus();
+    }
+
+
+    $('#Price').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Explanation').focus();
+        }
+    });
+
+    $('#Price').focus(function (e) {
+        $('#Price').select();
+    });
+
+    $('#Explanation').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+
+            $('#btn-CostModal-accept').click();
+
+        }
+    });
+
+
+</script>

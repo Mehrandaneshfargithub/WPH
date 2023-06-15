@@ -1,0 +1,195 @@
+﻿@model bool
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.UserPortion.UserPortionViewModel>()
+    .Name("kendoUserPortionGrid")
+    .Columns(columns =>
+    {
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeleteUserPortion)
+            {
+                columns.Bound("").Title(" ").Width(30)
+                .ClientTemplate(
+                    @"<a class='tooltip-error grid-btn' data-rel='tooltip' onClick='DeleteUserPortion(this);' data-id='#=Guid#' title='Delete' data-original-title='Delete' data-toggle='modal'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditUserPortion)
+            {
+                columns.Bound("").Title(" ").Width(10)
+                .ClientTemplate(
+                    @"<a class='tooltip-success grid-btn edit' data-rel='tooltip' onClick='EditUserPortion(this);' data-id='#=Guid#' data-userName='#=UserName#' data-spec='#=Specification#' data-portionPercent='#=PortionPercent#' title='Edit' data-original-title='Edit' >
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+           
+            columns.Bound(x => x.Specification).Filterable(false).Title(Localizer["Specification"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PortionPercent).Filterable(false).Title(Localizer["PortionPercent"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.UserName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Guid).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.UserName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.PortionPercent).Filterable(false).Title(Localizer["PortionPercent"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Specification).Filterable(false).Title(Localizer["Specification"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+             
+
+            if((bool)ViewBag.AccessEditUserPortion)
+            {
+                columns.Bound("").Title(" ").Width(10)
+                .ClientTemplate(
+                    @"<a class='tooltip-success grid-btn edit' data-rel='tooltip' onClick='EditUserPortion(this);' data-id='#=Guid#' data-userName='#=UserName#' data-spec='#=Specification#' data-portionPercent='#=PortionPercent#' title='Edit' data-original-title='Edit' >
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeleteUserPortion)
+            {
+                columns.Bound("").Title(" ").Width(30)
+                .ClientTemplate(
+                    @"<a class='tooltip-error grid-btn' data-rel='tooltip' onClick='DeleteUserPortion(this);' data-id='#=Guid#' title='Delete' data-original-title='Delete' data-toggle='modal'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+        }
+    })
+    .DataSource(dataSource => dataSource // Configure the Grid data source.
+    .Ajax()
+    //.ServerOperation(false)
+    .Model(model =>
+    {
+        model.Id(p => p.Guid);
+    })// Specify that Ajax binding is used.
+    .PageSize(10)
+    .Read(read => read.Action("GetAllUserPortion", "UserManagment")) // Set the action method which will return the data in JSON format.
+    )
+    .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+    .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+    .Pageable(pageable => pageable
+    .Input(true)
+    .Refresh(true)
+    .Numeric(true)) // Enable paging
+    .Sortable().HtmlAttributes(new { @style = "direction: ltr;height:auto;margin-top:7rem" }) // Enable sorting
+    )
+</div>
+
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $("#kendoUserPortionGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoUserPortionGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+    })
+
+
+    function DeleteUserPortion(element) {
+        let id = $(element).attr('data-id');
+
+
+        bootbox.confirm({
+            message: "Delete This Record?",
+            className: 'bootbox-class MyFont-Sarchia-grid',
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'k-primary k-button'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'k-button'
+                }
+            },
+            callback: function (result) {
+
+                if (result) {
+                    $(".loader").removeClass("hidden");
+                    $.ajax({
+                        data: { Id: id },
+                        url: "/UserManagment/RemoveUserPortion",
+                        type: "Post",
+                        success: function (response) {
+                            if (response != 0) {
+
+                                $("#kendoUserPortionGrid").find(".k-i-reload").click();
+                                $(".loader").addClass("hidden");
+                                $("#UserPortionName").data("kendoDropDownList").dataSource.read();
+
+                            }
+                        }
+                    });
+
+
+                }
+                else {
+                    return;
+                }
+            }
+        })
+    }
+
+    function EditUserPortion(element) {
+
+        let id = $(element).attr('data-id');
+        let userName = $(element).attr('data-userName');
+        let spec = $(element).attr('data-spec');
+        let portionPercent = $(element).attr('data-portionPercent');
+
+        
+
+        $("#UserPortionGuid").text(id);
+
+        $("#UserPortionNameText").val(userName);
+        if (spec === 'false')
+            $("#SpeceficationCheckbox").prop("checked", false);
+        else
+            $("#SpeceficationCheckbox").prop("checked", true);
+
+        $("#UserPercent").data("kendoNumericTextBox").value(portionPercent);
+
+        $("#UserPortionNameSpan").addClass('hidden');
+        $("#UserPortionNameTextSpan").removeClass('hidden');
+        $("#btn-cancelUserPortion").removeClass('hidden');
+    }
+
+    function CancelEdit() {
+
+        $("#UserPortionGuid").text('');
+        $("#UserPortionNameText").val('');
+
+        $("#SpeceficationCheckbox").prop("checked",false)
+
+        $("#UserPercent").data("kendoNumericTextBox").value('');
+
+        $("#UserPortionNameSpan").removeClass('hidden');
+        $("#UserPortionNameTextSpan").addClass('hidden');
+        $("#btn-cancelUserPortion").addClass('hidden');
+    }
+
+</script>

@@ -1,0 +1,187 @@
+﻿@model WPH.Models.CustomDataModels.AnalysisItem.AnalysisItemViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid, new { id = "Guid" })
+                    @Html.HiddenFor(m => m.Id, new { id = "Id" })
+                    @Html.HiddenFor(m => m.CreatedUserId)
+                    @Html.HiddenFor(m => m.CreatedDate)
+                    @Html.HiddenFor(m => m.AnalysisId)
+                    @Html.HiddenFor(m => m.NormalValues)
+                    @Html.HiddenFor(m => m.Priority)
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["AnalysisItemName"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { @class = "keypress", style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="NameExist hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["AnalysisNote"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Note")
+                                .Value(Model.Note)
+                                .HtmlAttributes(new { @class = "keypress", style = "width: 100%" })
+                            )
+                        </span>
+
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["NormalRange"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextArea()
+                            .Name("NormalValuesArea")
+                            .Value(Model.NormalValues)
+                            .Rows(3)
+                            .HtmlAttributes(new { @class = "keypress", style = "width: 100%", @data_checkEmpty = "NormalValues-box" })
+                            )
+                        </span>
+                        <span id="NormalValues-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Amount"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("Amount")
+                                .Format("#")
+                                .Min(0)
+                                .Max(10000000)
+                                .Value(Model.Amount)
+                                .HtmlAttributes(new { style = "width: 100%", title = "Price"})
+                            )
+                        </span>
+
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Type"] @Localizer["Currency"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                  .Name("AmountCurrencyId")
+                  .DataTextField("Name")
+                  .DataValueField("Id")
+                  //.Filter("contains")
+                  .DataSource(source =>
+                  {
+                      source.Read(read =>
+                      {
+                          read.Action("GetAllCurrencies", "BaseInfo");
+                      })
+                      .ServerFiltering(false);
+                  })
+                  .HtmlAttributes(new { style = "width: 100%;", onchange = "CurrencyChange()" })
+                            )
+                        </span>
+                    </label>
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+
+        var amountCurrencyId = $("#AmountCurrencyId").data("kendoDropDownList");
+        amountCurrencyId.value(@ViewBag.CurrencyTypeId);
+
+
+        //var createDate = $("#CreateDate").data("kendoDatePicker");
+        //var toDate = $("#KendoDateTo").data("kendoDatePicker");
+
+        //var Date = createDate.value();
+        //var tDate = toDate.value();
+
+        //let cMonth = Date.getMonth() + 1;
+        //let cDay = Date.getDate();
+        //let toMonth = tDate.getMonth() + 1;
+        //let toDay = tDate.getDate();
+
+        //if (cMonth < 10)
+        //    cMonth = "0" + cMonth;
+
+        //if (cDay < 10)
+        //    cDay = "0" + cDay;
+
+
+        //let from = Date.getFullYear() + "-" + cMonth + "-" + cDay;
+        //let too = tDate.getFullYear() + "-" + toMonth + "-" + toDay;
+
+        //$("#CreateDate").val(from);
+        //$("#ToDate").val(too);
+
+
+       // Discount = $("#Discount").data("kendoNumericTextBox");
+
+    });
+
+
+    $('#Name').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Note').focus();
+        }
+    });
+
+
+    $('#Note').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#NormalValue').focus();
+        }
+    });
+
+    $('#NormalValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Amount').focus();
+        }
+    });
+
+    $('#Amount').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let AmountCurrencyId = $("#AmountCurrencyId").data("kendoDropDownList");
+            AmountCurrencyId.focus();
+        }
+    });
+
+    $('#AmountCurrencyId').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#btn-AnalysisItemModal-accept').focus();
+        }
+    });
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+    });
+
+    function CurrencyChange() {
+        Discount.focus();
+    }
+
+</script>

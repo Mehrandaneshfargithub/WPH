@@ -1,0 +1,383 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newDiscountText" class="hidden">@Localizer["New"] @Localizer["Discount"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newDiscountText" class="hidden">@Localizer["Discount"] @Localizer["New"]</h3>
+    }
+    <h3 id="editDiscountText" class="hidden">@Localizer["Edit"] @Localizer["Discount"]</h3>
+
+}
+
+@Html.AntiForgeryToken()
+<div class="row page-header">
+    <div class="@pull ">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Discounts"]
+        </h1>
+
+    </div>
+
+
+    <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+        <a class="btn btn-danger" onClick="AddDiscount()" href="#" style="padding:0.2rem">
+            @Localizer["New"]
+            <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+        </a>
+    </div>
+
+</div>
+
+<div class="space-10"></div>
+
+<div class="row MyFont-Roboto-grid">
+
+
+</div>
+
+
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ReturnSaleInvoiceDiscount/dgReturnSaleInvoiceDiscountGrid.cshtml", Model)
+</div>
+
+
+<div id="DiscountModal" class="modal fade  @font" data-backdrop=" static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="position: fixed; left: 0; right: 0;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeDiscountModal()" aria-hidden="true">&times;</button>
+                <h3 id="DiscountModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="DiscountModal-body" class="modal-body" style="width:70rem">
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+            
+            <div id="Currency_NotExist" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["CantAddWithThisCurrency"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+            
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                .Name("btn-DiscountModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DiscountModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeDiscountModal()" })
+                .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="DeleteDiscountModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm" style="position: fixed; left: 0; right: 0;">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeDeleteDiscountModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteDiscountModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+
+                <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["InvoiceInUse"]
+                </div>
+                
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteDiscount-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteDiscount-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeDeleteDiscountModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    var totalContainer = document.getElementById("saleInvoiceDetailTotalPrice");
+
+    function closeDiscountModal() {
+
+        $('#DiscountModal').modal('toggle');
+        $('#DiscountModal-body').empty();
+    }
+
+    function AddDiscount() {
+        $("#DiscountModal #AmountOverFlow").addClass("hidden");
+        $("#DiscountModal #Currency_NotExist").addClass("hidden");
+        $("#DiscountModal #ERROR_Data").addClass("hidden");
+        $("#DiscountModal #InvoiceInUse").addClass("hidden");
+        $("#DiscountModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        let header = $("#newDiscountText").text();
+        $("#DiscountModal-header").text(header);
+
+        var link = `/ReturnSaleInvoiceDiscount/AddNewModal?returnSaleInvoiceId=${'@Model'}`;
+
+        $(".loader").removeClass("hidden");
+        $('#DiscountModal').modal('toggle');
+        $('#DiscountModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function EditDiscount(element) {
+        $("#DiscountModal #AmountOverFlow").addClass("hidden");
+        $("#DiscountModal #Currency_NotExist").addClass("hidden");
+        $("#DiscountModal #ERROR_Data").addClass("hidden");
+        $("#DiscountModal #InvoiceInUse").addClass("hidden");
+        $("#DiscountModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        let header = $("#editDiscountText").text();
+        $("#DiscountModal-header").text(header);
+
+        var link = "/ReturnSaleInvoiceDiscount/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#DiscountModal').modal('toggle');
+        $('#DiscountModal-body').load(link + Id, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+
+    $("#btn-DiscountModal-accept").on("click", function () {
+
+        $(this).attr("disabled", true);
+
+        $("#DiscountModal #AmountOverFlow").addClass("hidden");
+        $("#DiscountModal #Currency_NotExist").addClass("hidden");
+        $("#DiscountModal #ERROR_Data").addClass("hidden");
+        $("#DiscountModal #InvoiceInUse").addClass("hidden");
+        $("#DiscountModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#DiscountModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#DiscountModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+
+                    $('#btn-DiscountModal-accept').removeAttr("disabled"); 
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/ReturnSaleInvoiceDiscount/AddOrUpdate";
+        var data = $("#addNewDiscountForm").serialize();
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-DiscountModal-accept').removeAttr("disabled"); 
+
+                if (response === 0) {
+
+                    $("#DiscountModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#DiscountModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#DiscountModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                }  else if (response === "CantAddWithThisCurrency") {
+
+                    $("#DiscountModal #Currency_NotExist").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    $("#DiscountModal #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#DiscountModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    $('#DiscountModal-body').empty();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#kendoDiscountGrid .k-pager-refresh")[0].click();
+
+                    if (totalContainer)
+                        SetTotalPrice(response);
+                }
+            }
+        });
+
+
+    });
+
+    function closeDeleteDiscountModal() {
+
+        $('#DeleteDiscountModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+    }
+
+    function GridDeleteDiscountFunction(element) {
+        $("#DeleteDiscountModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteDiscountModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteDiscountModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteDiscountModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeleteDiscount-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+    
+
+    $("#btn-DeleteDiscount-accept").on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteDiscountModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteDiscountModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteDiscountModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        var link = "/ReturnSaleInvoiceDiscount/Remove";
+        var Id = $(this).attr('data-id');
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                returnSaleInvoiceDiscountId: Id
+            },
+            success: function (response) {
+                $('#btn-DeleteDiscount-accept').removeAttr("disabled"); 
+
+                if (response === 0) {
+
+                    $("#DeleteDiscountModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+
+                    $("#DeleteDiscountModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#DiscountModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong") {
+
+                    $("#DiscountModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#DeleteDiscountModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#kendoDiscountGrid .k-pager-refresh")[0].click();
+
+                    if (totalContainer)
+                        SetTotalPrice(response);
+                }
+            }
+        });
+
+
+    });
+
+
+</script>

@@ -1,0 +1,90 @@
+﻿@model WPH.Models.TransferDetail.TransferDetailViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="updateTransferDetailForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.MasterId)
+
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Product"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().TextBox()
+                            .Name("ProductName")
+                            .Enable(false)
+                            .Value(Model.ProductName)
+                            .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+                        </span>
+
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Number"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("Num")
+                                .Min(1)
+                                .Decimals(0)
+                                .Format("N0")
+                                .SelectOnFocus(true)
+                                .Value(Model.Num ?? 1)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Num-Ubox", id = "UNum" })
+                                )
+                        </span>
+                        <span id="Num-Ubox" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Consideration"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Consideration")
+                            .Value(Model.Consideration)
+                            .HtmlAttributes(new { style = "width: 100%;", id = "UConsideration" })
+                            )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            $('#UNum').data("kendoNumericTextBox").focus();
+        }, 200);
+
+    });
+
+    $("#UNum").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#UConsideration').focus();
+        }
+    });
+
+    $("#UConsideration").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-updateTransferDetail-accept').focus();
+        }
+    });
+
+</script>

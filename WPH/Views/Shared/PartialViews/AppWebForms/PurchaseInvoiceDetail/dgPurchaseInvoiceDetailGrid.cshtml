@@ -1,0 +1,207 @@
+﻿@*@model Guid*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string edit_title = Localizer["EditProduct"];
+    string remove_title = Localizer["RemoveProduct"];
+    string salePrice_title = Localizer["ProductSalePrices"];
+}
+
+<input id="TotalTxt" type="hidden" value="@Localizer["TotalPrice"]" />
+<input id="TotalDiscountTxt" type="hidden" value="@Localizer["TotalDiscount"]" />
+<input id="TotalPriceAfterDiscountTxt" type="hidden" value="@Localizer["TotalPriceAfterDiscount"]" />
+<input id="TotalCostTxt" type="hidden" value="@Localizer["TotalCost"]" />
+
+<style>
+
+    .elementBox {
+        height: 100px;
+        border-radius: 0.5rem;
+        background-color: #fff;
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, .125);
+        background-clip: border-box;
+        box-shadow: rgba(146, 168, 209,0.7) 0px 0px 5px 0.1px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .elementStyle {
+        overflow-wrap: break-word;
+        font-size: 18px;
+    }
+</style>
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.PurchaseInvoiceDetail.PurchaseInvoiceDetailViewModel>()
+    .Name("purchaseInvoiceDetailKendoGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeletePurchaseInvoiceDetail && !(bool)(ViewBag.PurchasePaid ?? false))
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-error grid-btn' onClick='PurchaseInvoiceDetailDeleteFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditPurchaseInvoiceDetail)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                $@"<a class='tooltip-success grid-btn edit' onClick='EditPurchaseInvoiceDetail(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessPurchaseInvoiceDetailSalePrice && ViewBag.PurchaseType == "Medicine")
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-success grid-btn ' onClick='AddSalePrice(this);' data-id='#=Guid#' data-rel='tooltip' title='{salePrice_title}' data-original-title='SalePrices'>
+                        <span class='purple'>
+                            <i class='ace-icon fa fa-money-bills bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound(x => x.Consideration).Title(Localizer["Consideration"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+            columns.Bound(x => x.SellingPriceCurrency).Title(Localizer["SalePrice"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.TotalAfterDiscount).Title(Localizer["TotalAfterDiscount"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+            columns.Bound(x => x.Discount).Title(Localizer["Discount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= Discount_Databound(Discount,CurrencyName)#");
+            columns.Bound(x => x.Total).Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= TotalCurrency_Databound(Total,CurrencyName)#");
+            columns.Bound(x => x.PurchaseCurrency).Title(Localizer["PurchasePrice"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.FreeNum).Format("{0:#,#.##}").Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Num).Format("{0:#,#.##}").Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ExpireDate).Title(Localizer["ExpDate"]).Format("{0: dd/MM/yyyy}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ProductName).Title(Localizer["Product"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+            columns.Bound(x => x.Guid).Hidden();
+
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ProductName).Title(Localizer["Product"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ExpireDate).Title(Localizer["ExpDate"]).Format("{0: dd/MM/yyyy}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Num).Format("{0:#,#.##}").Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.FreeNum).Format("{0:#,#.##}").Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PurchaseCurrency).Title(Localizer["PurchasePrice"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Total).Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= TotalCurrency_Databound(Total,CurrencyName)#");
+            columns.Bound(x => x.Discount).Title(Localizer["Discount"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= Discount_Databound(Discount,CurrencyName)#");
+
+            columns.Bound(x => x.TotalAfterDiscount).Title(Localizer["TotalAfterDiscount"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.SellingPriceCurrency).Title(Localizer["SalePrice"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+            columns.Bound(x => x.Consideration).Title(Localizer["Consideration"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+            if ((bool)ViewBag.AccessPurchaseInvoiceDetailSalePrice && ViewBag.PurchaseType == "Medicine")
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-success grid-btn ' onClick='AddSalePrice(this);' data-id='#=Guid#' data-rel='tooltip' title='{salePrice_title}' data-original-title='SalePrices'>
+                        <span class='purple'>
+                            <i class='ace-icon fa fa-money-bills bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessEditPurchaseInvoiceDetail)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-success grid-btn edit' onClick='EditPurchaseInvoiceDetail(this)' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeletePurchaseInvoiceDetail && !(bool)(ViewBag.PurchasePaid ?? false))
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    $@"<a class='tooltip-error grid-btn' onClick='PurchaseInvoiceDetailDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+        }
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(1000)
+        .Read(read => read.Action("GetAll", "PurchaseInvoiceDetail").Data("GetPurchaseInvoiceId"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(false)
+        .Refresh(true)
+        .PageSizes(false)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+<div id="purchaseInvoiceDetailTotalPrice">
+
+</div>
+
+<script>
+
+    function TotalCurrency_Databound(Total, CurrencyName) {
+
+        if (Total == 0)
+            return 0;
+
+        return `<div style="white-space: nowrap;margin: 0px 2px;"> ${CurrencyName} ${parseFloat(Total).toLocaleString('en')} </div>`;
+    }
+
+    function Discount_Databound(Discount, CurrencyName) {
+
+        if (Discount == 0)
+            return 0;
+
+        return `<div style="white-space: nowrap;margin: 0px 2px;"> ${CurrencyName} ${parseFloat(Discount).toLocaleString('en')} </div>`;
+    }
+
+    $(document).ready(function () {
+
+        $("#purchaseInvoiceDetailKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#purchaseInvoiceDetailKendoGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+</script>

@@ -1,0 +1,212 @@
+﻿@*@using BotDetect.Web.Mvc;*@
+@model WPH.Models.CustomDataModels.UserManagment.LoginViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@*   use _UserHandlerLayout.cshtml *@
+
+@{
+    string pull = "", direction = "";
+    if (Localizer["Ok"] == "Ok")
+    {
+        pull = " pull-right ";
+        direction = " direction:ltr; ";
+
+    }
+    else
+    {
+        pull = " pull-left ";
+        direction = " direction:rtl; ";
+
+    }
+
+}
+
+<div id="login-box" class="login-box visible widget-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <h4 class="header blue lighter bigger">
+                <i class="ace-icon fa fa-coffee green"></i>
+                @Localizer["plsEnterYourInformation"]
+            </h4>
+            <div id="loginError" class="hidden">
+                <span id="loginErrorText" class="text-danger">@Localizer["ErrorInLogin"]</span>
+            </div>
+            <div class="space-6"></div>
+            <form id="loginForm">
+                @Html.AntiForgeryToken()
+                <fieldset>
+                    @if (ViewBag.ShowClinicCode == "True")
+                    {
+                        <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                                @Html.TextBoxFor(m => m.Code, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["Code"] })
+                                <i class="ace-icon fa fa-code-fork"></i>
+                            </span>
+                        </label>
+                    }
+
+
+                    <label class="block clearfix">
+                        <span class="block input-icon input-icon-right">
+                            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["Username"] })
+                            <i class="ace-icon fa-solid fa-user"></i>
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <span class="block input-icon input-icon-right">
+                            @Html.PasswordFor(m => m.Pass3, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["Password"] })
+                            <i class="ace-icon fa-solid fa-lock"></i>
+                        </span>
+                    </label>
+
+                    <label id="UserCodeContainer" class=" clearfix hidden" style="width:100%;">
+                        <span class="block input-icon input-icon-right">
+                            @Html.TextBoxFor(m => m.UserCode, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["UserCode"] })
+                            <i class="ace-icon fa-solid fa-key"></i>
+                        </span>
+                        <span class=" red lighter bigger">
+                            @Localizer["EnterUserCode"]
+                        </span>
+                    </label>
+
+                    @if (ViewBag.ShowCaptcha == "True")
+                    {
+                        <div class="space"></div>
+
+                        @*MvcCaptcha exampleCaptcha = new MvcCaptcha("ExampleCaptcha");
+                            exampleCaptcha.UserInputID = "CaptchaCode";
+
+                            @Html.Captcha(exampleCaptcha)*@
+                        <div class="space"></div>
+                        <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                                @Html.TextBoxFor(m => m.CaptchaCode, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["SecurityCode"] })
+                                <i class="ace-icon fa fa-user-secret"></i>
+                            </span>
+                        </label>
+                    }
+
+
+                    <div class="space"></div>
+                    <div class="clearfix">
+                        <button id="loginUserFunc" type="button" class="pull-right btn btn-xs btn-primary radius-4 @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                @:pull-left
+                              }">
+                            <i class="ace-icon fa fa-key"></i>
+                            <span class="bigger-110">@Localizer["Login"]</span>
+                        </button>
+                    </div>
+
+                    <div class="space-4"></div>
+                </fieldset>
+            </form>
+
+            @if ((long)ViewBag.RemDays < 20)
+            {
+                <div style=" @direction">
+                    <span class=" red lighter bigger">
+                        <i class="ace-icon fa fa-exclamation-triangle red "></i>
+                        @ViewBag.RemDays @Localizer["TotalDaysExpire"]
+                    </span>
+                </div>
+            }
+
+        </div><!-- /.widget-main -->
+        @*<a href="/Home"> Home </a>*@
+
+        <div class="toolbar clearfix">
+            <button data-toggle="dropdown" class="btn btn-block btn-success btn-lg dropdown-toggle">
+                Choose Language
+                <i class="ace-icon fa fa-angle-down icon-on-right"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-success dropdown-menu-left" style="width:100%;">
+                <li>
+                    <a class="text-center chooseLang" name="en" style="font-size:20px;">English</a>
+                </li>
+
+                <li>
+                    <a class="text-center chooseLang" name="ku" style="font-size:20px;">کوردی</a>
+                </li>
+
+                <li>
+                    <a class="text-center chooseLang" name="ar-IQ" style="font-size:20px;">العربیه</a>
+                </li>
+            </ul>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.login-box -->
+
+
+
+<div id="ChooseClinicSectionModal" class="modal fade modal-xl" tabindex="-1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="ChooseClinicSectionModal-header" class="smaller lighter blue no-margin">@Localizer["UserAccessTranslated"]</h3>
+            </div>
+
+            <div id="ChooseClinicSectionModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<!--<div id="RemaningDaysModal" class="modal fade " data-backdrop="static" data-keyboard="false" style=" @direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close @pull" data-dismiss="modal" aria-hidden="true" style=" ">
+                    &times;
+                </button>
+                <h3 id="RemaningDays-header" class="smaller lighter blue no-margin ">
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["RemainingDays"]
+                </h3>
+            </div>
+
+            <div id="RemaningDays-body" class="modal-body" style="width:60rem">
+                <h2>
+                    @ViewBag.RemDays @Localizer["TotalDaysExpire"]
+                </h2>
+            </div>
+
+
+            <div class="modal-footer">
+
+
+            </div>
+        </div>-->
+@*.modal-content*@
+<!--</div>--> @*.modal-dialog*@
+<!--</div>-->
+
+
+
+
+<style>
+
+    .chooseLang:hover {
+        cursor: pointer
+    }
+</style>
+
+@*@if ((long)ViewBag.RemDays < 20)
+    {
+        <script>
+            $(document).ready(function () {
+                $('#RemaningDaysModal').modal('toggle');
+            });
+        </script>
+    }*@

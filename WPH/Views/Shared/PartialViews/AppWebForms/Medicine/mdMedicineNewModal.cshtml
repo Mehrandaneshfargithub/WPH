@@ -1,0 +1,274 @@
+﻿@model WPH.Models.CustomDataModels.Medicine.MedicineViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewMedicineForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.ClinicSectionid)
+                    @Html.HiddenFor(m => m.JoineryNameHolder)
+                    @Html.HiddenFor(m => m.Priority)
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Code"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Code")
+                                .Value(Model.Code)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["JoineryName"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("JoineryName")
+                                .Value(Model.JoineryName)
+                                .HtmlAttributes(new { style = "width: 100%",@data_checkEmpty = "JoineryName-box" })
+                            )
+                        </span>
+                        <span id="JoineryName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["ScientificName"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("ScientificName")
+                                .Value(Model.ScientificName)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Desc"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Description")
+                                .Value(Model.Description)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Producer"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("ProducerName")
+                            .DataTextField("Name")
+                            //.Events(events => events.Select("OnPatientSelectInEmergencyReception"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllProducers", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            )
+
+
+
+                            @*@(Html.Kendo().DropDownList()
+                                  .Name("ProducerId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Guid")
+                                  //.Filter("contains")
+                                  .DataSource(source =>
+                                    {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllProducers", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%;" })
+                            )*@
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["MedicineForm"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("MedicineFormName")
+                            .DataTextField("Name")
+                            //.Events(events => events.Select("OnPatientSelectInEmergencyReception"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllMedicineForm", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            )
+
+
+                            @*@(Html.Kendo().DropDownList()
+                                  .Name("MedicineFormId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Guid")
+                                  //.Filter("contains")
+                                  .DataSource(source =>
+                                    {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllMedicineForm", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%;" })
+                            )*@
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Barcode"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Barcode")
+                                .Value(Model.Barcode)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </span>
+                    </label>
+
+                    @*<label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Number"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("MedNum")
+                                .Format("{0:N0}")
+                                .Value(Model.MedNum)
+                                .HtmlAttributes(new { style = "width: 100%"})
+                            )
+                        </span>
+                    </label>*@
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    var ProducerDropDown;
+    var MedicineFormDropDown;
+
+    $(document).ready(function () {
+
+        ProducerDropDown = $("#ProducerName").data("kendoAutoComplete");
+        MedicineFormDropDown = $("#MedicineFormName").data("kendoAutoComplete");
+
+        setTimeout(function () {
+            $("#Code").focus();
+        },500);
+    });
+
+    $('#Code').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#JoineryName').focus();
+        }
+
+    })
+
+    $('#JoineryName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#ScientificName').focus();
+        }
+
+    })
+
+    $('#ScientificName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#Description').focus();
+        }
+
+    })
+
+    $('#Description').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            ProducerDropDown.focus();
+        }
+
+    })
+
+
+    $('#ProducerName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            MedicineFormDropDown.focus();
+        }
+
+    })
+
+    $('#MedicineFormName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#Barcode').focus();
+        }
+
+    })
+
+    $('#Barcode').keypress(function (e) {
+
+        //if (e.which === 13 || e.which === 9) {
+        //    $('#MedNum').focus();
+        //}
+
+        if (e.which === 13 || e.which === 9) {
+            if ($('#Guid').val() === "00000000-0000-0000-0000-000000000000")
+                $('#btn-NewMedicineModal-accept').focus();
+            else
+                $('#btn-update-accept').focus();
+        }
+
+    })
+
+    //$('#MedNum').keypress(function (e) {
+
+    //    if (e.which === 13 || e.which === 9) {
+    //        if ($('#Guid').val() === "00000000-0000-0000-0000-000000000000")
+    //            $('#btn-new-accept').focus();
+    //        else
+    //            $('#btn-update-accept').focus();
+    //    }
+
+    //})
+
+
+    $('#JoineryName').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#JoineryName-box").addClass('hidden');
+    });
+
+</script>

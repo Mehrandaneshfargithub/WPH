@@ -1,0 +1,199 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+
+    string edit_title = Localizer["EditSalary"];
+    string remove_title = Localizer["RemoveSalary"];
+    string history_title = Localizer["PaymentHistory"];
+    string pay_title = Localizer["PaySalary"];
+}
+
+
+<div class="row">
+    @(Html.Kendo().Grid<WPH.Models.HumanResourceSalary.HumanResourceSalaryViewModel>()
+    .Name("kendoHumanSalaryGrid")
+    .Columns(columns =>
+    {
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeleteHumanResourceSalary)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteSalaryFunction(this);' data-id='#=Guid#' data-type='Salary' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            if ((bool)ViewBag.AccessEditHumanResourceSalary)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditHumanSalary(this);' salary-type='#=SalaryType#' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn ' onClick='PaymentsHistory(this);' data-id='#=Guid#' data-rel='tooltip' title='{history_title}' data-original-title='History'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-history bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            if ((bool)ViewBag.AccessNewSalaryPayment)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn ' onClick='PayHumanSalary(this);' data-id='#=Guid#' data-rel='tooltip' title='{pay_title}' data-original-title='Pay'>
+                        <span class='blue'>
+                            <i class='ace-icon fa fa-credit-card bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound(x => x.Rem).Format("{0:n0}").Filterable(false).Title(Localizer["Remained"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Amount).Format("{0:n0}").Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PaymentStatus).Width(60).Title(Localizer["Status"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Sarchia-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= LineItems_Databound(PaymentStatus)#");
+            columns.Bound(x => x.DisplaySalaryType).Width(90).Title(Localizer["Type"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Sarchia-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Salary).Filterable(false).Title(Localizer["Salary"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new {@id="aa11" , @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            //columns.Bound(x => x.ExtraSalary).Filterable(false).Title(Localizer["ExtraSalary"]).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @id = "aa22", @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.WorkTime).Width(70).Filterable(false).Title(Localizer["WorkTime"]).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @id = "aa133", @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.CreateDate).Width(90).Title(Localizer["Date"]).Format("{0: dd/MM/yyyy}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.HumanResourceName).Width(90).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(30);
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.CurrencyId).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.CurrencyId).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(30);
+            columns.Bound(x => x.HumanResourceName).Width(90).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.CreateDate).Width(90).Title(Localizer["Date"]).Format("{0: dd/MM/yyyy}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.WorkTime).Width(70).Filterable(false).Title(Localizer["WorkTime"]).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" }).HeaderHtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" });
+            //columns.Bound(x => x.ExtraSalary).Filterable(false).Title(Localizer["ExtraSalary"]).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" }).HeaderHtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" });
+            columns.Bound(x => x.Salary).Filterable(false).Title(Localizer["Salary"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.DisplaySalaryType).Width(90).Title(Localizer["Type"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" }).HeaderHtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" });
+            columns.Bound(x => x.PaymentStatus).Width(60).Title(Localizer["Status"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" }).HeaderHtmlAttributes(new { @style = "text-align:center;padding-left: 0px !important;padding-right: 0px !important;" }).ClientTemplate("#= LineItems_Databound(PaymentStatus)#");
+            columns.Bound(x => x.Amount).Format("{0:n0}").Title(Localizer["Total"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Rem).Format("{0:n0}").Filterable(false).Title(Localizer["Remained"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            if ((bool)ViewBag.AccessNewSalaryPayment)
+            {
+                columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn ' onClick='PayHumanSalary(this);' data-id='#=Guid#' data-rel='tooltip' title='{pay_title}' data-original-title='Pay'>
+                        <span class='blue'>
+                            <i class='ace-icon fa fa-credit-card bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn ' onClick='PaymentsHistory(this);' data-id='#=Guid#' data-rel='tooltip' title='{history_title}' data-original-title='History'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-history bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            if ((bool)ViewBag.AccessEditHumanResourceSalary)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditHumanSalary(this);' salary-type='#=SalaryType#' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            if ((bool)ViewBag.AccessDeleteHumanResourceSalary)
+            {
+                columns.Bound("").Title("").Width(25).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteSalaryFunction(this);' data-id='#=Guid#' data-type='Salary' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+        }
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .ServerOperation(false)
+    .Model(model =>
+    {
+        model.Id(p => p.Guid);
+    })
+    .PageSize(10)
+    .Read(read => read.Action("GetAllHumanSalary", "HumanResource").Data("GetPeriodAndGuidAndCreatDate"))
+    )
+    .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+    .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+    .Pageable(pageable => pageable
+    .Input(true)
+    .Refresh(true)
+    .PageSizes(true)
+    .ButtonCount(3)
+    .Numeric(true)) // Enable paging
+    .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $("#kendoHumanSalaryGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoHumanSalaryGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+    function changeDateFormat(BeginDate) {
+        if (BeginDate === null)
+            return "";
+        var year = BeginDate.getFullYear();
+        var month = BeginDate.getMonth();
+        var day = BeginDate.getDate();
+        var d = day + "-" + month + "-" + year;
+        return d;
+    }
+
+    function LineItems_Databound(status) {
+        if (status == 'Paid') {
+            return "<div style='background:lightgreen;border-radius: 5px;'>" + status + " </div>";
+        } else {
+            return "<div style='background:pink;border-radius: 5px;'>" + status + " </div>";
+        }
+    }
+
+</script>

@@ -1,0 +1,126 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+<div class="col-sm-12" style="padding:0">
+
+    @(Html.Kendo().Grid<WPH.Models.CustomDataModels.ClinicSectionChoosenValue.ClinicSectionChoosenValueViewModel>()
+            .Name("KendoClinicSectionChoosenValueList")
+            .Columns(columns =>
+            {
+                columns.Bound(x => x.ClinicSectionId).Hidden();
+                columns.Bound(x => x.Guid).Hidden();
+                columns.Bound(x => x.Id).Hidden();
+                columns.Bound(x => x.PatientVariableId).Hidden();
+                columns.Bound(x => x.VariableDisplayId).Hidden();
+                columns.Bound(x => x.VariableStatusId).Hidden();
+                columns.Bound(x => x.Priority).Filterable(false).Title("").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.PatientVariableVariableName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("Variable Name").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.ShowInVisit).Filterable(false).Title("Show In Visit").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.ShowInPatient).Filterable(false).Title("Show In Patient").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.VariableChangePerVisit).Filterable(false).Title("Variable Change Per Visit").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Bound(x => x.FillBySecretary).Filterable(false).Title("Fill By Secretary").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                columns.Command(command => { command.Edit(); }).Width(30);
+                columns.Bound("").Title(string.Empty).Width(10)
+                .ClientTemplate(
+                   @"<a class='grid-btn tooltip-success' onClick='DicreasePriority(this)' data-id='#=Guid#' data-rel='tooltip' title='DicreasePriority' >
+                        <span class='green'>
+                            <i class='ace-icon glyphicon glyphicon-arrow-down bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+                columns.Bound("").Title(string.Empty).Width(10)
+                .ClientTemplate(
+                    @"<a class='grid-btn tooltip-success' onClick='IncreasePriority(this)' data-id='#=Guid#' data-rel='tooltip' title='IncreasePriority' >
+                         <span class='green'>
+                             <i class='ace-icon glyphicon glyphicon-arrow-up bigger-120'></i>
+                         </span>
+                     </a>
+                ");
+
+            })
+            .Editable(e => e.Mode(GridEditMode.InLine))
+            .DataSource(dataSource => dataSource
+                    .Ajax()
+                    //.Sort(x=>x.Add("Priority").Ascending())
+                    .Batch(true)
+                    .ServerOperation(false)
+                    .Model(model =>
+                    {
+                        model.Id(p => p.Guid);
+                        model.Field(p => p.PatientVariableVariableName).Editable(false);
+                        model.Field(p => p.Priority).Editable(false);
+                    })
+                    .PageSize(10)
+                    .Read(read => read.Action("GetAllChoosenVariables", "ClinicSectionChoosenValue"))
+                    .Update("ChoosenVariables_Update", "ClinicSectionChoosenValue")
+                    .Destroy("ChoosenVariables_Destroy", "ClinicSectionChoosenValue")
+                    )
+                            .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+                            .Pageable(pageable => pageable
+                            .Input(true)
+                            .Refresh(true)
+                            .PageSizes(true)
+                            .ButtonCount(5)
+                            .Numeric(true)) // Enable paging
+                            .Sortable()
+                            .HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem" })
+                    )
+
+</div>
+
+
+<script>
+
+    function DicreasePriority(element) {
+
+        var Id = $(element).attr('data-id');
+
+        var priority = "de";
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            data: { Id: Id, Priority: priority },
+            url: "/ClinicSectionChoosenValue/ChangePriority",
+            success: function (response) {
+
+                $(".k-pager-refresh")[0].click();
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            }
+
+
+        });
+
+    }
+
+    function IncreasePriority(element) {
+
+        var Id = $(element).attr('data-id');
+
+        var priority = "in";
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            data: { Id: Id, Priority: priority },
+            url: "/ClinicSectionChoosenValue/ChangePriority",
+            success: function (response) {
+
+                $(".k-pager-refresh")[0].click();
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            }
+
+
+        });
+
+    }
+
+
+</script>

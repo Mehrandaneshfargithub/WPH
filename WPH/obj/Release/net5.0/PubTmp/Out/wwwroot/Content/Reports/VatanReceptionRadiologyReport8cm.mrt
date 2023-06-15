@@ -1,0 +1,922 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<StiSerializer version="1.02" type="Net" application="StiReport">
+  <Dictionary Ref="1" type="Dictionary" isKey="true">
+    <BusinessObjects isList="true" count="2">
+      <Visit Ref="2" type="Stimulsoft.Report.Dictionary.StiBusinessObject" isKey="true">
+        <Alias>Visit</Alias>
+        <BusinessObjects isList="true" count="0" />
+        <Category />
+        <Columns isList="true" count="2">
+          <value>VisitNum,System.Int32</value>
+          <value>UniqueVisitNum,System.String</value>
+        </Columns>
+        <Dictionary isRef="1" />
+        <Guid>5cd98a5454624852bda11e50c48a5fde</Guid>
+        <Name>Visit</Name>
+      </Visit>
+      <PrescriptionDetail Ref="3" type="Stimulsoft.Report.Dictionary.StiBusinessObject" isKey="true">
+        <Alias>PrescriptionDetail</Alias>
+        <BusinessObjects isList="true" count="0" />
+        <Category />
+        <Columns isList="true" count="2"> 
+          <value>TestName,System.String</value>
+          <value>Explanation,System.String</value>
+        </Columns>
+        <Dictionary isRef="1" />
+        <Guid>b4e54ec0d0474ba6b29c589c4a18a8c0</Guid>
+        <Name>PrescriptionDetail</Name>
+      </PrescriptionDetail>
+    </BusinessObjects>
+    <Databases isList="true" count="0" />
+    <DataSources isList="true" count="0" />
+    <Relations isList="true" count="0" />
+    <Report isRef="0" />
+    <Resources isList="true" count="0" />
+    <Variables isList="true" count="44">
+      <value>,LogoImage,LogoImage,,System.String,E:_x005C_Projects_New_Srver_x005C_DMS_x005C_DMS_x005C_bin_x005C_x86_x005C_Debug_x005C_Images_x005C_LogoImage.jpg,False,False,False,True</value>
+      <value>,vMedicineName,vMedicineName,,System.String,اسم_x0020_المادة,False,False,False,True</value>
+      <value>,vNum,vNum,,System.String,الكمية,False,False,False,True</value>
+      <value>,vToday,vToday,,System.String,_x0030_1_x002F_02_x002F_2020_x0020_:التاریخ,False,False,False,True</value>
+      <value>,vPage,vPage,,System.String,صفحة,False,False,False,True</value>
+      <value>,vFrom,vFrom,,System.String,من,False,False,False,True</value>
+      <value>,vTitle,vTitle,,System.String,,False,False,False,True</value>
+      <value>,vUniqueVisitnum,vUniqueVisitnum,,System.String,,False,False,False,True</value>
+      <value>,vVisitNum,vVisitNum,,System.String,,False,False,False,True</value>
+      <value>,vConsumptionInstruction,vConsumptionInstruction,,System.String,,False,False,False,True</value>
+      <value>,vExplanation,vExplanation,,System.String,,False,False,False,True</value>
+      <value>,VisitDate,VisitDate,,System.String,,False,False,False,True</value>
+      <value>,UniqueVisitNum,UniqueVisitNum,,System.String,,False,False,False,True</value>
+      <value>,vVisitDate,vVisitDate,,System.String,,False,False,False,True</value>
+      <value>,vItem,vItem,,System.String,,False,False,False,True</value>
+      <value>,vPatientName,vPatientName,,System.String,,False,False,False,True</value>
+      <value>,PatientName,PatientName,,System.String,,False,False,False,True</value>
+      <value>,ReceptionDate,ReceptionDate,,System.String,,False,False,False,False</value>
+      <value>,DoctorName,DoctorName,,System.String,,False,False,False,False</value>
+      <value>,PhoneNumber,PhoneNumber,,System.String,,False,False,False,False</value>
+      <value>,Barcode,Barcode,,System.String,,False,False,False,False</value>
+      <value>,TotalAmount,TotalAmount,,System.String,,False,False,False,False</value>
+      <value>,Barcode1,Barcode1,,System.Drawing.Image,,False,False,False,False</value>
+      <value>,InvoiceNum,InvoiceNum,,System.String,,False,False,False,False</value>
+      <value>,Description,Description,,System.String,,False,False,False,False</value>
+      <value>,SectionType,SectionType,,System.String,,False,False,False,False</value>
+      <value>,Age,Age,,System.String,,False,False,False,False</value>
+      <value>,vAge,vAge,,System.String,,False,False,False,False</value>
+      <value>,vDoctorName,vDoctorName,,System.String,,False,False,False,False</value>
+      <value>,Money,Money,,System.String,,False,False,False,False</value>
+      <value>,vMoney,vMoney,,System.String,,False,False,False,False</value>
+      <value>,Date,Date,,System.String,,False,False,False,False</value>
+      <value>,vDate,vDate,,System.String,,False,False,False,False</value>
+      <value>,vXray,vXray,,System.String,,False,False,False,False</value>
+      <value>,vCTScan,vCTScan,,System.String,,False,False,False,False</value>
+      <value>,vMRI,vMRI,,System.String,,False,False,False,False</value>
+      <value>,vUltraSound,vUltraSound,,System.String,,False,False,False,False</value>
+      <value>,vSection,vSection,,System.String,,False,False,False,False</value>
+      <value>,Mammography,Mammography,,System.String,,False,False,False,False</value>
+      <value>,Nephrolithotripsy_x0020_Unit,Nephrolithotripsy_x0020_Unit,,System.String,,False,False,False,False</value>
+      <value>,Dexa_x0020_Scan,Dexa_x0020_Scan,,System.String,,False,False,False,False</value>
+      <value>,Logo,Logo,,System.Drawing.Image,,False,False,False,False</value>
+      <value>,ReportHeader,ReportHeader,,System.String,,False,False,False,False</value>
+      <value>,LabPhoneNumber,LabPhoneNumber,,System.String,,False,False,False,False</value>
+    </Variables>
+  </Dictionary>
+  <EngineVersion>EngineV2</EngineVersion>
+  <GlobalizationStrings isList="true" count="0" />
+  <Key>ce447ba121b9478ca3d6562209acdd60</Key>
+  <MetaTags isList="true" count="0" />
+  <Pages isList="true" count="1">
+    <Page1 Ref="4" type="Page" isKey="true">
+      <Border>None;Black;2;Solid;False;4;Black</Border>
+      <Brush>Transparent</Brush>
+      <Components isList="true" count="46">
+        <PageHeaderBand1 Ref="5" type="PageHeaderBand" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0,0.4,15,4.4</ClientRectangle>
+          <Components isList="true" count="8">
+            <Text1 Ref="6" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>4.6,0.2,10.2,3</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Segoe UI,26,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{ReportHeader}</Text>
+              <TextBrush>Black</TextBrush>
+              <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+              <Type>Expression</Type>
+            </Text1>
+            <Image1 Ref="7" type="Image" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,0,4.4,3.6</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <ImageData>{Logo}</ImageData>
+              <Margins>0,0,0,0</Margins>
+              <Name>Image1</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Stretch>True</Stretch>
+            </Image1>
+            <Image3 Ref="8" type="Image" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0,3.6,0.8,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <ImageBytes>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
+eS7vM5M9wTtAREQEREBERA//2Q==</ImageBytes>
+              <Margins>0,0,0,0</Margins>
+              <Name>Image3</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Stretch>True</Stretch>
+            </Image3>
+            <Text3 Ref="9" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>0.8,3.6,6.2,0.8</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Segoe UI,22,Bold</Font>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text3</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{LabPhoneNumber}</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text3>
+            <Text14 Ref="10" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>8.8,3.4,6,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Segoe UI,22,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text14</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{InvoiceNum}</Text>
+              <TextBrush>Black</TextBrush>
+              <VertAlignment>Center</VertAlignment>
+            </Text14>
+            <Text26 Ref="11" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7.2,3.4,1.6,1</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Segoe UI,22,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text26</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>NO:</Text>
+              <TextBrush>Black</TextBrush>
+              <Type>Expression</Type>
+              <VertAlignment>Center</VertAlignment>
+            </Text26>
+            <Text15 Ref="12" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>1.2,4.4,6.4,1.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Segoe UI,25,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text15</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{vDate}</Text>
+              <TextBrush>Black</TextBrush>
+              <VertAlignment>Center</VertAlignment>
+            </Text15>
+            <Text25 Ref="13" type="Text" isKey="true">
+              <Brush>Transparent</Brush>
+              <ClientRectangle>7.6,4.4,7.2,1.2</ClientRectangle>
+              <Conditions isList="true" count="0" />
+              <Font>Segoe UI,25,Bold</Font>
+              <HorAlignment>Right</HorAlignment>
+              <Margins>0,0,0,0</Margins>
+              <Name>Text25</Name>
+              <Page isRef="4" />
+              <Parent isRef="5" />
+              <Text>{ReceptionDate}</Text>
+              <TextBrush>Black</TextBrush>
+              <VertAlignment>Center</VertAlignment>
+            </Text25>
+          </Components>
+          <Conditions isList="true" count="0" />
+          <Guid>9296a1735ff14d5fa79083f87eddffa5</Guid>
+          <Name>PageHeaderBand1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <PrintOn>OnlyFirstPage</PrintOn>
+        </PageHeaderBand1>
+        <Text2 Ref="14" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>20.6,27.6,1.6,0.6</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Arial,13,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>NO:</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+        </Text2>
+        <Text4 Ref="15" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>8.8,6.6,5,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,28,Bold</Font>
+          <Guid>f5f6cdbdc61d42589599495d2eb5516f</Guid>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text4</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>وصل قبض</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text4>
+        <Text5 Ref="16" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>1.6,6.6,5,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,28,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text5</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Radiology</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text5>
+        <Text6 Ref="17" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,8.4,6.8,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text6</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>:{PatientName}</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text6>
+        <Text7 Ref="18" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>0.4,8.4,7.2,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <GrowToHeight>True</GrowToHeight>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text7</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vPatientName}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <VertAlignment>Center</VertAlignment>
+        </Text7>
+        <Text8 Ref="19" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,9.6,6.8,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text8</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>:{Age}</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text8>
+        <Text9 Ref="20" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.4,9.6,7.2,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text9</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vAge}</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text9>
+        <Text10 Ref="21" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,10.8,6.8,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text10</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>:{DoctorName}</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text10>
+        <Text11 Ref="22" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>0.4,10.8,7.2,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <GrowToHeight>True</GrowToHeight>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text11</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vDoctorName}</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text11>
+        <Text12 Ref="23" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,12,6.8,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text12</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>:{Money}</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text12>
+        <Text13 Ref="24" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>0.6,12,7,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,20,Bold</Font>
+          <HorAlignment>Right</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text13</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vMoney}</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text13>
+        <Text16 Ref="25" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>8.2,16.8,5.6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,30,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text16</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>الأشعة</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text16>
+        <Text17 Ref="26" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,18.4,6.6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,27,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text17</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>المفراس الحلزونی</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text17>
+        <Text18 Ref="27" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,13.6,6.6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,25,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text18</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>الرنین المغناطیسی</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text18>
+        <Text19 Ref="28" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>8.4,15.2,5,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,27,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text19</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>السونار</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text19>
+        <Text20 Ref="29" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>1.2,16.8,5.8,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text20</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vXray}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text20>
+        <Text21 Ref="30" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>1.2,18.4,5.8,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text21</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vCTScan}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <VertAlignment>Center</VertAlignment>
+        </Text21>
+        <Text22 Ref="31" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>0.8,13.6,6.4,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text22</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vMRI}</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text22>
+        <Text23 Ref="32" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>0.8,15.2,5.8,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text23</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{vUltraSound}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text23>
+        <Text24 Ref="33" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>11,26.2,3.2,1</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text24</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>المستلم</Text>
+          <TextBrush>Black</TextBrush>
+          <Type>Expression</Type>
+          <VertAlignment>Center</VertAlignment>
+        </Text24>
+        <Text27 Ref="34" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>1.4,20,5.8,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text27</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{Mammography}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <VertAlignment>Center</VertAlignment>
+        </Text27>
+        <Text28 Ref="35" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,20,6.6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,25,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text28</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Mammography</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text28>
+        <Text29 Ref="36" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>1,22.2,6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text29</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{Nephrolithotripsy_Unit}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <VertAlignment>Center</VertAlignment>
+        </Text29>
+        <Text30 Ref="37" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>7.6,21.6,6.6,2.4</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,25,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text30</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Nephrolithotripsy Unit</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <VertAlignment>Center</VertAlignment>
+        </Text30>
+        <Text31 Ref="38" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <CanGrow>True</CanGrow>
+          <ClientRectangle>1,24.4,6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,24,Bold</Font>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text31</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>{Dexa_Scan}</Text>
+          <TextBrush>Black</TextBrush>
+          <TextOptions>,,,,WordWrap=True,A=0</TextOptions>
+          <VertAlignment>Center</VertAlignment>
+        </Text31>
+        <Text32 Ref="39" type="Text" isKey="true">
+          <Brush>Transparent</Brush>
+          <ClientRectangle>8,24.4,6,1.2</ClientRectangle>
+          <Conditions isList="true" count="0" />
+          <Font>Segoe UI,25,Bold</Font>
+          <HorAlignment>Center</HorAlignment>
+          <Margins>0,0,0,0</Margins>
+          <Name>Text32</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Text>Dexa Scan</Text>
+          <TextBrush>Black</TextBrush>
+          <VertAlignment>Center</VertAlignment>
+        </Text32>
+        <RectanglePrimitive1 Ref="40" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>0.2,6.4,14.4,21.4</ClientRectangle>
+          <Color>Black</Color>
+          <Guid>50fac9f8c0db4af0b1e1397da5296dd8</Guid>
+          <Name>RectanglePrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Size>8</Size>
+        </RectanglePrimitive1>
+        <StartPointPrimitive1 Ref="41" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+          <ClientRectangle>0.2,6.4,0,0</ClientRectangle>
+          <Name>StartPointPrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>50fac9f8c0db4af0b1e1397da5296dd8</ReferenceToGuid>
+        </StartPointPrimitive1>
+        <EndPointPrimitive1 Ref="42" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+          <ClientRectangle>14.6,27.8,0,0</ClientRectangle>
+          <Name>EndPointPrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>50fac9f8c0db4af0b1e1397da5296dd8</ReferenceToGuid>
+        </EndPointPrimitive1>
+        <HorizontalLinePrimitive1 Ref="43" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.2,8,14.4,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="44" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Name>HorizontalLinePrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Size>8</Size>
+          <StartCap Ref="45" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive1>
+        <VerticalLinePrimitive1 Ref="46" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>7.4,6.4,0.0254,1.6</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="47" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>a3889176a0a04f46a3f2e587248c0674</Guid>
+          <Name>VerticalLinePrimitive1</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <Size>8</Size>
+          <StartCap Ref="48" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </VerticalLinePrimitive1>
+        <StartPointPrimitive2 Ref="49" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+          <ClientRectangle>7.4,6.4,0,0</ClientRectangle>
+          <Name>StartPointPrimitive2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>a3889176a0a04f46a3f2e587248c0674</ReferenceToGuid>
+        </StartPointPrimitive2>
+        <EndPointPrimitive2 Ref="50" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+          <ClientRectangle>7.4,8,0,0</ClientRectangle>
+          <Name>EndPointPrimitive2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>a3889176a0a04f46a3f2e587248c0674</ReferenceToGuid>
+        </EndPointPrimitive2>
+        <RectanglePrimitive2 Ref="51" type="RectanglePrimitive" isKey="true">
+          <ClientRectangle>0.4,13.4,14,12.4</ClientRectangle>
+          <Color>Black</Color>
+          <Guid>1c61b6a6eba145e4a60d816ae2b0d871</Guid>
+          <Name>RectanglePrimitive2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+        </RectanglePrimitive2>
+        <StartPointPrimitive3 Ref="52" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+          <ClientRectangle>0.4,13.4,0,0</ClientRectangle>
+          <Name>StartPointPrimitive3</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>1c61b6a6eba145e4a60d816ae2b0d871</ReferenceToGuid>
+        </StartPointPrimitive3>
+        <EndPointPrimitive3 Ref="53" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+          <ClientRectangle>14.4,25.8,0,0</ClientRectangle>
+          <Name>EndPointPrimitive3</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>1c61b6a6eba145e4a60d816ae2b0d871</ReferenceToGuid>
+        </EndPointPrimitive3>
+        <HorizontalLinePrimitive2 Ref="54" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.4,15,14,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="55" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Name>HorizontalLinePrimitive2</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="56" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive2>
+        <VerticalLinePrimitive4 Ref="57" type="VerticalLinePrimitive" isKey="true">
+          <ClientRectangle>7.4,13.4,0.0254,12.4</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="58" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>4a95eb8a2ef44f18b2725ca31174d728</Guid>
+          <Name>VerticalLinePrimitive4</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="59" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </VerticalLinePrimitive4>
+        <StartPointPrimitive6 Ref="60" type="Stimulsoft.Report.Components.StiStartPointPrimitive" isKey="true">
+          <ClientRectangle>7.4,13.4,0,0</ClientRectangle>
+          <Name>StartPointPrimitive6</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>4a95eb8a2ef44f18b2725ca31174d728</ReferenceToGuid>
+        </StartPointPrimitive6>
+        <EndPointPrimitive6 Ref="61" type="Stimulsoft.Report.Components.StiEndPointPrimitive" isKey="true">
+          <ClientRectangle>7.4,25.8,0,0</ClientRectangle>
+          <Name>EndPointPrimitive6</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <ReferenceToGuid>4a95eb8a2ef44f18b2725ca31174d728</ReferenceToGuid>
+        </EndPointPrimitive6>
+        <HorizontalLinePrimitive3 Ref="62" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.4,16.6,14,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="63" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>23dee79cec3f47fa869dc8cae3e25c6a</Guid>
+          <Name>HorizontalLinePrimitive3</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="64" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive3>
+        <HorizontalLinePrimitive4 Ref="65" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.4,19.8,14,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="66" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>ac481dfbc4634ea7bb86269f455089be</Guid>
+          <Name>HorizontalLinePrimitive4</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="67" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive4>
+        <HorizontalLinePrimitive5 Ref="68" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.4,18.2,14,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="69" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>9844735da0274c96ab74cd41fdddff8f</Guid>
+          <Name>HorizontalLinePrimitive5</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="70" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive5>
+        <HorizontalLinePrimitive6 Ref="71" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.4,21.4,14,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="72" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>2d9506ee82e34a6fa8eaaf2309e35378</Guid>
+          <Name>HorizontalLinePrimitive6</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="73" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive6>
+        <HorizontalLinePrimitive7 Ref="74" type="HorizontalLinePrimitive" isKey="true">
+          <ClientRectangle>0.4,24.2,14,0.0254</ClientRectangle>
+          <Color>Black</Color>
+          <EndCap Ref="75" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </EndCap>
+          <Guid>4469197efbed438d8757d8f898529d09</Guid>
+          <Name>HorizontalLinePrimitive7</Name>
+          <Page isRef="4" />
+          <Parent isRef="4" />
+          <StartCap Ref="76" type="Cap" isKey="true">
+            <Color>Black</Color>
+          </StartCap>
+        </HorizontalLinePrimitive7>
+      </Components>
+      <Conditions isList="true" count="0" />
+      <Guid>b840e88d25e14c13ae6beffd7a24f5f9</Guid>
+      <Margins>0,0,0,0</Margins>
+      <Name>Page1</Name>
+      <PageHeight>31</PageHeight>
+      <PageWidth>15</PageWidth>
+      <PaperSize>B5</PaperSize>
+      <Report isRef="0" />
+    </Page1>
+  </Pages>
+  <ReferencedAssemblies isList="true" count="8">
+    <value>System.Dll</value>
+    <value>System.Drawing.Dll</value>
+    <value>System.Windows.Forms.Dll</value>
+    <value>System.Data.Dll</value>
+    <value>System.Xml.Dll</value>
+    <value>Stimulsoft.Controls.Dll</value>
+    <value>Stimulsoft.Base.Dll</value>
+    <value>Stimulsoft.Report.Dll</value>
+  </ReferencedAssemblies>
+  <ReportAlias>Report</ReportAlias>
+  <ReportChanged>12/18/2022 10:59:08 PM</ReportChanged>
+  <ReportCreated>4/26/2015 1:33:27 PM</ReportCreated>
+  <ReportFile>E:\Workspaces\WAS\WPH\WPH\wwwroot\Content\Reports\VatanReceptionRadiologyReport8cm.mrt</ReportFile>
+  <ReportGuid>72278d78c43b44539e465e6a8abb35d0</ReportGuid>
+  <ReportName>Report</ReportName>
+  <ReportUnit>Centimeters</ReportUnit>
+  <ReportVersion>2019.2.1.0</ReportVersion>
+  <Script>using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Data;
+using Stimulsoft.Controls;
+using Stimulsoft.Base.Drawing;
+using Stimulsoft.Report;
+using Stimulsoft.Report.Dialogs;
+using Stimulsoft.Report.Components;
+
+namespace Reports
+{
+    public class Report : Stimulsoft.Report.StiReport
+    {
+        public Report()        {
+            this.InitializeComponent();
+        }
+
+        #region StiReport Designer generated code - do not modify
+		#endregion StiReport Designer generated code - do not modify
+    }
+}
+</Script>
+  <ScriptLanguage>CSharp</ScriptLanguage>
+  <Styles isList="true" count="0" />
+</StiSerializer>

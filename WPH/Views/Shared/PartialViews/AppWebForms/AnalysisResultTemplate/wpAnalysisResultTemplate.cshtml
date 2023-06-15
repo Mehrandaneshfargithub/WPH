@@ -1,0 +1,74 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+@{
+    string font = "", pull = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        <h3 id="newSymptomText" class="hidden">@Localizer["New"] @Localizer["Template"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        <h3 id="newSymptomText" class="hidden">@Localizer["Template"] @Localizer["New"]</h3>
+    }
+
+}
+
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Template"]
+        </h1>
+
+    </div>
+
+    @if ((bool)ViewBag.AccessNewTemplate)
+    {
+        <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddTemplate(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+
+</div><!-- /.page-header -->
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/AnalysisResultTemplate/dgAnalysisResultTemplateGrid.cshtml")
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+
+<script>
+
+
+    function AddTemplate(element) {
+        var link = $("#GridAddLink").attr("data-Value");
+        let header = $("#newSymptomText").text();
+        $('#new-modal-header').text(header);
+        $(".loader").removeClass("hidden");
+        $('#my-modal-new').modal('toggle');
+        $('#new-modal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+
+</script>

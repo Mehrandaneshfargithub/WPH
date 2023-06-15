@@ -1,0 +1,157 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@*@{
+    string edit_title = Localizer["EditProduct"];
+    string remove_title = Localizer["RemoveProduct"];
+    string report_title = Localizer["ProductReport"];
+    string barcode_title = Localizer["ProductBarcode"];
+}
+
+<style>
+
+    .k-state-selected {
+        background-color: #3379b5 !important;
+    }
+
+    .elementBox {
+        height: 160px;
+        border-radius: 0.5rem;
+        background-color: #fff;
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, .125);
+        background-clip: border-box;
+        box-shadow: rgba(146, 168, 209,0.7) 0px 0px 5px 0.1px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .elementStyle {
+        overflow-wrap: break-word;
+        margin: 5px 0px;
+        padding: 2px 5px;
+    }
+
+        .elementStyle:hover {
+            background: lightgray;
+            border-radius: 0.5rem;
+        }
+</style>*@
+
+
+<div style="clear:both">
+
+    @(Html.Kendo().Grid<WPH.Models.Product.ProductCardexReportResultViewModel>()
+    .Name("cardexReportKendoGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+
+
+            //if ((bool)ViewBag.AccessDeleteStoreroom)
+            //{
+            //    columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            //    .ClientTemplate(
+            //        "#if(ChildrensCount < 1){#  <a class='tooltip-error grid-btn' onClick='GridMaterialProductDeleteFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='" + remove_title + @"' data-original-title='Delete'>
+            //            <span class='red'>
+            //                <i class='ace-icon fa fa-trash-can bigger-120'></i>
+            //            </span>
+            //        </a>#}#
+            //    ");
+            //}
+
+            columns.Bound(x => x.RemainingNum).Format("{0:#,0.##}").Title(Localizer["Rem"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.BujNumber).Title(Localizer["BujNumber"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.ExpireDate).Title(Localizer["ExpireDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.TotalOutCurrency).Title(Localizer["TotalSale"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.SalePriceCurrency).Title(Localizer["SalePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.OutFreeNum).Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.OutNum).Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.TotalInCurrency).Title(Localizer["TotalPurchase"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PurchasePriceCurrency).Title(Localizer["PurchasePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InFreeNum).Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InNum).Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InvoiceDate).Title(Localizer["InvoiceDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            //columns.Bound(x => x.Guid).Hidden();
+
+        }
+        else
+        {
+            //columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InvoiceDate).Title(Localizer["InvoiceDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InNum).Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InFreeNum).Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PurchasePriceCurrency).Title(Localizer["PurchasePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.TotalInCurrency).Title(Localizer["TotalPurchase"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.OutNum).Title(Localizer["Num"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.OutFreeNum).Title(Localizer["FreeNum"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.SalePriceCurrency).Title(Localizer["SalePrice"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.TotalOutCurrency).Title(Localizer["TotalSale"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ExpireDate).Title(Localizer["ExpireDate"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.BujNumber).Title(Localizer["BujNumber"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.RemainingNum).Format("{0:#,0.##}").Title(Localizer["Rem"]).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+
+            //if ((bool)ViewBag.AccessDeleteStoreroom)
+            //{
+            //    columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            //    .ClientTemplate(
+            //        "#if(ChildrensCount < 1){#<a class='tooltip-error grid-btn' onClick='GridMaterialProductDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='" + remove_title + @"' data-original-title='Delete'>
+            //            <span class='red'>
+            //                <i class='ace-icon fa fa-trash-can bigger-120'></i>
+            //            </span>
+            //        </a>#}#
+            //    ");
+            //}
+
+
+        }
+    })
+        //.DataSource(dataSource => dataSource
+        //.Ajax()
+        //.ServerOperation(false)
+        //.Events(e => e.RequestStart("MaterialProductKendoGridRequestStart"))
+        //.Model(model =>
+        //{
+        //    model.Id(p => p.Guid);
+        //})
+        //    .PageSize(10)
+        //    .Read(read => read.Action("GetAll", "Product").Data("GetClinicSectionId"))
+        //)
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+
+</div>
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        //$("#productKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+        //    click_dblClick = false;
+        //    $("#productKendoGrid").find("tr.k-state-selected td a.edit").click();
+        //});
+
+    });
+
+</script>

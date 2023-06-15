@@ -1,0 +1,352 @@
+﻿
+@model WPH.Models.CustomDataModels.UserManagment.UserInformationViewModel
+@inject WPH.Resources.SharedViewLocalizer Localizer
+    <style>
+        #user_Name:read-only {
+            background-color: white !important;
+        }
+
+        @@media (max-width:767px) {
+            #signup-box {
+                width:80vw;
+            }
+        }
+
+        @@media (min-width:768px) {
+            #signup-box {
+                width: 50vw;
+            }
+        }
+
+    </style>
+    <div id="signup-box" class="signup-box no-border" @*style="width:50vw"*@>
+        <div class="widget-body">
+            <div class="widget-main">
+                <form id="addNewForm">
+                    <fieldset>
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(x => x.Guid)
+                        @Html.HiddenFor(x => x.UserNameHolder)
+                        @Html.HiddenFor(x => x.ClinicSectionId)
+                        @Html.HiddenFor(x => x.AccessTypeId)
+                        @Html.HiddenFor(x => x.Active)
+                        @Html.HiddenFor(x => x.MultiSelectGuids)
+                        <div class="col-md-6">
+
+                            <label class="block clearfix">
+                                <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Name"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                //.Readonly(true)
+                                .HtmlAttributes(new {id="user_Name", style = "width: 100%", @data_checkEmpty = "Name-box" })
+                                )
+                                </span>
+                                <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                                <span id="Name-Exist2" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                                </span>
+                            </label>
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Mobile"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                .Name("PhoneNumber")
+                                .Value(Model.PhoneNumber)
+                                .HtmlAttributes(new { style = "width: 100%", @validate_mobile = "Mobile-wrong", onkeypress = "return OnlyNumberKey(event)" })
+                                )
+                                </span>
+
+                                <span id="Mobile-wrong" class="hidden" style="color:red;">
+                                    @Localizer["MobileNotCorrect"]
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Email"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                .Name("Email")
+                                .Value(Model.Email)
+                                .HtmlAttributes(new { style = "width: 100%", @validate_email= "Email-wrong" })
+                                )
+                                </span>
+                                <span id="Email-wrong" class="hidden emailNotValid" style="color:red;">
+                                    @Localizer["EmailNotCorrect"]
+                                </span>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["UserType"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DropDownList()
+                                .Name("UserTypeId")
+                                .DataTextField("Name")
+                                .DataValueField("Id")
+                                //.Filter("contains")
+                                .DataSource(source =>
+                                {
+                                source.Read(read =>
+                                {
+                                read.Action("GetAllUserTypes", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                                })
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                                </span>
+
+                            </label>
+                            <label class="block clearfix">
+                                <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["UserName"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                .Name("UserName")
+                                .Value(Model.UserName)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "UserName-box" })
+                                )
+                                </span>
+
+                                <span id="loaderuser" class="loader-user-exist hidden"></span>
+                                <span id="UserName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                                <span id="Name-Exist" class="emptybox hidden" style="color:red;">
+                                    @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Password"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                .Name("Pass3")
+                                .Value(Model.Pass3)
+                                .HtmlAttributes(new { style = "width: 100%", type = "password", @data_checkEmpty = "Pass3-box" })
+                                )
+                                </span>
+                                <span id="Pass3-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Repeat"] @Localizer["Password"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                .Name("Pass4")
+                                .Value(Model.Pass4)
+                                .HtmlAttributes(new { style = "width: 100%", type = "password", @data_checkEmpty = "Pass4-box" })
+                                )
+                                </span>
+                                <span id="Pass4-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                                <span id="incorrectPass" class="emptybox hidden" style="color:red;">
+                                    Passwords didn't match , please try again
+                                </span>
+                            </label>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["UserAccess"]</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().MultiSelect()
+                                .Name("ClinicSections")
+                                //.BindTo(Model.ClinicSectionGuids)
+                                .DataValueField("Guid")
+                                .DataTextField("Name")
+                                .DataSource(source =>
+                                {
+                                source.Read(read =>
+                                {
+                                read.Action("GetAllClinicSectionsForUser", "ClinicSection");
+                                })
+                                .ServerFiltering(false);
+                                })
+                                .Value(Model.ClinicSectionGuids)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "ClinicSections-box" })
+                                .AutoClose(false)
+                                //.Placeholder(@ViewBag.UserAccess)
+
+                                )
+                                </span>
+
+                                <span id="ClinicSections-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+
+                            </label>
+                        </div>
+
+                        <div class="space-24"></div>
+                    </fieldset>
+                </form>
+            </div>
+        </div><!-- /.widget-body -->
+    </div><!-- /.signup-box -->
+
+    <script type="text/javascript">
+
+
+
+        var Numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "/", ".", "٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", " "];
+
+        var EnglishKey = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "Q", "w", "e", "E", "r", "R", "t", "T", "y", "Y", "u", "U", "i", "I", "o", "O", "p", "P", "a"
+            , "A", "s", "S", "d", "D", "f", "F", "g", "G", "h", "H", "j", "J", "k", "K", "l", "L", "z", "Z", "x", "X", "c", "C", "v", "V", "b", "B", "n", "N", "m", "M"];
+
+        var KurdishKey = [1632, 1633, 1634, 1635, 1636, 1637, 1638, 1639, 1640, 1641, 1602, 96, 1608, 1749, 1610, 1585, 1685, 1578, 1591, 1740, 1742, 1574, 1569
+            , 1581, 1593, 1734, 1572, 1662, 1579, 1575, 1570, 1587, 1588, 1583, 1584, 1601, 1573, 1711, 1594, 1607, 8204, 1688, 1571, 1705, 1603, 1604
+            , 1717, 1586, 1590, 1582, 1589, 1580, 1670, 1700, 1592, 1576, 1609, 1606, 1577, 1605, 1600
+        ];
+
+        var ClinicSectionsMulti;
+
+
+        $(document).ready(function () {
+            $("#user_Name").attr("readonly", true);
+            setTimeout(function () {
+                //$("#user_Name").removeAttr('readonly');
+                $("#user_Name").attr("readonly", false);
+                if ($("#UserNameHolder").val() === '') {
+                    $("#user_Name").val('');
+                    $("#Pass3").val('');
+                    $("#user_Name").focus();
+                }
+            }, 1000);
+
+            ClinicSectionsMulti = $("#ClinicSections").data("kendoMultiSelect");
+            if (ClinicSectionsMulti !== undefined)
+                ClinicSectionsMulti.bind("open", ClinicSectionsMulti_Open);
+        });
+
+        $('#user_Name').on('focus', function (e) {
+            $('#user_Name').select();
+        });
+
+        $('#user_Name').on('keypress', function (e) {
+            if (e.which === 13) {
+                $('#PhoneNumber').select();
+            }
+        });
+
+        $('#PhoneNumber').on('keypress', function (e) {
+
+            $("#PhoneNumber-box-wrong").addClass('hidden');
+
+            let char = Numbers.indexOf(e.key)
+
+            if (char !== -1 || e.which === 13 || e.which === 9) {
+
+                let index = KurdishKey.indexOf(e.which);
+                if (e.which === 13 || e.which === 9) {
+                    $('#Email').focus();
+
+                }
+                else if (index !== -1) {
+                    e.preventDefault();
+                    let index1 = EnglishKey[index];
+                    let preVal = $(this).val();
+                    $(this).val(preVal + index1);
+                }
+            }
+            else {
+                e.preventDefault();
+            }
+        });
+
+
+        $('#PhoneNumber').on('focus', function (e) {
+            $('#PhoneNumber').select();
+        });
+
+        $('#Email').on('keypress', function (e) {
+            if (e.which === 13) {
+
+                let type = $('#UserTypeId').data("kendoDropDownList");
+                type.focus();
+                type.open();
+            }
+        });
+
+        $('#Email').on('focus', function (e) {
+
+            $('#Email').select();
+        });
+
+
+        $("#UserTypeId").parent().on("keypress", function (e) {
+            if (e.which === 13) {
+                $('#UserName').focus();
+            }
+        });
+
+
+        $('#UserName').on('keypress', function (e) {
+
+            if (e.which === 13) {
+
+                $('#Pass3').focus();
+            }
+        });
+
+        $('#UserName').on('focus', function (e) {
+
+            $('#UserName').select();
+        });
+
+        $('#Pass3').on('keypress', function (e) {
+
+            if (e.which === 13) {
+
+                $('#Pass4').focus();
+            }
+        });
+
+        $('#Pass3').on('focus', function (e) {
+
+            $('#Pass3').select();
+        });
+
+
+        $('#Pass4').on('keypress', function (e) {
+
+            if (e.which === 13) {
+                let type = $('#ClinicSections').data("kendoMultiSelect");
+                type.focus();
+                type.open();
+            }
+        });
+
+        $('#Pass4').on('focus', function (e) {
+            $('#Pass4').select();
+        });
+
+        $('#ClinicSections').parent().on('keypress', function (e) {
+
+            if (e.which === 13) {
+                $('#btn-new-accept').focus();
+            }
+        });
+
+        $('#ClinicSections').on('focus', function (e) {
+            $('#ClinicSections').select();
+        });
+
+        function ClinicSectionsMulti_Open() {
+            $("#ClinicSections-box").addClass('hidden');
+        }
+
+        $('#Name').focus(function () {
+            $("#Name-Exist").addClass('hidden');
+            $("#Name-box").addClass('hidden');
+            $('#Name').select();
+        });
+
+
+
+    </script>

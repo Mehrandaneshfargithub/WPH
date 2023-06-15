@@ -1,0 +1,329 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", pull_rev = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " direction:rtl; ";
+    }
+
+}
+
+<div class="row Grid-Content shadow-border" style="margin:2rem 0">
+    <div>
+        <h4 id="thisAnalysisItems" class="@font">
+            @Localizer["AnalysisItems"]
+        </h4>
+    </div>
+    <div class="col-xs-12">
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Analysis/dgAnalysisAnalysisItemGrid.cshtml")
+    </div>
+
+</div>
+<input class="hidden" type="text" id="unitId" data-Value="@ViewBag.UnitId" />
+
+<div class="row Grid-Content shadow-border" style="margin:2rem 0">
+    <div class="col-sm-12">
+        <div class="col-xs-6">
+            <h4 class="@font">
+                @Localizer["All"] @Localizer["AnalysisItems"]
+            </h4>
+        </div>
+
+        <div>
+            <a class="btn btn-danger @pull " onClick="AddNewAnalysisItem()" href="#" style="font-size:1.5rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="col-sm-12">
+
+    </div>
+
+    <div class="col-xs-12 @font">
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/AnalysisItem/dgSelectedAnalysisItemGrid.cshtml")
+    </div>
+</div>
+
+
+<div id="AnalysisItemModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAnalysisItemModal()" aria-hidden="true">&times;</button>
+                <h3 id="AnalysisItemModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["AnalysisItem"] @Localizer["New"]
+                </h3>
+            </div>
+
+            <div id="AnalysisItemModal-body" class="modal-body" style="width:70rem">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                        .Name("btn-newAnalysisItem-accept")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "analysisItemClick()" })
+                        .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                        .Name("btn-AnalysisItemModal-close")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeAnalysisItemModal()" })
+                        .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div id="AnalysisAnalysisItemDeleteModal" class="modal fade bd-example-modal-lg @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeAnalysisAnalysisItemDeleteModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller'>
+                    <i class='ace-icon fa fa-exclamation-triangle red @font'></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="AnalysisAnalysisItemDeleteModal-body" class="modal-body">
+                <div class="label label-warning label-white middle" style="font-size:1.5rem;height:40px;">
+                    <i class="ace-icon fa fa-exclamation-triangle bigger-120"></i>
+                    @Localizer["DeleteRecordBody"]
+                </div>
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="label label-danger label-white middle hidden" style="font-size:small;height:40px;">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="label label-danger label-white middle hidden" style="font-size:small;height:40px;">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+
+                @(Html.Kendo().Button()
+                .Name("btn-AnalysisAnalysisItemDelete-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick="removeAnalysisAnalysisItem()", @data_id="" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AnalysisAnalysisItemDeleteModal-c;ose")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick="closeAnalysisAnalysisItemDeleteModal()" })
+                .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+<script>
+
+    function AddAnalysisItemToAnalysisOrGroup(element) {
+
+        var link = "/Analysis/AddAnalysisItemToAnalysis";
+        let analysisId = $('#btn-AddAnalysisItemToAnalysisModal-close').attr('data-analysisId');
+        let analysisItemId = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: { AnalysisId: analysisId, AnalysisItemId:analysisItemId },
+            success: function (response) {
+
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+                $("#kendoAnalysisAnalysisItemGrid").find(".k-pager-refresh").click();
+                $("#kendoSelectedAnalysisItemGrid").find(".k-pager-refresh").click();
+            }
+        });
+    }
+
+    function DeleteAnalysisAnalysisItem(element) {
+        if (!$("#ERROR_ThisRecordHasDependencyOnItInAnotherEntity").hasClass("hidden")) {
+            $("#ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        }
+        if (!$("#ERROR_SomeThingWentWrong").hasClass("hidden")) {
+            $("#ERROR_SomeThingWentWrong").addClass("hidden");
+        }
+        $(".loader").removeClass("hidden");
+        $('#AnalysisAnalysisItemDeleteModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-AnalysisAnalysisItemDelete-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    function removeAnalysisAnalysisItem() {
+
+        if (!$("#ERROR_ThisRecordHasDependencyOnItInAnotherEntity").hasClass("hidden")) {
+            $("#ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        }
+        if (!$("#ERROR_SomeThingWentWrong").hasClass("hidden")) {
+            $("#ERROR_SomeThingWentWrong").addClass("hidden");
+        }
+        var Id = $('#btn-AnalysisAnalysisItemDelete-accept').attr('data-id');
+
+        var link = "/Analysis/RemoveAnalysisItemFromAnalysis"
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+
+                Id: Id
+            },
+            success: function (response) {
+                if (response === "SUCCESSFUL") {
+                    $('#AnalysisAnalysisItemDeleteModal').modal('hide');
+
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#kendoAnalysisAnalysisItemGrid").find(".k-pager-refresh").click();
+                    $("#kendoSelectedAnalysisItemGrid").find(".k-pager-refresh").click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    }
+
+
+    function closeAnalysisAnalysisItemDeleteModal() {
+        $('#AnalysisAnalysisItemDeleteModal').modal('hide');
+    }
+
+    function AddNewAnalysisItem() {
+
+        var link = "/AnalysisItem/AddNewModal";
+        $(".loader").removeClass("hidden");
+        $('#AnalysisItemModal').modal('toggle');
+        $('#AnalysisItemModal-body').load(link, function () {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+
+    }
+
+
+    function analysisItemClick() {
+
+        let ValueType = $('#ValueTypeId').data("kendoDropDownList");
+        let ValueTypeId = ValueType.text();
+        check = true;
+        switch (ValueTypeId) {
+
+            case "Optional": {
+                AnalysisItemValuesRange = $('#divAnalysisItemValuesRangeAdded #spanName');
+                if (AnalysisItemValuesRange.length == 0) {
+                    check = false;
+                    $('#spanAlert').html('@Localizer["ValueNotSelected"]');
+                    $('#divAlert').show(500);
+                    divAlertHide();
+                }
+                break;
+            }
+            default:
+        }
+
+        if (check) {
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+        var link = "/AnalysisItem/AddOrUpdate";
+
+        var NormalValues = $('#NormalValuesArea').val();
+            $('#NormalValues').val(NormalValues);
+
+           let str = '';
+        $('#divAnalysisItemValuesRangeAdded #spanName').each(function (index, value) {
+            str += value.innerHTML + ',';
+        });
+            $('#AnalysisItemValuesRanges_Value').val(str);
+
+            $('#BaseInfoGeneralName').val(ValueTypeId);
+
+        var data = $("#addNewFormAnalysisItem").serialize();
+        $(".loader").removeClass("hidden");
+
+            $.ajax({
+                type: "Post",
+                url: link,
+                data: data,
+                success: function (response) {
+                    if (response !== 0) {
+                        if (response === "ValueIsRepeated") {
+
+                            $('#Name-Exist').removeClass('hidden');
+
+                            $(".loader").fadeIn("slow");
+                            $(".loader").addClass("hidden");
+                        }
+
+                        $('#AnalysisItemModal').modal('toggle');
+                        $('#AnalysisItemModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $('#kendoSelectedAnalysisItemGrid').find(".k-pager-refresh").click();
+
+                    }
+                }
+            });
+        }
+    }
+
+
+    function closeAnalysisItemModal() {
+        $('#AnalysisItemModal').modal('toggle');
+        $('#AnalysisItemModal-body').empty();
+    }
+
+</script>

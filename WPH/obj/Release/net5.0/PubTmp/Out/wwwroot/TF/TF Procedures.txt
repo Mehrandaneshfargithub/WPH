@@ -1,0 +1,731 @@
+
+
+CREATE OR ALTER PROCEDURE [dbo].[DSP_RefreshReceptionNums] @DoctorId UNIQUEIDENTIFIER
+AS
+BEGIN	
+	DECLARE @guid UNIQUEIDENTIFIER
+	DECLARE @ConvertedDate TIME
+	DECLARE @ReceptionNum INT = 1
+	DECLARE TodayVisits CURSOR FOR
+	SELECT GUID, ConvertedDate
+	FROM
+	(
+	SELECT Reception.GUID, CONVERT(TIME,ReserveDetail.ReserveStartTime, 126) AS ConvertedDate  
+	FROM Reception 
+	INNER JOIN ReserveDetail ON Reception.ReserveDetailId = ReserveDetail.GUID 
+	WHERE CAST(Reception.ReceptionDate AS DATE) = CAST(SYSDATETIME() AS DATE) AND ReserveDetail.DoctorId = @DoctorId
+	)
+	TEMP 
+	ORDER BY ConvertedDate
+	OPEN TodayVisits
+	FETCH NEXT FROM TodayVisits INTO @guid, @ConvertedDate
+	WHILE @@FETCH_STATUS = 0
+		BEGIN
+			
+			UPDATE Reception
+			SET VisitNum = @ReceptionNum
+			WHERE GUID = @guid
+
+			SET @ReceptionNum = @ReceptionNum + 1
+
+			FETCH NEXT FROM TodayVisits INTO  @guid, @ConvertedDate
+		END
+	CLOSE TodayVisits
+	DEALLOCATE TodayVisits
+
+END
+GO
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestPurchaseInvoiceNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.PurchaseInvoice
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM PurchaseInvoice WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.PurchaseInvoice
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'PurchaseInvoiceNumberStartFrom'
+	END
+	
+	RETURN;
+END
+go
+
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestSaleInvoiceNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.SaleInvoice
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM SaleInvoice WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.SaleInvoice
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'SaleInvoiceNumberStartFrom'
+	END
+	
+	RETURN;
+END
+go
+
+CREATE OR ALTER FUNCTION [dbo].[FN_GetAllUserSubsystems]
+(
+	@UserId UNIQUEIDENTIFIER,
+	@SectionTypeId INT,
+	@ClinicSectionId UNIQUEIDENTIFIER,
+	@LanguageId INT = 0
+)
+RETURNS TABLE 
+AS
+RETURN
+(
+	SELECT 
+		SubSystem.Id, 
+		SubSystem.Name,
+		SubSystem.Priority,
+		SubSystem.Parent, 
+		SubSystem.Link, 
+		SubSystem.ShowName,
+		SubSystem.Active,
+		SubSystem.Icon,
+		dbo.SubSystem.ParentRelationId
+	FROM 
+		SubSystem INNER JOIN 
+		SubSystemSection ON SubSystem.Id = SubSystemSection.SubSystemId 
+	WHERE 
+		1 = 
+		CASE @UserId 
+			WHEN '17c98716-1bd7-ea11-b5e9-801934ca48af' THEN 1
+		ELSE 
+			dbo.FN_HasSystemAccess(@UserId, SubSystem.Id, @ClinicSectionId)
+		END
+		AND SubSystemSection.SectionTypeId = @SectionTypeId
+)
+
+
+Go
+
+
+CREATE OR ALTER PROCEDURE ResetRemainingNums
+	AS
+	BEGIN
+	
+	
+	DECLARE @ToneId UNIQUEIDENTIFIER
+	DECLARE @ToneNum NUMERIC(20,7)
+	DECLARE @ToneRemain NUMERIC(20,7)
+	DECLARE @TtwoId UNIQUEIDENTIFIER
+	DECLARE @TtwoNum NUMERIC(20,7)
+	DECLARE @TtwoRemain NUMERIC(20,7)
+	DECLARE @PId UNIQUEIDENTIFIER
+	DECLARE @Pnum NUMERIC(20,7)
+	DECLARE @PFreenum NUMERIC(20,7)
+	DECLARE @PRemain NUMERIC(20,7)
+	
+	
+
+
+	--UPDATE dbo.TransferDetail SET RemainingNum = ISNULL(Num,0)
+	--UPDATE dbo.PurchaseInvoiceDetails SET RemainingNum = ISNULL(Num,0) + ISNULL(FreeNum,0)
+
+	
+
+DECLARE AllTransfer CURSOR FOR
+	SELECT * --ToneId, ToneNum, ToneRemain, TtwoId, TtwoNum,TtwoRemain, PId ,Pnum, PFnum ,PRemain
+	FROM
+	(
+	SELECT transferOne.Guid ToneId, transferOne.Num ToneNum,transferOne.RemainingNum ToneRemain ,  NULL TtwoId,NULL TtwoNum,NULL TtwoRemain,purchase.Guid PId , purchase.Num Pnum, purchase.FreeNum PFnum, purchase.RemainingNum PRemain
+	FROM dbo.TransferDetail transferOne
+	INNER JOIN dbo.PurchaseInvoiceDetails purchase ON purchase.Guid = transferOne.PurchaseInvoiceDetailId
+	
+	UNION
+
+	SELECT transferOne.Guid ToneId,transferOne.Num ToneNum,transferOne.RemainingNum ToneRemain,  transferTwo.Guid TtwoId , transferTwo.Num TtwoNum,transferTwo.RemainingNum TtwoRemain,NULL PId, NULL Pnum, NULL PFnum, NULL PRemain
+	FROM dbo.TransferDetail transferOne
+	INNER JOIN dbo.TransferDetail transferTwo ON transferOne.TransferDetailId = transferTwo.Guid
+
+	)
+	TEMP 
+	
+	OPEN AllTransfer
+	FETCH NEXT FROM AllTransfer INTO @ToneId,@ToneNum,@ToneRemain,@TtwoId, @TtwoNum,@TtwoRemain, @PId , @Pnum, @PFreenum,@PRemain
+	WHILE @@FETCH_STATUS = 0
+		BEGIN
+			
+			IF @TtwoId IS NOT NULL
+				BEGIN
+
+				
+					UPDATE dbo.TransferDetail SET RemainingNum = (SELECT RemainingNum FROM dbo.TransferDetail WHERE Guid = @TtwoId) - @ToneRemain WHERE Guid = @TtwoId
+
+				END
+			ELSE
+				BEGIN
+
+					UPDATE dbo.PurchaseInvoiceDetails SET RemainingNum = (SELECT RemainingNum FROM dbo.PurchaseInvoiceDetails WHERE Guid = @PId) - @ToneRemain WHERE Guid = @PId
+			
+				END
+			
+			FETCH NEXT FROM AllTransfer INTO  @ToneId,@ToneNum,@ToneRemain,@TtwoId, @TtwoNum,@TtwoRemain, @PId , @Pnum, @PFreenum,@PRemain
+		END
+	CLOSE AllTransfer
+	DEALLOCATE AllTransfer
+	END
+GO
+
+
+
+ALTER   PROCEDURE [dbo].[EmptyDB]
+AS
+BEGIN
+
+
+UPDATE dbo.Analysis SET CreateUserId = (SELECT [GUID] FROM dbo.[User] WHERE UserName = 'mehran')
+UPDATE dbo.AnalysisItem SET CreatedUserId = (SELECT [GUID] FROM dbo.[User] WHERE UserName = 'mehran')
+UPDATE dbo.Analysis SET ModifiedUserId = (SELECT [GUID] FROM dbo.[User] WHERE UserName = 'mehran')
+UPDATE dbo.AnalysisItem SET ModifiedUserId = (SELECT [GUID] FROM dbo.[User] WHERE UserName = 'mehran')
+	delete from Cost
+	delete from dbo.Disease_Symptom
+	delete from dbo.Visit_Patient_Disease
+	delete from dbo.PatientDiseaseRecord
+	delete from dbo.Medicine_Disease
+	delete from dbo.Disease
+	
+	delete from dbo.PatientMedicineRecord
+	
+	delete from AnalysisResult
+	delete from AnalysisResultMaster
+	delete from AnalysisResultTemplate
+	
+	delete from PatientImage
+	delete from PatientVariablesValue
+	delete from dbo.Pay
+	delete from dbo.PrescriptionDetail
+	delete from dbo.PrescriptionTestDetail
+	DELETE from dbo.TransferDetail
+	DELETE from dbo.[Transfer]
+	DELETE from dbo.ReturnSaleInvoiceDetail
+	DELETE from dbo.ReturnSaleInvoice
+	DELETE from dbo.ReturnPurchaseInvoiceDetail
+	DELETE from dbo.ReturnPurchaseInvoice
+	DELETE from dbo.ReturnSaleInvoice
+	DELETE from dbo.SaleInvoiceDetails
+	DELETE from dbo.SaleInvoiceDiscount
+	DELETE from dbo.SaleInvoiceCost
+	DELETE from dbo.SaleInvoiceReceive
+	DELETE from dbo.SaleInvoice
+	DELETE from dbo.PurchaseInvoiceDetails
+	DELETE from dbo.PurchaseInvoice
+
+	delete from dbo.PatientVariables
+	delete from PatientReceptionAnalysis
+	delete from PatientReceptionReceived
+
+	
+
+	IF EXISTS(SELECT * FROM   INFORMATION_SCHEMA.TABLES WHERE  TABLE_NAME = 'InvoiceDetail') 
+		BEGIN
+			DELETE from InvoiceDetail
+		END
+		
+		 
+	 
+	
+	delete from ReceptionAmbulance
+	delete from ReceptionClinicSection
+	delete from ReceptionDoctor
+	delete from ReceptionServiceReceived
+	delete from ReceptionService
+	delete from ReceptionRoomBed
+	delete from dbo.ReceptionInsuranceReceived
+	delete from dbo.ReceptionInsurance
+	delete from dbo.Reminder
+	delete from SurgeryDoctor
+	delete from HumanResourceSalaryPayment
+	delete from HumanResourceSalary
+	delete from HumanResource
+	delete from Surgery
+	delete from dbo.ReceptionDetailPay
+	delete from ReceptionTemperature
+	delete from [Emergency]
+	delete from Reception
+	delete from dbo.ReserveDetail
+	delete from dbo.Reserve
+	delete from dbo.Medicine
+	
+	delete from [Service]
+	delete from Ambulance
+	delete from Hospital
+	delete from GroupAnalysis_Analysis
+	delete from GroupAnalysisItem
+	delete from GroupAnalysis
+	delete from Child
+	Delete from Doctor
+	delete from Patient
+	delete from RoomItem
+	delete from Item
+	delete from dbo.ReceiveAmount
+	delete from dbo.[Receive]
+	delete from dbo.Customer
+	delete from dbo.PayAmount
+	delete from dbo.Pay
+	delete from dbo.Supplier
+	delete from dbo.ProductBarcode
+	delete from Product
+	
+	delete from RoomBed
+	delete from Room
+	delete from BaseInfo WHERE TypeId <> 'D8DBD917-1BCC-4420-94E3-2B93B2E2ECE4'
+	delete from dbo.UserPortion
+	delete from UserProfile
+	DECLARE @id UNIQUEIDENTIFIER
+	SET @id = (SELECT [GUID] FROM dbo.[User] WHERE UserName = 'mehran')
+	delete from dbo.UserSubSystemAccess where UserId <> @id
+	delete from dbo.ClinicSection_User where UserId <> @id
+	delete from [User] where UserName <> 'mehran'
+END
+
+
+
+GO
+
+CREATE OR ALTER PROCEDURE PS_DeleteRepeatedDoctor
+ @MainId uniqueidentifier ,
+ @DeletedId uniqueidentifier
+ AS
+Update SurgeryDoctor set DoctorId = @MainId where DoctorId = @DeletedId
+
+IF NOT EXISTS(SELECT * FROM dbo.HumanResource WHERE GUID=@MainId)
+BEGIN
+ UPDATE HumanResource set GUID = @MainId where GUID = @DeletedId 
+END
+
+update HumanResourceSalary set HumanResourceId = @MainId where HumanResourceId = @DeletedId
+update dbo.Child set DoctorId = @MainId where DoctorId = @DeletedId
+
+
+delete from dbo.Child where DoctorId = @DeletedId
+delete from HumanResource where GUID =  @DeletedId
+delete from Doctor where GUID = @DeletedId
+delete from [User] where GUID = @DeletedId
+Go
+
+
+ALTER function [dbo].[FN_GetAllSubSystemsWithAccess]
+(
+	@UserId UNIQUEIDENTIFIER,
+	@SectionTypeId INT ,
+	@ClinicSectionId UNIQUEIDENTIFIER,
+	@LanguageId int = 0,
+	@ParentUserId UNIQUEIDENTIFIER
+)
+RETURNS TABLE 
+AS
+RETURN
+	(	
+
+	--DECLARE @UserId UNIQUEIDENTIFIER = 'c87407b4-5ea2-45d8-8af4-2beba8475b25';
+	--DECLARE @SectionTypeId INT = 1116 ;
+	--DECLARE @ClinicSectionId UNIQUEIDENTIFIER = '4801535B-755E-ED11-B2E7-68172993A336';
+	--DECLARE @LanguageId int = 0;
+	--DECLARE @ParentUserId UNIQUEIDENTIFIER = 'fe7d6a0f-13eb-4973-b040-df069243235b';
+
+	SELECT DISTINCT 
+		SubSystem.Id, 
+		SubSystem.Parent As ParentId , 
+		[Name], 
+		SubSystem.ShowName,
+		CONVERT(bit, 0) AS Checked  
+	FROM 
+		SubSystem 
+		INNER JOIN SubSystemSection ON SubSystem.Id = SubSystemSection.SubSystemId AND SubSystemSection.SectionTypeId = @SectionTypeId
+		INNER JOIN dbo.SubSystemAccess ON SubSystemAccess.SubSystemId = SubSystem.Id
+		LEFT JOIN dbo.UserSubSystemAccess ON UserSubSystemAccess.SubSystemAccessId = SubSystemAccess.Id AND dbo.UserSubSystemAccess.UserId = @ParentUserId
+		
+	UNION
+	SELECT 
+		SubSystemAccess.Id, 
+		SubSystemAccess.SubSystemId ParentId, 
+		Access.[Name],
+		Access.[Name] As ShowName,
+		CASE 
+			WHEN UserSubSystemAccess.GUID IS NULL
+				THEN CONVERT(bit, 0)
+			ELSE CONVERT(bit, 1) 
+			END AS Checked
+	FROM 
+		SubSystemAccess
+		INNER JOIN Access ON SubSystemAccess.AccessId = Access.Id
+		LEFT JOIN UserSubSystemAccess ON SubSystemAccess.Id = UserSubSystemAccess.SubSystemAccessId AND UserSubSystemAccess.UserId = @UserId AND UserSubSystemAccess.ClinicSectionId = @ClinicSectionId 
+		WHERE @ParentUserId = '9551D520-7447-43FA-8799-6F504343F380' AND SubSystemAccess.Id = SubSystemAccess.Id 
+		OR @ParentUserId <> '9551D520-7447-43FA-8799-6F504343F380' AND SubSystemAccess.Id IN( SELECT SubSystemAccessId FROM dbo.UserSubSystemAccess WHERE UserId = @ParentUserId AND ClinicSectionId = @ClinicSectionId)
+		
+		
+		
+
+)
+GO
+
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_GetAllEventsForCalendar]
+(
+	@OriginalClinicSectionId UNIQUEIDENTIFIER,
+	@ClinicSectionId UNIQUEIDENTIFIER,
+	@FromDate DATE,
+	@ToDate DATE,
+	@DoctorId UNIQUEIDENTIFIER
+	
+)
+RETURNS @returnList TABLE ([GUID] UNIQUEIDENTIFIER, [Name] NVARCHAR(50), FileNum NVARCHAR(50), FormNumber NVARCHAR(50), PhoneNumber NVARCHAR(50), ReserveStartTime NVARCHAR(50)
+	, ReserveEndTime NVARCHAR(50), StatusName NVARCHAR(50), OldVisit BIT, LastVisit BIT, Amount NUMERIC(20,2),Explanation NVARCHAR(150), Remain NUMERIC(20,2), UseFormNum BIT) 
+AS
+
+	BEGIN	
+	--DECLARE @reserveDtoToday TABLE ([GUID] uniqueidentifier, [Name] NVARCHAR(50), FileNum NVARCHAR(50), FormNum[dbo].[FN_GetAllEventsForCalendar1]ber NVARCHAR(50), PhoneNumber NVARCHAR(50), ReserveStartTime NVARCHAR(50)
+	--, ReserveEndTime NVARCHAR(50), StatusName NVARCHAR(50), OldVisit bit, LastVisit bit, ReserveDate date)
+	
+	--INSERT INTO @returnList
+		DECLARE @UseFormNum NVARCHAR(50) = ISNULL((
+			SELECT TOP 1 SValue
+			FROM ClinicSectionSettingValue 
+			INNER JOIN ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id 
+			AND ClinicSectionSetting.SName = 'UseFormNumber'
+			AND ClinicSectionId = @OriginalClinicSectionId
+		), '')
+		
+	INSERT INTO @returnList
+
+	SELECT 
+		Temp.GUID,
+		Temp.Name,
+		Temp.FileNum,
+		Temp.FormNumber,
+		Temp.PhoneNumber,
+		Temp.ReserveStartTime,
+		Temp.ReserveEndTime,
+		Temp.statusName,
+		Temp.OldVisit,
+		Temp.LastVisit,
+		Temp.amount,
+		Temp.Explanation,
+		temp.pay - Temp.amount Remain,
+		CASE
+			WHEN UPPER(@UseFormNum) = 'FALSE' THEN 0
+			WHEN UPPER(@UseFormNum) = 'TRUE' THEN 1
+			ELSE 0 
+		END UseFormNum
+	FROM
+	(
+SELECT
+		ReserveDetail.[GUID], 
+		[User].[Name] AS Name, 
+		Patient.FileNum AS FileNum,
+		Patient.FormNumber AS FormNumber, 
+		[User].PhoneNumber PhoneNumber, 
+		ReserveDetail.ReserveStartTime, 
+		ReserveDetail.ReserveEndTime, 
+		BaseInfoGeneral.[Name] statusName, 
+		ReserveDetail.OldVisit, 
+		ReserveDetail.LastVisit, 
+		ReserveDetail.Explanation,
+		ISNULL(CASE WHEN CONVERT(DATE, Reception.ReceptionDate) = CONVERT(DATE, GETDATE()) THEN Received.Amount ELSE 0 END, 0) amount,
+		ISNULL(CASE WHEN CONVERT(DATE, Reception.ReceptionDate) = CONVERT(DATE, GETDATE()) THEN Received.pay ELSE 0 END, 0) pay
+		
+	FROM ReserveDetail
+		INNER JOIN Reserve ON ReserveDetail.MasterId = Reserve.[GUID]
+		AND Reserve.ClinicSectionId = @ClinicSectionId 
+		AND ReserveDetail.ReserveDate >= @FromDate AND ReserveDetail.ReserveDate <= @ToDate
+		AND ReserveDetail.DoctorId = @DoctorId
+		INNER JOIN BaseInfoGeneral ON BaseInfoGeneral.Id = ReserveDetail.StatusId
+		INNER JOIN Patient ON Patient.[GUID] = ReserveDetail.PatientId
+		INNER JOIN [User] ON [User].[GUID] = Patient.[GUID]
+		LEFT JOIN dbo.Reception ON Reception.ReserveDetailId = ReserveDetail.[GUID] 
+		LEFT JOIN (SELECT rs.ReceptionId,SUM(ISNULL(rsr.Amount,0)) pay,SUM((ISNULL(rs.Number,0)*ISNULL(rs.Price,0))-ISNULL(rs.Discount,0)) amount FROM dbo.ReceptionService rs
+		LEFT JOIN dbo.ReceptionServiceReceived rsr ON rs.GUID = rsr.ReceptionServiceId GROUP BY rs.ReceptionId) Received ON Received.ReceptionId = Reception.GUID
+	) Temp
+	RETURN
+	END
+
+GO
+
+
+CREATE OR ALTER PROCEDURE SP_UpdatePurchaseInvoiceTotalPrice @MasterId UNIQUEIDENTIFIER
+AS
+BEGIN
+ 
+UPDATE dbo.PurchaseInvoice SET TotalPrice=
+(SELECT SUM((pid.Num*pid.PurchasePrice)-ISNULL(pid.Discount,0)) FROM dbo.PurchaseInvoiceDetails pid WHERE MasterId=@MasterId)
+WHERE PurchaseInvoice.Guid=@MasterId
+
+END
+GO
+
+
+
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestReturnPurchaseInvoiceNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.ReturnPurchaseInvoice
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM ReturnPurchaseInvoice WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.ReturnPurchaseInvoice
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'ReturnPurchaseInvoiceNumberStartFrom'
+	END
+	
+	RETURN;
+END
+Go
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestDamageNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.Damage
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM Damage WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.Damage
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'DamageNumberStartFrom'
+	END
+	
+	RETURN;
+END
+GO 
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestReturnSaleInvoiceNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.ReturnSaleInvoice
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM ReturnSaleInvoice WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.ReturnSaleInvoice
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'ReturnSaleInvoiceNumberStartFrom'
+	END
+	
+	RETURN;
+END
+GO 
+
+
+CREATE OR  ALTER PROCEDURE SP_UpdatePurchaseInvoiceTotalPrice
+AS
+BEGIN
+UPDATE dbo.PurchaseInvoice SET TotalPrice=
+(SELECT STRING_AGG(tt.price,'_') FROM 
+(SELECT total.MasterId,CONCAT(cu.Name,' ',FORMAT( SUM(total.totalprice),'#,#.##')) price FROM 
+(SELECT MasterId,CurrencyId,SUM(Num*PurchasePrice-ISNULL(Discount,0)) totalprice FROM dbo.PurchaseInvoiceDetails GROUP BY MasterId,CurrencyId
+UNION
+SELECT PurchaseInvoiceId MasterId,CurrencyId,-SUM(Amount) totalprice FROM dbo.PurchaseInvoiceDiscount GROUP BY PurchaseInvoiceId,CurrencyId) total
+LEFT JOIN dbo.BaseInfoGeneral cu ON cu.Id = total.CurrencyId GROUP BY total.MasterId,cu.Name) tt
+WHERE tt.MasterId=Guid GROUP BY tt.MasterId)
+WHERE OldFactor IS NULL OR OldFactor=0
+END 
+GO
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestPayInvoiceNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.Pay
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM Pay WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.Pay
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'PayInvoiceNumberStartFrom'
+	END
+	
+	RETURN;
+END
+go
+
+
+
+
+CREATE OR ALTER FUNCTION [dbo].[FN_LatestReceiveInvoiceNum]
+(
+	@ClinicSectionid UNIQUEIDENTIFIER
+)
+RETURNS @returnList TABLE (CODE NVARCHAR(50))
+AS
+BEGIN
+	DECLARE @LInvoiceNum NVARCHAR(50)
+	DECLARE @LargestLen NVARCHAR(10)
+
+	DECLARE @PatientCount INT
+	SET @PatientCount = (SELECT COUNT(*) 
+						 FROM dbo.Receive
+						 WHERE ClinicSectionId = @ClinicSectionid)
+						
+	IF @PatientCount > 0
+		BEGIN
+			SET @LargestLen = (SELECT MAX(LEN(InvoiceNum)) 
+								FROM Receive WHERE ClinicSectionId = @ClinicSectionid)
+			INSERT INTO @returnList
+				SELECT TOP 1 InvoiceNum 
+				FROM dbo.Receive
+				WHERE LEN(InvoiceNum) = @LargestLen AND ClinicSectionId = @ClinicSectionid
+				ORDER BY InvoiceNum DESC
+		END
+	ELSE
+	BEGIN
+		INSERT INTO @returnList
+				SELECT TOP 1 SValue 
+				FROM 
+					ClinicSectionSettingValue INNER JOIN
+					ClinicSectionSetting ON ClinicSectionSettingValue.SettingId = ClinicSectionSetting.Id
+				WHERE (ClinicSectionSettingValue.ClinicSectionId = @ClinicSectionid) AND ClinicSectionSetting.SName = 'ReceiveInvoiceNumberStartFrom'
+	END
+	
+	RETURN;
+END
+go
