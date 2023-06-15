@@ -71,8 +71,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataLayer\DataLayer.csproj" />
-    <ProjectReference Include="..\DMSDataLayer\DMSDataLayer.csproj" />
+    <ProjectReference Include="..\..\DataLayer\DataLayer.csproj" />
+    <ProjectReference Include="..\..\DMSDataLayer\DMSDataLayer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

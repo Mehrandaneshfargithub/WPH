@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9RFYfuM6U3uXkRYxS9Z9XlZaj63LhJ1SKeJurbHl1wFI6F6PaV/X55djtWgHDJPGOpi9AoPJzIPc/cenmJbTBw==",
+  "dgSpecHash": "Ywkuu2Pggdr2P+p9Kg31y6icqb4Y126mf/qTbSpIUMCdL6BfHMvYNIVxX1mhiUDxtezR/99CEizV1CBJHKPMng==",
   "success": true,
-  "projectFilePath": "H:\\Projects\\WASVersion2\\WPH\\WPH.csproj",
+  "projectFilePath": "H:\\Projects\\WASVersion2\\WPH\\WPH\\WPH.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mehran\\.nuget\\packages\\humanizer.core\\2.2.0\\humanizer.core.2.2.0.nupkg.sha512",
     "C:\\Users\\Mehran\\.nuget\\packages\\localization.aspnetcore.taghelpers\\0.6.0\\localization.aspnetcore.taghelpers.0.6.0.nupkg.sha512",

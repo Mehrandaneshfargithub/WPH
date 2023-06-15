@@ -340,6 +340,9 @@
           },
           "en/WPH.resources.dll": {
             "locale": "en"
+          },
+          "ku/WPH.resources.dll": {
+            "locale": "ku"
           }
         },
         "compile": {
