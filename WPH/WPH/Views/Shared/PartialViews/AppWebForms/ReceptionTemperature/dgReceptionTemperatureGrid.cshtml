@@ -1,0 +1,122 @@
+﻿@model WPH.Models.BaseInfo.SectionViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.ReceptionTemperature.ReceptionTemperatureViewModel>()
+    .Name("kendoReceptionTemperatureGrid")
+    .HtmlAttributes(new { Class = "k-grid-header" })
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            columns.Bound("").Title(" ").Width(30)
+            .ClientTemplate(
+            @"<a class='tooltip-error grid-btn' onClick='DeleteReceptionTemperature(this);' data-id='#=Guid#' data-type='Temp' data-rel='tooltip' title='Delete' data-original-title='Delete'>
+                <span class='red'>
+                    <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                </span>
+            </a>
+            ");
+
+
+
+            columns.Bound(x => x.RespirationRate).Filterable(false).Title("Respiration Rate").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PulseRate).Filterable(false).Title("Pulse Rate").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.SYSBloodPressure).Filterable(false).Title("SYSBloodPressure").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.DIABloodPressure).Filterable(false).Title("DIABloodPressure").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Temperature).Filterable(false).Title(Localizer["Temperature"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.InsertedDate).Format("{0: dd/MM/yyyy HH:mm}").Title(Localizer["Date"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(5).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(30);
+            columns.Bound(x => x.Guid).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(5).Title("#").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(30);
+            columns.Bound(x => x.InsertedDate).Format("{0: dd/MM/yyyy HH:mm}").Title(Localizer["Date"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Temperature).Filterable(false).Title(Localizer["Temperature"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.DIABloodPressure).Filterable(false).Title("DIABloodPressure").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.SYSBloodPressure).Filterable(false).Title("SYSBloodPressure").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.PulseRate).Filterable(false).Title("Pulse Rate").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.RespirationRate).Filterable(false).Title("Respiration Rate").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+
+
+            columns.Bound("").Title(" ").Width(30)
+            .ClientTemplate(
+            @"<a class='tooltip-error grid-btn' onClick='DeleteReceptionTemperature(this);' data-id='#=Guid#' data-type='Temp' data-rel='tooltip' title='Delete' data-original-title='Delete'>
+                <span class='red'>
+                    <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                </span>
+            </a>
+            ");
+        }
+    })
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAllReceptionTemperature", "Reception", new { ReceptionId = Model.Id }))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+
+
+    )
+</div>
+
+<script>
+
+
+
+    $(document).ready(function () {
+
+        $("#kendoPatientGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoPatientGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+
+
+
+    function PatinetAge(birthDate) {
+
+        if (birthDate === null)
+            return "";
+        var today = new Date();
+        //var birthDate = new Date(dateString);
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+            m = 12 + m;
+        }
+
+        //var Age =   m + '  @ViewBag.YearTranslated  ' + '  @ViewBag.MonthTranslated' + age;
+        //var Age =   '  @ViewBag.MonthTranslated ' + m + '  @ViewBag.YearTranslated ' + age;
+        var Age =  age +  '  year ' + m + ' month ';
+
+        return Age;
+
+    }
+
+
+
+</script>

@@ -1,0 +1,232 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+
+    }
+
+}
+
+<h3 id="UserPortionGuid" class="hidden"></h3>
+
+<div class="col-12" style="display:flex;align-items:center">
+
+    <div class="col-md-5">
+        <div class="col-sm-4 ">
+            <label class="pull-left" for="form-field-8">@Localizer["Name"] : </label>
+        </div>
+        <div class="col-sm-8">
+            <span id="UserPortionNameSpan">
+
+                @(Html.Kendo().DropDownList()
+                                    .Name("UserPortionName")
+                                    .DataTextField("Name")
+                                    .DataValueField("Guid")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllUsersExeptUserPortions", "UserManagment");
+                                        })
+                                        .ServerFiltering(false);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "UserPortionName-box" })
+                                    )
+
+            </span>
+
+            <span id="UserPortionNameTextSpan" class="hidden">
+
+                @(Html.Kendo().TextBox()
+                            .Name("UserPortionNameText")
+                            .Enable(false)
+                            .HtmlAttributes(new { @id = "UserPortionNameText", style = "width:100%" })
+                        )
+
+            </span>
+
+
+
+            <span id="UserPortionName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+            </span>
+        </div>
+
+
+
+    </div>
+
+    <div class="col-md-2">
+        @(Html.Kendo().CheckBox()
+                    .Name("SpeceficationCheckbox")
+                    .Label(Localizer["Specefication"])
+                    .HtmlAttributes(new { @id = "SpeceficationCheckbox", @class = "kendoCheckbox", style = "font-size:5rem" }))
+        
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="col-sm-6 ">
+            <label class="pull-left" for="form-field-8">% @Localizer["Percent"] : </label>
+        </div>
+        <div class="col-sm-6">
+            @(Html.Kendo().NumericTextBox<int>()
+                            .Name("Percent")
+                            .Min(0)
+                            .Max(100)
+                            .HtmlAttributes(new { @id = "UserPercent", style = "width:100%" })
+                        )
+            <span id="Percent-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                Percent > 100!
+            </span>
+        </div>
+
+
+    </div>
+
+    @if ((bool)ViewBag.AccessNewUserPortion)
+    {
+        <div class="col-md-2">
+
+            @(Html.Kendo().Button()
+                .Name("btn-acceptPatientDisease")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "AddUserPortion()" })
+                .Content(Localizer["Ok"]))
+            @(Html.Kendo().Button()
+                .Name("btn-cancelUserPortion")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right hidden", onclick = "CancelEdit()" })
+                .Content(Localizer["Cancel"]))
+
+
+        </div>
+    }
+
+
+</div>
+
+
+
+<div class=" @font">
+    <div >
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/UserPortion/dgUserPortionGrid.cshtml")
+    </div>
+   
+</div>
+
+
+<script>
+
+    function AddUserPortion(e) {
+        $(this).attr("disabled", true);
+        $("#UserPortionName-box").addClass('hidden');
+        $("#Percent-box").addClass('hidden');
+        let user = $("#UserPortionGuid").text();
+
+        let userId;
+
+        if (user != '') {
+            userId = user;
+        }
+        else {
+            userId = $("#UserPortionName").val();
+            $('.emptybox').addClass('hidden');
+            var isEmmpty = true;
+            $('.emptybox').each(function () {
+                if ($(this).attr('data-isEssential') === 'true') {
+                    var empty = $(this).attr('id');
+                    if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                        $(this).removeClass('hidden');
+                        isEmmpty = false;
+                        return;
+                    }
+                }
+            });
+
+            if (isEmmpty === false) {
+                return;
+            }
+        }
+
+
+
+        //if (!$("#SpeceficationCheckbox").prop("checked") && $("#UserPercent").val() != "") {
+
+        //    var grid = $("#kendoUserPortionGrid").data("kendoGrid");
+
+        //    let data = grid.dataSource._data;
+
+        //    let totalPercent = 0;
+        //    for (let i = 0; i < data.length; i++) {
+
+        //        let specific = data[i].get("Specification");
+        //        let portionPercent = data[i].get("PortionPercent");
+
+        //        if (!specific) {
+        //            totalPercent += parseFloat(portionPercent);
+        //        }
+
+
+        //    }
+
+        //    totalPercent += parseFloat($("#UserPercent").val());
+
+        //    if (totalPercent > 100) {
+        //        $("#Percent-box").removeClass('hidden');
+        //        return;
+        //    }
+                
+
+        //}
+
+       
+
+        var link = "/UserManagment/AddOrUpdateUserPortion";
+
+        var data =
+        {
+            Guid: userId,
+            Specification: $("#SpeceficationCheckbox").prop("checked"),
+            PortionPercent: $("#UserPercent").val()
+        }
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+
+                    $("#kendoUserPortionGrid .k-pager-refresh")[0].click();
+                    $(".loader").addClass("hidden");
+                    $("#UserPortionName").data("kendoDropDownList").dataSource.read();
+
+                    CancelEdit();
+
+                    $(this).attr("disabled", false);
+                }
+            }
+        });
+    }
+
+    
+
+
+
+</script>

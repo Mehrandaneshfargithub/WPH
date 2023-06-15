@@ -1,0 +1,97 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+<div class="row page-header ">
+
+    <div class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+            @:pull-right
+        }
+        else {
+        @:pull-left
+        } ">
+        <h1 class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        }" style="font-size: 2.3rem">
+            @Localizer["Sections"]
+        </h1>
+
+    </div>
+    <div class="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+            @:pull-right
+            @:MyFont-Sarchia-grid
+        }
+        else {
+        @:pull-left
+         @:MyFont-Roboto-grid
+        }" style="margin:0 2rem;transform:translateY(-10%)">
+        <a class="btn btn-danger" onClick="AddClinicSection()" href="#" style="padding:0.2rem">
+            @Localizer["New"]
+            <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+        </a>
+        @*<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#AddHospitalModal">
+                @Localizer["New"]
+            </button>*@
+    </div>
+
+
+</div><!-- /.page-header -->
+<!-- Modal -->
+<!-- Grid -->
+
+
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ClinicSection/dgClinicSectionGrid.cshtml")
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ClinicSection/ClinicSectionModalSection.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+@{
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        <h3 id="newHospitalText" class="hidden">@Localizer["New"] @Localizer["Section"]</h3>
+    }
+    else
+    {
+        <h3 id="newHospitalText" class="hidden">@Localizer["Section"] @Localizer["New"]</h3>
+    }
+
+    <h3 id="editHospitalText" class="hidden">@Localizer["Edit"] @Localizer["Section"]</h3>
+}
+
+<script>
+
+
+    function AddClinicSection() {
+
+        var link = "/ClinicSection/AddNewModal"
+        $(".loader").removeClass("hidden");
+        $('#ClinicSectionModal').modal('toggle');
+        $('#ClinicSectionModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+
+
+    function EditClinicSection(element) {
+
+        var Id = $(element).attr('data-id');
+        let link = "/ClinicSection/EditModal?Id=";
+
+        $(".loader").removeClass("hidden");
+        $('#ClinicSectionModal').modal('toggle');
+        $('#ClinicSectionModal-body').load(link + Id, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+
+</script>

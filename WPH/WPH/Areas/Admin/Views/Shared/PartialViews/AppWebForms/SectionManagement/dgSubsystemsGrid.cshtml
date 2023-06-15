@@ -1,0 +1,103 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div>
+    @(Html.Kendo().Grid<WPH.Areas.Admin.Models.SectionManagement.SubsystemViewModel>()
+    .Name("subsystemsKendoGrid")
+    .Columns(columns =>
+    {
+
+        
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ParentName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["ParentName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Priority).Filterable(false).Title(Localizer["Priority"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Link).Filterable(false).Title(Localizer["Link"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ShowName).Filterable(false).Title(Localizer["ShowName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound(x => x.Active).Title(Localizer["Active"]).Width(30).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    @"<a class='tooltip-success grid-btn ' onClick='ChangeSubsystemActive(this)' data-id='#=Id#' data-rel='tooltip' title='ActiveSubsystem' data-original-title='Active'>
+                        <span class='#if(Active){#green#}else{#grey#}#'>
+                            <i class='ace-icon fa fa-check bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            columns.Bound(x => x.Icon).Title(Localizer["Icon"]).Width(20).Filterable(false).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                @"
+                    <span class='blue'>
+                        <i class='ace-icon fa #=Icon# bigger-120' aria-hidden='true'></i>
+                    </span>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                @"<a class='tooltip-success grid-btn edit' onClick='EditSubsystem(this)' data-id='#=Id#' data-rel='tooltip' title='EditSubsystem' data-original-title='Edit'>
+                    <span class='green'>
+                        <i class='ace-icon fa fa-pencil bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                @"<a class='tooltip-error grid-btn' onClick='SubsystemDeleteFunction(this)' data-id='#=Id#' data-rel='tooltip' title='DeleteSubsystem' data-original-title='Delete'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+
+            columns.Bound("").Title(" ").Width(30).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                @"<a class='tooltip-success grid-btn ' onClick='SetSubsystemAccess(this)' data-id='#=Id#' data-rel='tooltip' title='SetSubsystemAccess' data-original-title='SetSubsystemAccess'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-plus-circle bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+        
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Id);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAllSubSystemsGrid", "SectionManagement", new { area = "Admin" }))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(3)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#subsystemsKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#subsystemsKendoGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+</script>

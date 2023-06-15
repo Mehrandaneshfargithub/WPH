@@ -1,0 +1,210 @@
+﻿@model WPH.Models.CustomDataModels.Doctor.DoctorViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewDoctorForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.NameHolder)
+                    @Html.HiddenFor(m => m.PhoneNumberHolder)
+
+                    <label class="block clearfix">
+                        <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Name"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("User.Name")
+                                .Value(Model.User.Name)
+                                .HtmlAttributes(new { @id = "Name2", style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Mobile"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("User.PhoneNumber")
+                                .Value(Model.User.PhoneNumber)
+                                .HtmlAttributes(new { @id = "PhoneNumber", style = "width: 100%", @validate_mobile = "Mobile-wrong", onkeypress = "return OnlyNumberKey(event)" })
+                            )
+                        </span>
+
+                        <span id="Mobile-wrong" class="hidden" style="color:red;">
+                            @Localizer["MobileNotCorrect"]
+                        </span>
+
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["DoctorSpeciality"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().AutoComplete()
+                            .Name("SpecialityName")
+                            .DataTextField("Name")
+                            //.Events(events => events.Select("OnPatientSelectInEmergencyReception"))
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllDoctorSpecialities", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.SpecialityName)
+                            )
+                        </span>
+                        <span id="SpecialityName-box" class=" hidden"  style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["MedicalSystemCode"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("MedicalSystemCode")
+                                .Value(Model.MedicalSystemCode)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+                    
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Explanation"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Explanation")
+                                .Value(Model.Explanation)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<h3 id="newDoctor" class="hidden"> @Localizer["DoctorSpeciality"] - @Localizer["New"] </h3>
+
+<script>
+    var ProducerDropDown;
+    var MedicineFormDropDown;
+
+    var Numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "/", ".", "٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", " "];
+    var EnglishKey = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "Q", "w", "e", "E", "r", "R", "t", "T", "y", "Y", "u", "U", "i", "I", "o", "O", "p", "P", "a"
+        , "A", "s", "S", "d", "D", "f", "F", "g", "G", "h", "H", "j", "J", "k", "K", "l", "L", "z", "Z", "x", "X", "c", "C", "v", "V", "b", "B", "n", "N", "m", "M"];
+
+    var KurdishKey = [1632, 1633, 1634, 1635, 1636, 1637, 1638, 1639, 1640, 1641, 1602, 96, 1608, 1749, 1610, 1585, 1685, 1578, 1591, 1740, 1742, 1574, 1569
+        , 1581, 1593, 1734, 1572, 1662, 1579, 1575, 1570, 1587, 1588, 1583, 1584, 1601, 1573, 1711, 1594, 1607, 8204, 1688, 1571, 1705, 1603, 1604
+        , 1717, 1586, 1590, 1582, 1589, 1580, 1670, 1700, 1592, 1576, 1609, 1606, 1577, 1605, 1600
+    ];
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name2").focus();
+        }, 200);
+    });
+
+    $('#Name2').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#PhoneNumber').focus();
+        }
+    })
+
+
+    $('#Name2').focus(function (e) {
+        $('#Name2').select();
+    })
+
+    $('#PhoneNumber').keypress(function (e) {
+        $("#PhoneNumber-box-wrong").addClass('hidden');
+
+        let char = Numbers.indexOf(e.key)
+
+        if (char !== -1 || e.which === 13 || e.which === 9) {
+
+            let index = KurdishKey.indexOf(e.which);
+            if (e.which === 13 || e.which === 9) {
+                $('#SpecialityName').data("kendoAutoComplete").focus();
+            }
+            else if (index !== -1) {
+                e.preventDefault();
+                let index1 = EnglishKey[index];
+                let preVal = $(this).val();
+                $(this).val(preVal + index1);
+            }
+        }
+        else {
+            e.preventDefault();
+        }
+    })
+
+    $('#PhoneNumber').focus(function (e) {
+        $('#PhoneNumber').select();
+    })
+
+    $("#SpecialityName").on('focus', function (e) {
+
+        let inputAuto = $("#SpecialityName").data("kendoAutoComplete");
+        let value = inputAuto.value();
+        inputAuto.search(value);
+    });
+
+    $("#SpecialityName").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#MedicalSystemCode').focus();
+        }
+    });
+
+    $('#MedicalSystemCode').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#Explanation').focus();
+        }
+    })
+
+    
+    $('#Explanation').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#btn-DoctorModal-accept').focus();
+        }
+    })
+
+
+    $('#MedicalSystemCode').focus(function (e) {
+        $('#MedicalSystemCode').select();
+    })
+
+
+    $('#Name2').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+    });
+
+    $('#PhoneNumber').focus(function () {
+        $("#PhoneNumber-Exist").addClass('hidden');
+        $("#PhoneNumber-box").addClass('hidden');
+    });
+
+</script>
+

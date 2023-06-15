@@ -1,0 +1,163 @@
+﻿@model WPH.Areas.Admin.Models.SectionManagement.ClinicSectionNamesViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewClinicSectionForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["SectionType"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("SectionTypeId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  .Filter("contains")
+                                  .DataSource(source =>
+                                    {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllSectionNames", "SectionManagement", new { area = "Admin" });
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.SectionTypeId?.ToString())
+                                  .HtmlAttributes(new { style = "width: 100%;" , @data_checkEmpty = "SectionType-box" })
+                            )
+                        </span>
+                        <span id="SectionType-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["ClinicSectionType"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("ClinicSectionTypeId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  .OptionLabel(" ")
+                                  .Filter("contains")
+                                  .DataSource(source =>
+                                    {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetClinicSectionType", "SectionManagement", new { area = "Admin" });
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.ClinicSectionTypeId?.ToString())
+                                  .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Parent"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("ParentId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Guid")
+                                  .Filter("contains")
+                                  .DataSource(source =>
+                                    {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetClinicSectionParents", "SectionManagement", new { area = "Admin" });
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.ParentId?.ToString())
+                                  .HtmlAttributes(new { style = "width: 100%;" , @data_checkEmpty = "Parent-box" })
+                            )
+                        </span>
+                        <span id="Parent-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Priority"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<int>()
+                                .Name("Priority")
+                                .Value(Model.Priority)
+                                .Decimals(0)
+                                .Min(0)
+                                .Format("0")
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Priority-box" })
+                            )
+                        </span>
+                        <span id="Priority-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+
+    });
+
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#Name").select();
+    });
+
+    $('#Name').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#RoomBedTypeId').focus();
+        }
+
+        $('#RoomBedTypeId').on('keypress', function (e) {
+
+        if (e.which === 9) {
+
+            $('#btn-addRoomBed-accept').focus();
+        }
+    });
+
+
+    });
+</script>

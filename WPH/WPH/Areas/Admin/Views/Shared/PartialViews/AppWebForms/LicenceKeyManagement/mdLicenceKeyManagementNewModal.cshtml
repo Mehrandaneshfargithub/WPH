@@ -1,0 +1,57 @@
+﻿@model WPH.Areas.Admin.Models.LicenceKeyManagement.LicenceKeyManagementViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewLicenceKeyForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Id)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["SerialKey"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("SerialKey")
+                                .Value(Model.SerialKey)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "EName-box" })
+                            )
+                        </span>
+                        <span id="EName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#SerialKey").focus();
+        }, 200);
+    });
+    
+    $('#SerialKey').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+
+            $('#btn-LicenceKeyModal-accept').focus();
+        }
+    })
+
+
+</script>
+

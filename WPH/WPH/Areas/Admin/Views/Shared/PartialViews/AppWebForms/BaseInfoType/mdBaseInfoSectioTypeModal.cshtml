@@ -1,0 +1,60 @@
+﻿@model Guid
+
+<style>
+
+    #BaseInfoSectionTypeContainer li {
+        list-style: none;
+        padding-bottom: 1em;
+    }
+
+</style>
+
+<div>
+
+    <div>
+
+        <ul id="BaseInfoSectionTypeContainer">
+
+        </ul>
+
+    </div>
+
+</div>
+
+<input type="hidden" id="BaseInfoTypeId" value="@Model" />
+
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            type: "Get",
+            url: "/Admin/BaseInfoType/GetBaseInfoSectioType?baseInfoTypeId=@Model",
+            success: function (response) {
+                var elements = '';
+
+                for (var i = 0; i < response.length; i++) {
+
+                    if (response[i].Checked) {
+                        elements +=
+                            `<li>
+                                <input id="ch${i}" type="checkbox" checked="checked" data-id="${response[i].SectionTypeId}" class="chValue"/>
+                                <label for="ch${i}">${response[i].SectionTypeName}</label>
+                            </li>`;
+
+                    } else {
+                        elements +=
+                            `<li>
+                                <input id="ch${i}" type="checkbox" data-id="${response[i].SectionTypeId}" class="chValue"/>
+                                <label for="ch${i}">${response[i].SectionTypeName}</label>
+                            </li>`;
+
+                    }
+
+                }
+
+                var ul = document.getElementById("BaseInfoSectionTypeContainer");
+                ul.insertAdjacentHTML('afterbegin', elements);
+
+            }
+        });
+    })
+</script>

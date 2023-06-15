@@ -1,0 +1,590 @@
+﻿@model WPH.Models.CustomDataModels.ReserveDetail.ReserveDetailViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", pull = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-right ";
+        dir = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-left ";
+        dir = " direction:rtl; ";
+    }
+
+}
+
+
+<style>
+
+    .k-checkbox-label {
+        font-size: 1.6rem;
+        margin-right: 0.5rem;
+    }
+</style>
+
+<div id="signup-box" class="signup-box no-border" style="width:70rem">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="ReserveForm" autocomplete="off">
+                <fieldset>
+
+                    @(Html.Kendo().Button()
+                                .Name("btn-reserve-accept2")
+                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick= "Pasand()" })
+                                .Content(Localizer["Ok"]))
+
+                    @{
+                        if (Model.PatientId != null)
+                        {
+                            @(Html.Kendo().Button()
+                                .Name("btn-patient-record")
+                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-left", onclick="DiseaseRecord()" })
+                                .Content(Localizer["DiseaseRecord"]))
+
+                        }
+
+                    }
+                    <div class="space-24"></div>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid, new { @id = "Guid" })
+                    @Html.HiddenFor(m => m.MasterId)
+                    @Html.HiddenFor(m => m.PatientId, new { @id = "PatientId" })
+                    @Html.HiddenFor(m => m.SecretaryId)
+                    @Html.HiddenFor(m => m.DoctorId)
+                    @Html.HiddenFor(m => m.StatusId)
+                    @Html.HiddenFor(m => m.ClinicSectionId)
+                    @Html.HiddenFor(m => m.Patient.FileNum)
+                    @Html.HiddenFor(m => m.Patient.Guid)
+                    @Html.HiddenFor(m => m.Patient.NameHolder, new { @id = "NameHolder" })
+                    @Html.HiddenFor(m => m.Patient.PhoneNumberHolder)
+                    @Html.HiddenFor(m => m.Patient.UserName)
+                    @Html.HiddenFor(m => m.Patient.Pass1)
+                    @Html.HiddenFor(m => m.Patient.FatherJobId, new { @id = "FatherJobId" })
+                    @Html.HiddenFor(m => m.Patient.MotherJobId, new { @id = "MotherJobId" })
+                    @Html.HiddenFor(m => m.Patient.AddressId, new { @id = "AddressId" })
+                    @Html.HiddenFor(m => m.ReserveStartTime)
+                    @Html.HiddenFor(m => m.ReserveEndTime)
+                    @Html.HiddenFor(m => m.ReserveDate)
+                    @Html.HiddenFor(m => m.OldVisit, new { @id = "OldVisit" })
+                    @Html.HiddenFor(m => m.LastVisit, new { @id = "LastVisit" })
+                    @Html.HiddenFor(m => m.Patient.DateOfBirthYear, new { @id = "DateOfBirthYear" })
+                    @Html.HiddenFor(m => m.Patient.DateOfBirthMonth, new { @id = "DateOfBirthMonth" })
+                    @Html.HiddenFor(m => m.Patient.DateOfBirthDay, new { @id = "DateOfBirthDay" })
+
+                    <div class="col-xs-12" style="margin:1rem 0">
+                        @(Html.Kendo().CheckBox()
+                                   .Name("OldVisitHelper")
+                                   .Label(Localizer["TestResult"])
+                                   .HtmlAttributes(new { @id = "OldVisitHelper", @class = "kendoCheckbox", style = "font-size:5rem", onchange = "oldVisitChange()" }))
+
+                    </div>
+
+                    <div class="col-xs-6">
+
+                        <label class="block clearfix">
+                            <span class="red">*</span>
+                            <label for="form-field-8">@Localizer["FName"] : </label>
+                            <span class="block input-icon input-icon-right " onkeydown="">
+
+                                <script>
+
+                                    function OnSelect(e) {
+
+                                        var DataItem = this.dataItem(e.item.index());
+                                        var id = this.element.attr('id');
+
+                                        if (id === "FatherJobName") {
+                                            $("#FatherJobId").val(DataItem.Guid);
+                                            return
+                                        }
+
+                                        if (id === "MotherJobName") {
+                                            $("#MotherJobId").val(DataItem.Guid);
+                                            return
+                                        }
+
+                                        if (id === "AddressName") {
+                                            $("#AddressId").val(DataItem.Guid);
+                                            return
+                                        }
+
+                                        if (id === "Name2") {
+                                            $("#Name2").val(DataItem.Name);
+                                            $("#FormNumber").val(DataItem.FormNumber);
+                                            $("#FileNum").val(DataItem.FileNum);
+                                            $("#PatientId").val(DataItem.Guid);
+                                        }
+
+                                        else if (id === "FormNumber" || id === "FileNum") {
+                                            $("#Name2").val(DataItem.Name);
+                                            $("#PatientId").val(DataItem.Guid);
+                                        }
+
+                                        $("#Age").val(DataItem.Age);
+
+                                        $("#DateOfBirth").val(DataItem.DateOfBirth);
+                                        $("#PhoneNumber").val(DataItem.PhoneNumber);
+                                        $("#AddressName").val(DataItem.AddressName);
+                                        $("#AddressId").val(DataItem.AddressId);
+
+                                        var dropdownlist = $("#GenderId").data("kendoDropDownList");
+
+                                        dropdownlist.value(DataItem.GenderId);
+                                        $("#FatherJobName").val(DataItem.FatherJobName);
+                                        $("#FatherJobId").val(DataItem.FatherJobId);
+                                        $("#MotherJobName").val(DataItem.MotherJobName);
+                                        $("#MotherJobId").val(DataItem.MotherJobId);
+
+                                        $("#Email").val(DataItem.Email);
+                                        $("#Explanation").val(DataItem.Explanation);
+                                        $("#DateOfBirth").focus();
+
+                                        if (id === "Name2") {
+                                            setTimeout(function () {
+                                                $("#Name2").val(DataItem.Name);
+                                                $('#btn-reserve-accept').focus();
+                                            }, 50);
+
+                                        }
+                                    }
+
+                                </script>
+
+                                @(Html.Kendo().AutoComplete()
+                                      .Name("Patient.Name")
+                                      .DataTextField("NameAndFileNum")
+                                      .BindTo(Model.Patient.Name)
+                                      .Events(events => events.Select("OnSelect"))
+                                      .Filter("contains")
+                                      .HighlightFirst(true)
+                                      .ClearButton(false)
+                                      .HtmlAttributes(new { @id = "Name2", style = "width:100%", @data_checkEmpty = "Name2-box"})
+                                      //.DataSource(source =>
+                                      //{
+                                      //    source.Read(read =>
+                                      //    {
+                                      //        read.Action("GetPatient", "Reserves");
+                                      //    })
+                                      //    .ServerFiltering(false);
+                                      //})
+                                      .Value(Model.Patient.Name)
+                                )
+
+
+                            </span>
+                            <span id="Name2-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+                        @{
+                            if (Model.Patient.FileNumChoose ?? false)
+                            {
+                                <label class="block clearfix">
+                                    <span class="red">*</span><label for="form-field-8"> @Localizer["FormNumber"]: </label>
+                                    <span class="block input-icon input-icon-right">
+
+                                        @{
+                                            if (Model.UseAutoCompleteFormNum ?? false)
+                                            {
+                                                @(Html.Kendo().AutoComplete()
+                                                      .Name("Patient.FormNumber")
+                                                      .DataTextField("FormNumber")
+                                                      .Events(events => events.Select("OnSelect"))
+                                                      .Filter(FilterType.Contains)
+                                                      .HighlightFirst(true)
+                                                      .ClearButton(false)
+                                                      .HtmlAttributes(new { @id = "FormNumber", style = "width:100%" })
+                                                      .DataSource(source =>
+                                                      {
+                                                          source.Read(read =>
+                                                          {
+                                                              read.Action("GetPatient", "Reserves");
+                                                          })
+                                                          .ServerFiltering(false);
+                                                      })
+                                                      .Value(Model.Patient.FormNumber)
+                                                )
+                                            }
+                                            else
+                                            {
+                                                @(Html.Kendo().TextBox()
+                                                    .Name("Patient.FormNumber")
+                                                    .Value(Model.Patient.FormNumber)
+                                                    .HtmlAttributes(new { @id = "FormNumber", style = "width:100%" })
+                                                )
+                                            }
+                                        }
+
+                                    </span>
+                                    <span id="FileNumber-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+                                </label>
+                            }
+
+                        }
+
+                        <label class="block clearfix">
+                            <span class="red">*</span><label for="form-field-8">@Localizer["DateOfBirth"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                @(Html.Kendo().DatePicker()
+                                    .Name("Patient.DateOfBirthTxt")
+                                    .Value(Model?.Patient?.DateOfBirth ?? DateTime.Now)
+                                    .Format("dd/MM/yyyy")
+                                    .Animation(false)
+                                    .Max(DateTime.Now)
+                                    .Min(new DateTime(1900,1,1))
+                                    .Events(e =>
+                                    {
+                                        e.Change("changeBirthOfDatePatientDatetimePicker");
+                                    })
+                                    .HtmlAttributes(new { @id = "DateOfBirth", style = "width: 100%", title = "datepicker", @data_checkEmpty = "Age-box", onchange = "dateTimePickerWorkWithSpace(this)"})
+                                )
+
+                                <label for="form-field-8" style="width:100%">@Localizer["Age"]: </label>
+
+                                <span style="width:25%">
+                                    <label for="form-field-8">@Localizer["Year"] : </label>
+                                    @(Html.Kendo().TextBox()
+                                        .Name("Patient.Year")
+                                        //.Readonly(true)
+                                        //.Placeholder(@ViewBag.YearTranslated)
+                                        //.Value(Model.Age.ToString())
+                                        .HtmlAttributes(new { onchange = "ReserveInsertAge(this)", id = "Year", style = "width: 25%", onkeypress = "return OnlyNumberKey(event)" })
+                                    )
+                                </span>
+
+                                <span style="width:25%">
+
+                                    <label for="form-field-8"> @Localizer["Month"]: </label>
+
+                                    @(Html.Kendo().TextBox()
+                                        .Name("Patient.Month")
+                                        //.Readonly(true)
+                                        //.Placeholder(@ViewBag.MonthTranslated)
+                                        //.Value(Model.Age.ToString())
+                                        .HtmlAttributes(new { onchange = "ReserveInsertAge(this)", id = "Month", style = "width: 25%", onkeypress = "return OnlyNumberKey(event)" })
+                                    )
+
+                                </span>
+
+                            </span>
+                            <span id="Age-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+
+                        <script>
+                            function OnPhoneNumberSelect(e) {
+
+                                var DataItem = this.dataItem(e.item.index());
+                                $("#Age").val(DataItem.Age);
+
+                                $("#DateOfBirth").val(DataItem.DateOfBirth);
+                                $("#Name2").val(DataItem.Name);
+                                $("#FormNumber").val(DataItem.FormNumber);
+                                $("#FileNum").val(DataItem.FileNum);
+                                $("#AddressName").val(DataItem.AddressName);
+                                $("#AddressId").val(DataItem.AddressId);
+                                var dropdownlist = $("#GenderId").data("kendoDropDownList");
+
+                                dropdownlist.value(DataItem.GenderId);
+                                $("#FatherJobName").val(DataItem.FatherJobName);
+                                $("#FatherJobId").val(DataItem.FatherJobId);
+                                $("#MotherJobName").val(DataItem.MotherJobName);
+                                $("#MotherJobId").val(DataItem.MotherJobId);
+                                $("#Email").val(DataItem.Email);
+                                $("#Explanation").val(DataItem.Explanation);
+
+                                $("#DateOfBirth").focus();
+
+                                setTimeout(function () {
+                                    $("#PhoneNumber").val(DataItem.PhoneNumber);
+                                    $('#btn-reserve-accept').focus();
+                                }, 50);
+                            }
+                        </script>
+
+                        <label class="block clearfix">
+                            @*<span class="red">*</span>*@<label for="form-field-8"> @Localizer["Mobile"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                @if ((bool)(ViewBag.AutoCompletePhoneNumber ?? false))
+                                {
+                                    @(Html.Kendo().AutoComplete()
+                                     .Name("Patient.PhoneNumber")
+                                     .DataTextField("PhoneNumberAndName")
+                                     .BindTo(Model.Patient.PhoneNumber)
+                                     .Events(events => events.Select("OnPhoneNumberSelect"))
+                                     .Filter("contains")
+                                     .HighlightFirst(true)
+                                     .MinLength(0)
+                                     .ClearButton(false)
+                                     .HtmlAttributes(new { @id = "PhoneNumber", style = "width:100%", @data_checkEmpty = "PhoneNumber-box", onkeypress = "return OnlyNumberKey(event)" })
+                                     //.DataSource(source =>
+                                     //{
+                                     //    source.Read(read =>
+                                     //    {
+                                     //        read.Action("GetPatient", "Reserves");
+                                     //    })
+                                     //    .ServerFiltering(false);
+                                     //})
+                                     .Value(Model.Patient.PhoneNumber)
+                                )
+                                }
+                                else
+                                {
+                                    @(Html.Kendo().TextBox()
+                                       .Name("Patient.PhoneNumber")
+                                       .Value(Model.Patient.PhoneNumber)
+                                       .HtmlAttributes(new { @id = "PhoneNumber", style = "width: 100%", @data_checkEmpty = "PhoneNumber-box", onkeypress = "return OnlyNumberKey(event)" })
+                                    )
+                                }
+
+
+                            </span>
+                            <span id="PhoneNumber-box" class="emptybox hidden" data-isEssential="false" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Gender"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                @(Html.Kendo().DropDownList()
+                                      .Name("Patient.GenderId")
+                                      .DataTextField("Name")
+                                      .DataValueField("Id")
+                                      .DataSource(source =>
+                                        {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetAllGenders", "BaseInfo");
+                                          })
+                                          .ServerFiltering(false);
+                                      })
+                                      .HtmlAttributes(new { @id = "GenderId", style = "width: 100%;", @data_checkEmpty = "Gender-box" })
+                                )
+
+                            </span>
+                            <span id="Gender-box" class="emptybox hidden" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+                    </div>
+
+
+                    <div class="col-xs-6">
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Address"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <a href="\\#" class="k-link k-button k-button-icon @pull" onclick="AddAddress()" style="padding:0.2rem 0.1rem"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+
+                                @(Html.Kendo().AutoComplete()
+                                  .Name("Patient.AddressName")
+                                  .DataTextField("Name")
+                                  .Filter(FilterType.Contains)
+                                  .HighlightFirst(true)
+                                  .MinLength(1)
+
+                                  .ClearButton(false)
+                                  .Events(events => events.Select("OnSelect"))
+                                  .HtmlAttributes(new { style = "font-size:1.5rem;width:80%", @id = "AddressName" })
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllAddress", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.Patient.AddressName)
+                                )
+
+                            </span>
+
+                        </label>
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["FatherJob"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <a href="\\#" class="k-link k-button k-button-icon @pull" onclick="AddJob()" style="padding:0.2rem 0.1rem"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+
+                                @(Html.Kendo().AutoComplete()
+                                  .Name("Patient.FatherJobName")
+                                  .DataTextField("Name")
+                                  .HighlightFirst(true)
+                                  .Filter(FilterType.Contains)
+                                  .MinLength(0)
+                                  .ClearButton(false)
+                                  .Events(events => events.Select("OnSelect"))
+                                  .HtmlAttributes(new { style = "font-size:1.5rem;width:80%", @id = "FatherJobName" })
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllJobs", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.Patient.FatherJobName)
+                                )
+
+                            </span>
+
+                        </label>
+
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["MotherJob"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <a href="\\#" class="k-link k-button k-button-icon @pull" onclick="AddJob()" style="padding:0.2rem 0.1rem"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+
+                                @(Html.Kendo().AutoComplete()
+                                  .Name("Patient.MotherJobName")
+                                  .DataTextField("Name")
+                                  .Filter(FilterType.Contains)
+                                  .MinLength(0)
+
+                                  .HighlightFirst(true)
+                                  .ClearButton(false)
+                                  .Events(events => events.Select("OnSelect"))
+                                  .HtmlAttributes(new { style = "font-size:1.5rem;width:80%", @id = "MotherJobName" })
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllJobs", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Value(Model.Patient.MotherJobName)
+                                )
+
+                            </span>
+
+                        </label>
+
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Explanation"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                @(Html.Kendo().TextBox()
+                                   .Name("Explanation")
+                                   .Value(Model.Explanation)
+                                   .HtmlAttributes(new { @id = "Explanation", style = "width: 100%" })
+                                )
+
+                            </span>
+                            <span id="Description-box" class="emptybox hidden" data-isEssential="false" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+
+                    </div>
+
+                    <div class="space-24"></div>
+
+                </fieldset>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<input class="hidden" type="text" id="Job" data-Value="@ViewBag.JobId" />
+<input class="hidden" type="text" id="Address" data-Value="@ViewBag.addressId" />
+<h3 class="hidden" id="AddressText">@Localizer["Address"] @Localizer["New"]  </h3>
+<h3 class="hidden" id="JobText">@Localizer["Job"] @Localizer["New"]  </h3>
+
+
+<div id="PatientRecordModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="PatientHide()" aria-hidden="true">&times;</button>
+                <h3 id="modalform-header" class="smaller lighter blue no-margin"></h3>
+                <h4 class="modal-title @font" id="myModalLabel">
+                    @Localizer["DiseaseRecord"]
+                </h4>
+            </div>
+
+            <div id="PatientRecordModal-body" class="modal-body" style="height:50rem;width:60rem">
+
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-acceptPatientDisease")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "PatientHide()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-close-modal-Patient")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "PatientHide()" })
+                    .Content(Localizer["Exit"]))
+
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="my-modalTest-new" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="CloseModal()" aria-hidden="true">&times;</button>
+                <h3 id="new-modalTest-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["NewTest"]
+                </h3>
+            </div>
+
+            <div id="new-modalTest-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-test-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-test-accept-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+<style>
+
+    .k-primary:focus {
+        border: solid 2px black;
+    }
+</style>
+
+
+<script src="~/Content/Js/ReserveNewModal.js"></script>

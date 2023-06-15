@@ -1,0 +1,267 @@
+﻿@model WPH.Models.Service.ServiceViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<script>
+    function serviceTypeBind() {
+
+        serviceTypeChange();
+    }
+</script>
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewServiceForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.NameHolder)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Name")
+                            .Value(Model.Name)
+                            .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">
+                            @{
+                                if (HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Hospital")
+                                {
+                                    @Localizer["ServicePrice"]
+                                }
+                                else
+                                {
+                                    @Localizer["Price"]
+                                }
+                            }
+                            :
+                        </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("Price")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    .Value(Model.Price)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Price-box" })
+                                )
+                        </span>
+                        <span id="Price-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["ServiceType"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("TypeId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Id")
+                                  //.Filter("contains")
+                                  .DataSource(source =>
+                                    {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllServiceTypes", "BaseInfo");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .Events(e=>e.DataBound("serviceTypeBind"))
+                                  .Value(Model.TypeId.ToString())
+                                  .HtmlAttributes(new { style = "width: 100%;" ,onchange = "serviceTypeChange()"})
+                            )
+                        </span>
+                    </label>
+
+                    <label id="operationType_content" class="clearfix hidden">
+                        <label for="form-field-8">@Localizer["OperationType"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().AutoComplete()
+                            .Name("OperationTypeName")
+                            .DataTextField("Name")
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllBaseInfosByBaseInfoTypeName", "BaseInfo",new { TypeName = "OperationType" });
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.OperationTypeName)
+                            .HtmlAttributes(new { style = "width:100%;", @data_checkEmpty = "OperationTypeName-box" })
+                            )
+                        </span>
+                        <span id="OperationTypeName-box" class="emptybox hidden" data-isEssential="false" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label id="wage_content" class="clearfix hidden">
+                        <label for="form-field-8">@Localizer["DoctorWage"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("DoctorWage")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    .Value(Model.DoctorWage)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Wage-box" })
+                                )
+                        </span>
+                        <span id="Wage-box" class="emptybox hidden" data-isEssential="false" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Explanation"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextArea()
+                                .Name("Explanation")
+                                .Value(Model.Explanation)
+                                .Rows(7)
+                                .MaxLength(200)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+
+    });
+
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#Name").select();
+    });
+
+    $('#Name').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            let priceBox = $("#Price").data("kendoNumericTextBox");
+            priceBox.focus();
+        }
+    });
+
+    $('#Price').on('keypress', function (e) {
+
+        if (e.which === 13) {
+
+            let type = $('#TypeId').data("kendoDropDownList");
+            type.focus();
+            type.open();
+
+        }
+    });
+
+    $("#DoctorWage").on("keypress", function (e) {
+        if (e.which === 13) {
+
+            $('#Explanation').focus();
+        }
+    });
+    
+    $("#Explanation").on("keypress", function (e) {
+        if (e.which === 13) {
+
+            $('#btn-addService-accept').focus();
+        }
+    });
+
+    function serviceTypeChange() {
+
+        let type = $("#TypeId").data("kendoDropDownList");
+
+
+        if (type.text() === "Operation") {
+
+            $("#operationType_content").removeClass("hidden");
+            $("#operationType_content").addClass("block");
+            $("#OperationType-box").attr("data-isEssential", "true");
+            $("#OperationType-box").addClass("hidden");
+
+            $("#wage_content").removeClass("hidden");
+            $("#wage_content").addClass("block");
+            $("#Wage-box").attr("data-isEssential", "true");
+            $("#Wage-box").addClass("hidden");
+
+            $("#TypeId").parent().on("keypress", function (e) {
+                if (e.which === 13) {
+
+                    $("#OperationTypeName").data("kendoAutoComplete").focus();
+                }
+            });
+
+            $("#OperationTypeName").parent().on("keypress", function (e) {
+                if (e.which === 13) {
+
+                    let wageBox = $("#DoctorWage").data("kendoNumericTextBox");
+                    wageBox.focus();
+                }
+            });
+
+        } else {
+
+            let txt = $("#OperationTypeName").data("kendoAutoComplete");
+            txt.text("");
+
+            $("#operationType_content").addClass("hidden");
+            $("#operationType_content").removeClass("block");
+            $("#OperationType-box").attr("data-isEssential", "false");
+
+            $("#wage_content").addClass("hidden");
+            $("#wage_content").removeClass("block");
+            $("#Wage-box").attr("data-isEssential", "false");
+
+            $("#TypeId").parent().on("keypress", function (e) {
+                if (e.which === 13) {
+
+                    $('#Explanation').focus();
+                }
+            });
+
+        }
+    }
+
+    $("#OperationTypeName").on('focus', function (e) {
+
+        let inputAuto = $("#OperationTypeName").data("kendoAutoComplete");
+        let value = inputAuto.value();
+        inputAuto.search(value);
+    });
+
+</script>

@@ -1,0 +1,982 @@
+﻿@model Guid
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", pull_rev = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        direction = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        direction = " direction:rtl; ";
+    }
+
+}
+
+<script>
+
+    function GetTransferId() {
+        return {
+            transferId: $("#MasterId").val()
+        }
+    }
+
+    function FilterProductItems(e) {
+        e.preventDefault();
+
+        var txt = e.filter.value;
+        var filter_list = FilterProductLists(product_list, txt);
+
+        $("#ProductId").data("kendoDropDownList").dataSource.data(filter_list);
+    }
+
+    function ProductIdChange(e) {
+        //var productId = $("#ProductId").data("kendoDropDownList");
+        //productId.value('');
+        let val = $("#ProductId").val();
+        if (val == '') {
+
+            $("#PurchasePrice").val("");
+            $("#SellingPrice").val("");
+            $("#WholeSellPrice").val("");
+            $("#MiddleSellPrice").val("");
+            $("#InvoiceType").val("");
+            $("#DetailId").val("");
+
+        } else {
+            ShowProductListModal(val);
+        }
+
+    }
+
+    function GetProductInfo() {
+        return {
+            productId: $("#ProductId").val(),
+            transferId: $("#MasterId").val(),
+        }
+    }
+
+</script>
+
+<div class="row page-header ">
+
+    <div class="">
+
+        <div class="widget-body">
+            <div class="widget-main">
+                <form id="addNewTransferDetailForm">
+                    <fieldset>
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" id="MasterId" name="MasterId" value="@Model" />
+                        <input type="hidden" id="InvoiceType" />
+                        <input type="hidden" id="DetailId" />
+
+                        <div class="col-sm-12" style="display: flex; align-items: flex-end;flex-wrap:wrap">
+
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Product"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ProductId")
+                                        .DataTextField("FullName")
+                                        .DataValueField("Guid")
+                                        .Filter("contains")
+                                        .OptionLabel(" ")
+                                        .Events(x => x.Filtering("FilterProductItems").Change("ProductIdChange"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetLimitedProductsName", "Product");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Product-box" })
+                                            )
+                                    </span>
+                                    <span id="Product-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Number"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().NumericTextBox<decimal>()
+                                        .Name("Num")
+                                        .Min(1)
+                                        .Decimals(0)
+                                        .Format("N0")
+                                        .SelectOnFocus(true)
+                                        .Value(1)
+                                        .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Num-box" })
+                                        )
+                                    </span>
+                                    <span id="Num-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Consideration"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().TextBox()
+                                        .Name("Consideration")
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["PurchasePrice"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().TextBox()
+                                        .Name("PurchasePrice")
+                                        .Enable(false)
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12" style="display: flex; align-items: flex-end;">
+
+                            <div class="col-12 col-md-3">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["SalePrice"]: </label>
+                                    <span class="block input-icon input-icon-right">
+
+                                        @(Html.Kendo().TextBox()
+                                        .Name("SellingPrice")
+                                        .Enable(false)
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                @if ((bool)(ViewBag.AccessCanUseWholeSellPrice ?? false))
+                                {
+                                    <label class="block clearfix">
+                                        <label for="form-field-8">@Localizer["WholeSellPrice"]: </label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name("WholeSellPrice")
+                                            .Enable(false)
+                                            .HtmlAttributes(new { style = "width: 100%"})
+                                            )
+                                        </span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="WholeSellPrice" />
+                                }
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                @if ((bool)(ViewBag.AccessCanUseMiddleSellPrice ?? false))
+                                {
+                                    <label class="block clearfix">
+                                        <label for="form-field-8">@Localizer["MiddleSellPrice"]: </label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name("MiddleSellPrice")
+                                            .Enable(false)
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+                                        </span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="MiddleSellPrice" />
+                                }
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                @if ((bool)ViewBag.AccessNewTransferDetail)
+                                {
+                                    @(Html.Kendo().Button()
+                                    .Name("btn-addTransferDetail-accept")
+                                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary " + pull_rev + "" })
+                                    .Content(Localizer["AddProduct"]))
+                                }
+                            </div>
+                        </div>
+
+
+                        <div class="col-sm-12 space-10"></div>
+
+                        <div>
+                            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                                <i class="ace-icon fa fa-stop bigger-120"></i>
+                                @Localizer["ERROR_DataNotValid"]
+                            </div>
+
+                            <div id="NotEnoughProductCount" class="red label-white middle hidden" style="height:40px;display:block">
+                                <i class="ace-icon fa fa-stop bigger-120"></i>
+                                @Localizer["NotEnoughProductCount"]
+                            </div>
+
+                            <div id="ProductNotFound" class="red label-white middle hidden" style="height:40px;display:block">
+                                <i class="ace-icon fa fa-stop bigger-120"></i>
+                                @Localizer["ProductNotFound"]
+                            </div>
+
+                            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                                <i class="ace-icon fa fa-stop bigger-120"></i>
+                                @Localizer["ERROR_InsertWrong"]
+                            </div>
+
+                            <div id="ERROR_UsedInOtherTransfer" class="red label-white middle hidden" style="height:40px;display:block">
+                                <i class="ace-icon fa fa-stop bigger-120"></i>
+                                @Localizer["ERROR_ThisRecordUsedInOtherTransfer"]
+                            </div>
+
+                            <div id="ERROR_TransferAccepted" class="red label-white middle hidden" style="height:40px;display:block">
+                                <i class="ace-icon fa fa-stop bigger-120"></i>
+                                @Localizer["ERROR_ThisRecordAcceptedInDestination"]
+                            </div>
+
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- /.page-header -->
+
+
+<div id="UpdateTransferDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction ">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeUpdateTransferDetailModal()" aria-hidden="true">&times;</button>
+                <h3 id="UpdateTransferDetailModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["Edit"] @Localizer["TransferDetail"]
+                </h3>
+            </div>
+
+            <div id="UpdateTransferDetailModal-body" class="modal-body" style="width:80rem">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="NotEnoughProductCount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NotEnoughProductCount"]
+            </div>
+
+            <div id="ProductNotFound" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ProductNotFound"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ERROR_TransferAccepted" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordAcceptedInDestination"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-updateTransferDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-updateTransferDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeUpdateTransferDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteTransferDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeDeleteTransferDetailModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteTransferDetailModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+            </div>
+
+            <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+            </div>
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div id="ERROR_TransferAccepted" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordAcceptedInDestination"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteTransferDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteTransferDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeDeleteTransferDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowProductListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction ">
+    <div class="modal-dialog" style="width:85%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowProductListModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowProductListModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["ProductsList"]
+                </h3>
+            </div>
+
+            <div id="ShowProductListModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ERROR_NothingSelected" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NothingSelected"]
+            </div>
+
+            <div id="ERROR_AccessDenied" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["AccessDenied"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowProductListModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-ShowProductListModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowProductListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="AddSalePriceModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction ">
+    <div class="modal-dialog" style="width:80%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddSalePriceModal()" aria-hidden="true">&times;</button>
+                <div style="display: flex;">
+                    <h3 id="AddSalePriceModal-header" class="smaller lighter blue no-margin @font">
+                        @Localizer["SalePrice"] _ &nbsp;
+                    </h3>
+                    <h3 id="AddSalePriceModal-productName" class="smaller lighter blue no-margin @font">
+                    </h3>
+                </div>
+            </div>
+
+            <div id="AddSalePriceModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_MoneyConvert" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ThereIsNoMoneyConvert"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddSalePriceModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddSalePriceModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/TransferDetail/dgTransferDetailGrid.cshtml")
+</div>
+
+<script>
+
+    var product_list = [];
+    $(document).ready(function () {
+
+        GetAllProductList().done(function (data) {
+
+            product_list = data;
+        });
+
+        setTimeout(function () {
+            $('#ProductId').data("kendoDropDownList").focus();
+        }, 200);
+
+    });
+
+    $("#ProductId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Num').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Num").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Consideration').focus();
+        }
+    });
+
+    $("#Consideration").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-addTransferDetail-accept').focus();
+        }
+    });
+
+    $('#btn-addTransferDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#addNewTransferDetailForm #NotEnoughProductCount").addClass("hidden");
+        $("#addNewTransferDetailForm #ProductNotFound").addClass("hidden");
+        $("#addNewTransferDetailForm #ERROR_Data").addClass("hidden");
+        $("#addNewTransferDetailForm #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#addNewTransferDetailForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#addNewTransferDetailForm .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-addTransferDetail-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/TransferDetail/AddOrUpdate";
+
+        let transferDetail = {
+
+            MasterId: $("#MasterId").val(),
+            DetailId: $("#DetailId").val(),
+            InvoiceType: $("#InvoiceType").val(),
+            Num: $("#Num").val(),
+            Consideration: $("#Consideration").val(),
+
+        }
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: transferDetail,
+            success: function (response) {
+                $('#btn-addTransferDetail-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "NotEnoughProductCount") {
+
+                        $("#addNewTransferDetailForm #NotEnoughProductCount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ProductNotFound") {
+
+                        $("#addNewTransferDetailForm #ProductNotFound").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#addNewTransferDetailForm #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#transferDetailKendoGrid .k-pager-refresh")[0].click();
+                        resetValues();
+                    }
+                } else {
+
+                    $("#addNewTransferDetailForm #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+
+    function EditTransferDetail(element) {
+        $("#UpdateTransferDetailModal #ERROR_Data").addClass("hidden");
+        $("#UpdateTransferDetailModal #NotEnoughProductCount").addClass("hidden");
+        $("#UpdateTransferDetailModal #ProductNotFound").addClass("hidden");
+        $("#UpdateTransferDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#UpdateTransferDetailModal #ERROR_TransferAccepted").addClass("hidden");
+
+        $('#UpdateTransferDetailModal').modal('toggle');
+
+        var link = "/TransferDetail/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#UpdateTransferDetailModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+
+    }
+
+    $('#btn-updateTransferDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#UpdateTransferDetailModal #ERROR_Data").addClass("hidden");
+        $("#UpdateTransferDetailModal #NotEnoughProductCount").addClass("hidden");
+        $("#UpdateTransferDetailModal #ProductNotFound").addClass("hidden");
+        $("#UpdateTransferDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#updateTransferDetailForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#updateTransferDetailForm .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-updateTransferDetail-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/TransferDetail/AddOrUpdate";
+        var data = $("#updateTransferDetailForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-updateTransferDetail-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "NotEnoughProductCount") {
+
+                        $("#UpdateTransferDetailModal #NotEnoughProductCount").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ProductNotFound") {
+
+                        $("#UpdateTransferDetailModal #ProductNotFound").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#UpdateTransferDetailModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "TransferAccepted") {
+
+                        $("#UpdateTransferDetailModal #ERROR_TransferAccepted").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#UpdateTransferDetailModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#UpdateTransferDetailModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#transferDetailKendoGrid .k-pager-refresh")[0].click();
+                    }
+                } else {
+
+                    $("#UpdateTransferDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeDeleteTransferDetailModal() {
+
+        $('#DeleteTransferDetailModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+
+    }
+
+    function closeUpdateTransferDetailModal() {
+
+        $('#UpdateTransferDetailModal').modal('hide');
+        $('#UpdateTransferDetailModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+    function TransferDetailDeleteFunction(element) {
+
+        $("#DeleteTransferDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteTransferDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteTransferDetailModal #ERROR_TransferAccepted").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteTransferDetailModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteTransferDetail-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-deleteTransferDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteTransferDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteTransferDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteTransferDetailModal #ERROR_TransferAccepted").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/TransferDetail/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteTransferDetail-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteTransferDetailModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#transferDetailKendoGrid .k-pager-refresh")[0].click();
+
+                } else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteTransferDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#DeleteTransferDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "TransferAccepted") {
+                    $("#DeleteTransferDetailModal #ERROR_TransferAccepted").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function ShowProductListModal(productId) {
+        $("#ShowProductListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowProductListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#ShowProductListModal #ERROR_NothingSelected").addClass("hidden");
+        $("#ShowProductListModal #ERROR_AccessDenied").addClass("hidden");
+        $("#ShowProductListModal #MultiReason-box").addClass("hidden");
+        $("#ShowProductListModal #ERROR_Data-box").addClass("hidden");
+
+        $('#ShowProductListModal').modal('toggle');
+        $('#ShowProductListModal-body').empty();
+
+        var link = `/TransferDetail/SelectModal?productId=${productId}`;
+
+        $(".loader").removeClass("hidden");
+        $('#ShowProductListModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+
+    function closeShowProductListModal() {
+        resetValues();
+
+        $('#ShowProductListModal').modal('hide');
+        $('#ShowProductListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    function resetValues() {
+        $('#Num').data("kendoNumericTextBox").value(1);
+        $('#Consideration').val('');
+
+        $("#PurchasePrice").val("");
+        $("#SellingPrice").val("");
+        $("#WholeSellPrice").val("");
+        $("#MiddleSellPrice").val("");
+        $("#InvoiceType").val("");
+        $("#DetailId").val("");
+        var productId = $("#ProductId").data("kendoDropDownList");
+        productId.value('');
+    }
+
+
+    $('#btn-ShowProductListModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+        var details = [];
+
+        $("#ShowProductListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowProductListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#ShowProductListModal #ERROR_NothingSelected").addClass("hidden");
+        $("#ShowProductListModal #ERROR_AccessDenied").addClass("hidden");
+        $("#ShowProductListModal #MultiReason-box").addClass("hidden");
+        $("#ShowProductListModal #ERROR_Data").addClass("hidden");
+
+        $('.select_detail').each(function () {
+            if ($(this).is(":checked")) {
+                var item = {
+                    MasterId: $("#MasterId").val(),
+                    DetailId: $(this).attr("data-id"),
+                    InvoiceType: $(this).attr("data-type"),
+                    Num: $(this).attr("data-rem"),
+                    PurchasePrice: $(this).attr("data-price"),
+                    SellingPrice: $(this).attr("data-sell"),
+                    MiddleSellPrice: $(this).attr("data-middle"),
+                    WholeSellPrice: $(this).attr("data-whole"),
+                };
+                details.push(item);
+            }
+        });
+
+        if (details.length == 0) {
+
+            $("#ShowProductListModal #ERROR_NothingSelected").removeClass("hidden");
+            $('#btn-ShowProductListModal-accept').removeAttr("disabled");
+            return;
+        }
+
+        if (details.length == 1) {
+
+            $("#DetailId").val(details[0].DetailId);
+            $("#InvoiceType").val(details[0].InvoiceType);
+
+            let num = $("#Num").data("kendoNumericTextBox");
+            num.value(details[0].Num);
+
+            $("#PurchasePrice").val(details[0].PurchasePrice);
+            $("#SellingPrice").val(details[0].SellingPrice);
+            $("#WholeSellPrice").val(details[0].WholeSellPrice);
+            $("#MiddleSellPrice").val(details[0].MiddleSellPrice);
+
+
+            $('#btn-ShowProductListModal-accept').removeAttr("disabled");
+            $('#ShowProductListModal').modal('hide');
+            $('#ShowProductListModal-body').empty();
+            $(".modal-backdrop:last").remove();
+
+        } else {
+
+
+            $(".loader").removeClass("hidden");
+
+            $.ajax({
+                type: "Post",
+                url: "/TransferDetail/AddList",
+                data: {
+                    viewModels: details
+                },
+                success: function (response) {
+                    $('#btn-ShowProductListModal-accept').removeAttr("disabled");
+
+                    if (response === 0) {
+
+                        $("#ShowProductListModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "InvoiceInUse") {
+
+                        $("#ShowProductListModal #InvoiceInUse").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "AccessDenied") {
+
+                        $("#ShowProductListModal #ERROR_AccessDenied").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "EmptyList") {
+
+                        $("#ShowProductListModal #ERROR_NothingSelected").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#ShowProductListModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#ShowProductListModal').modal('hide');
+                        $('#ShowProductListModal-body').empty();
+
+                        resetValues();
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#transferDetailKendoGrid .k-pager-refresh")[0].click();
+                    }
+                }
+            });
+
+        }
+
+    });
+
+
+    function AddSalePrice(element) {
+        $("#AddSalePriceModal #AmountOverFlow").addClass("hidden");
+        $("#AddSalePriceModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddSalePriceModal #ERROR_Data").addClass("hidden");
+        $("#AddSalePriceModal #Date-valid").addClass("hidden");
+        $("#AddSalePriceModal #InvoiceInUse").addClass("hidden");
+        $("#AddSalePriceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddSalePriceModal').modal('toggle');
+
+        $('#AddSalePriceModal-productName').text("");
+
+        $('#AddSalePriceModal-body').empty();
+
+        var link = "/TransferDetailSalePrice/Form?transferDetailId=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddSalePriceModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function closeAddSalePriceModal() {
+
+        $('#AddSalePriceModal').modal('hide');
+        $('#AddSalePriceModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+</script>

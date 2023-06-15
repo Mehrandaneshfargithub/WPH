@@ -1,0 +1,343 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        dir = "  ";
+        <h3 id="newDamageText" class="hidden">@Localizer["New"] @Localizer["Damages"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        dir = " direction:rtl; ";
+        <h3 id="newDamageText" class="hidden">@Localizer["Damages"] @Localizer["New"]</h3>
+    }
+    <h3 id="editDamageText" class="hidden">@Localizer["Edit"] @Localizer["Damages"]</h3>
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["DamageList"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewDamage)
+    {
+        <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddDamage(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+</div><!-- /.page-header -->
+
+<script>
+    function GetPeriodForDamage() {
+
+        var periodId = $('#period-id').attr('data-Value');
+
+        var fromDate = $("#KendoFromDate").data("kendoDatePicker");
+        var toDate = $("#KendoDateTo").data("kendoDatePicker");
+
+        var frDate = fromDate.value();
+        var tDate = toDate.value();
+        let frMonth = frDate.getMonth() + 1;
+        let frDay = frDate.getDate();
+        let toMonth = tDate.getMonth() + 1;
+        let toDay = tDate.getDate();
+
+        if (frMonth < 10)
+            frMonth = "0" + frMonth;
+        if (toMonth < 10)
+            toMonth = "0" + toMonth;
+        if (frDay < 10)
+            frDay = "0" + frDay;
+        if (toDay < 10)
+            toDay = "0" + toDay;
+
+        let from = frDate.getFullYear() + "-" + frMonth + "-" + frDay;
+        let too = tDate.getFullYear() + "-" + toMonth + "-" + toDay;
+
+        let filterViewModel = {
+            PeriodId: periodId,
+            TxtDateFrom: from,
+            TxtDateTo: too,
+        };
+
+        return filterViewModel;
+    }
+</script>
+
+<div style="overflow:hidden">
+
+    <div class="col-sm-12 MyFont-Roboto-grid">
+
+        <div class="col-sm-3">
+            @(Html.Kendo().DropDownList()
+            .Name("periods")
+            .BindTo(Model.periods)
+            .DataTextField("Name")
+            .DataValueField("Id")
+            .Filter("contains")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+            )
+        </div>
+
+    </div>
+
+    <div class="col-sm-12 hidden" id="searchDiv" style="margin-top:20px;display:flex;align-items: flex-end;">
+
+        <div class="col-sm-3 " style="">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["FromDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoFromDate")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div class="col-sm-3 " style="">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["ToDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoDateTo")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div id="" class="col-sm-2 " style="">
+
+            @(Html.Kendo().Button()
+                .Name("btn-search-purchase")
+                .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;margin-bottom:5px;", type = "button", @class = "k-primary ", onclick = "btnSearchClick()" })
+                .Content("<i class='fa fa-search'></i>"))
+
+        </div>
+
+    </div>
+
+</div>
+
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div id="ShowDiscountsListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog" style="width:80%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowDiscountsListModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowDiscountsListModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="ShowDiscountsListModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+        
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowDiscountsList-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowDiscountsListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowTotalPriceModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog" style="width:80%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowTotalPriceModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowTotalPriceModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["TotalDamage"]
+                </h3>
+            </div>
+
+            <div id="ShowTotalPriceModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowTotalPrice-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowTotalPriceModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Damage/dgDamageGrid.cshtml")
+</div>
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+<script>
+
+    function PeriodsChange() {
+
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        var fromTo = $("#FromTo").text();
+
+        if (periodValue === fromTo) {
+
+            $("#searchDiv").removeClass("hidden");
+
+            let date = $("#KendoFromDate").data("kendoDatePicker");
+            date.element.focus();
+            date.element.select();
+
+        } else {
+
+            $("#searchDiv").addClass("hidden");
+
+            $("#damageKendoGrid").find(".k-i-reload").click();
+
+        }
+
+    }
+
+    function btnSearchClick() {
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        $("#damageKendoGrid").find(".k-i-reload").click();
+    }
+
+    function AddDamage(element) {
+
+        $(".loader").removeClass("hidden");
+        $(".page-content").load("/Damage/AddAndNewModal", function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+    function EditDamage(element) {
+
+        $(".loader").removeClass("hidden");
+        var link = "/Damage/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".page-content").load(link + Id, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+    function ShowDiscountsList(element) {
+
+        $("#ShowDiscountsListModal #ERROR_Data").addClass("hidden");
+        $("#ShowDiscountsListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowDiscountsListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#ShowDiscountsListModal').modal('toggle');
+
+        var link = "/DamageDiscount/Form?damageId=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#ShowDiscountsListModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    };
+
+    function closeShowDiscountsListModal() {
+
+        $('#ShowDiscountsListModal').modal('hide');
+        $('#ShowDiscountsListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    function ShowTotalPrice(element) {
+
+        $("#ShowTotalPriceModal #ERROR_Data").addClass("hidden");
+        $("#ShowTotalPriceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#ShowTotalPriceModal').modal('toggle');
+
+        var link = "/Damage/TotalPriceModal?Id=";
+        var Id = $(element).attr('data-id');
+
+        $(".loader").removeClass("hidden");
+        $('#ShowTotalPriceModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    };
+
+    function closeShowTotalPriceModal() {
+
+        $('#ShowTotalPriceModal').modal('hide');
+        $('#ShowTotalPriceModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+</script>

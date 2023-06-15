@@ -1,0 +1,163 @@
+﻿@*@using Stimulsoft.Report.Mvc*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+    }
+
+}
+
+
+
+<div class="row page-header">
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["AnalysisResult"]
+        </h1>
+
+    </div>
+</div><!-- /.page-header -->
+
+
+<div id="signup-box" class="signup-box no-border @font">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+
+                    <div class="col-xs-12" style="@direction">
+
+                        <div class="col-xs-6" style="padding:0">
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Code"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        <input id="FromDate" class="hidden" title="datepicker" style="width: 100%;font-size:1.5rem" type="date" />
+                                        @(Html.Kendo().TextBox()
+                                            .Name("Code")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+                                    </span>
+                                    <span id="Code-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Mobile"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        <input id="ToDate" class="hidden" title="datepicker" style="width: 100%;font-size:1.5rem" type="date" />
+                                        @(Html.Kendo().TextBox()
+                                            .Name("Number")
+                                            .HtmlAttributes(new {  style = "width: 100%" })
+                                            )
+                                    </span>
+                                    <span id="PhoneNumber-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+
+                                </label>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="col-sm-1">
+                        <h3 id="notExist" class="red hidden" >Not Exist</h3>
+                    </div>
+                    
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+<div class="col-sm-12">
+
+    
+        @(Html.Kendo().Button()
+        .Name("btn-GetReport-accept")
+        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = $"k-primary {pull}", onclick = "GetResultFile()" })
+        .Content(Localizer["Ok"]))
+    
+
+</div>
+
+
+    <script>
+
+        function GetResultFile() {
+
+            if ($("#Code").val() === "") {
+                $("#Code-box").removeClass('hidden');
+                return;
+            }
+
+            if ($("#Number").val() === "") {
+                $("#PhoneNumber-box").removeClass('hidden');
+                return;
+            }
+            else {
+                $("#Code-box").addClass('hidden');
+                $("#PhoneNumber-box").addClass('hidden');
+            }
+
+
+
+            let Code = $("#Code").val();
+            let PhoneNumber = $("#Number").val();
+            //fetch("/Home/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber).then((response) => {console.log(response)})
+            //let mypage = window.open("/Home/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber, '_blank').;
+
+            //console.log(mypage);
+            //console.log(mypage.document.body);
+            //console.log(mypage.document.body.innerText);
+            //console.log(mypage.document.body.firstChild);
+            //window.location = ("/Home/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber, _blank);
+            //fetch("/Home/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber).then((res) => {console.log(res)});
+            $.ajax({
+
+                url: "/AnalysisResult/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber,
+                success: function (data) {
+                    if (data === "NotExist")
+                        $("#notExist").removeClass('hidden');
+                    else {
+                $("#notExist").css("visibility", "hidden");
+
+                        let ss = window.open("/AnalysisResult/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber, '_blank');
+                        //let ss = window.location = "/Home/GetResult?Code=" + Code + "&PhoneNumber=" + PhoneNumber;
+                        //console.log(ss.)
+                    }
+
+                },
+
+            });
+
+    }
+
+</script>
+
+

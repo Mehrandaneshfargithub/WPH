@@ -1,0 +1,127 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string remove_title = Localizer["RemoveAnalysisItem"];
+    string up_title = Localizer["IncreasePriority"];
+    string down_title = Localizer["DecreasePriority"];
+}
+
+
+<div style="overflow:auto">
+    @(Html.Kendo().Grid<WPH.Models.CustomDataModels.Analysis_AnalysisItem.Analysis_AnalysisItemViewModel>
+    ()
+    .Name("kendoAnalysisAnalysisItemGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            columns.Bound("").Title(string.Empty).Width(10)
+            .ClientTemplate(
+               $@"<a class='tooltip-error grid-btn' onClick='DeleteAnalysisAnalysisItem(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete' data-toggle='modal'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='GridAnalysisAnalysisItemUpPriorityFunction(this);' data-id='#=Guid#' data-Priority='#=Priority#' data-rel='tooltip' title='{up_title}' data-original-title='Up'>
+                    <span class='blue'>
+                        <i class='ace-icon fa fa-arrow-up bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='GridAnalysisAnalysisItemDownPriorityFunction(this);' data-id='#=Guid#' data-Priority='#=Priority#' data-rel='tooltip' title='{down_title}' data-original-title='Down'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-arrow-down bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound(x => x.AnalysisItem.ValueTypeName).Filterable(false).Width(100).Title(Localizer["Type"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.UnitName).Filterable(false).Width(50).Title(Localizer["Unit"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.AmountCurrencyName).Width(20).Filterable(false).Title(Localizer["Type"] + ' ' + Localizer["Currency"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.Amount).Width(100).Filterable(false).Format("{0:n0}").Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.NormalValues).Filterable(false).Title(Localizer["NormalRange"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.Note).Filterable(false).Width(100).Title(Localizer["AnalysisNote"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.Abbreviation).Filterable(false).Width(50).Title(Localizer["Abbreviation"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.Code).Filterable(false).Width(50).Title(Localizer["Code"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["AnalysisItemName"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.AnalysisItem.Index).Filterable(false).Width(10).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Priority).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Priority).Hidden();
+            columns.Bound(x => x.AnalysisItem.Index).Filterable(false).Title("#").Width(10).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(300).Title(Localizer["AnalysisItemName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.Code).Filterable(false).Width(50).Title(Localizer["Code"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.Abbreviation).Filterable(false).Width(50).Title(Localizer["Abbreviation"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.Note).Filterable(false).Width(100).Title(Localizer["AnalysisNote"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.NormalValues).Filterable(false).Title(Localizer["NormalRange"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.Amount).Width(100).Filterable(false).Format("{0:n0}").Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.AmountCurrencyName).Width(20).Filterable(false).Title(Localizer["Type"] + ' ' + Localizer["Currency"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.UnitName).Filterable(false).Width(50).Title(Localizer["Unit"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.AnalysisItem.ValueTypeName).Filterable(false).Width(50).Title(Localizer["Type"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='GridAnalysisAnalysisItemDownPriorityFunction(this);' data-id='#=Guid#' data-Priority='#=Priority#' data-rel='tooltip' title='{down_title}' data-original-title='Down'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-arrow-down bigger-120'></i>
+                    </span>
+                </a>
+            ");
+            columns.Bound("").Title(string.Empty).Width(30)
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='GridAnalysisAnalysisItemUpPriorityFunction(this);' data-id='#=Guid#' data-Priority='#=Priority#' data-rel='tooltip' title='{up_title}' data-original-title='Up'>
+                    <span class='blue'>
+                        <i class='ace-icon fa fa-arrow-up bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(10)
+            .ClientTemplate(
+               $@"<a class='tooltip-error grid-btn' onClick='DeleteAnalysisAnalysisItem(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete' data-toggle='modal'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+        }
+
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(100)
+        .Read(read => read.Action("GetAllAnalysisAnalysisItem", "Analysis").Data("GetAnalysisId"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;font-size:1.3rem;overflow:auto", @class = "MyFont-Roboto-grid" }) // Enable sorting
+    )
+</div>
+
+

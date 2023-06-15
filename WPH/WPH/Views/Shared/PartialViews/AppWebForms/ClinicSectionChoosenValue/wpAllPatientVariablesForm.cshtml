@@ -1,0 +1,43 @@
+﻿@using WPH.Models.CustomDataModels.PatientVariable
+@using WPH.Models.CustomDataModels.ClinicSectionChoosenValue
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div class="col-xs-12" style="padding:0 0 0 2rem">
+
+    @{
+        //IEnumerable<ClinicSectionChoosenValueViewModel> AllChoosenVariables = ViewBag.AllChoosenVariables;
+
+        foreach (PatientVariableViewModel variable in ViewBag.AllPatientVariables)
+        {
+
+            <div class="col-xs-3" style="padding:1rem 0 0 0;text-align:left">
+                @{
+                    //ClinicSectionChoosenValueViewModel c = AllChoosenVariables.SingleOrDefault(x => x.PatientVariableId == variable.Id);
+                    if (variable.Value)
+                    {
+                        @(Html.Kendo().CheckBox()
+                                .Name("checkbox")
+                                .Label(variable.VariableName)
+                                .Checked(true)
+                                .HtmlAttributes(new { @class = "kendoCheckbox1", @data_Id = variable.Id }))
+                    }
+                    else
+                    {
+                        @(Html.Kendo().CheckBox()
+                                .Name("checkbox")
+                                .Label(variable.VariableName)
+                                .HtmlAttributes(new { @class = "kendoCheckbox1", @data_Id = variable.Id }))
+                    }
+                }
+
+
+            </div>
+        }
+    }
+
+
+</div>
+

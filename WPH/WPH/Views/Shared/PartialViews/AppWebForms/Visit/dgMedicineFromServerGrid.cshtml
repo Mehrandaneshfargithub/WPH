@@ -1,0 +1,155 @@
+﻿
+<style>
+
+    .serverPatient{
+        color:blue;
+        font-size:1.5rem;
+        margin-left:1rem;
+    }
+
+</style>
+
+<div>
+    <div class="col-sm-12">
+        <div class="col-sm-6" style="display:flex">
+
+            <label class="block clearfix" for="form-field-8">Prescription Number: </label>
+            <label class="block clearfix serverPatient" for="form-field-8" id="ServerPrescriptionNumber"></label>
+
+        </div>
+
+        <div class="col-sm-6" style="display:flex">
+
+            <label class="block clearfix" for="form-field-8">Patient Name: </label>
+            <label class="block clearfix serverPatient" for="form-field-8" id="ServerPatientName"></label>
+
+        </div>
+
+    </div>
+
+    <div class="col-sm-12">
+        <div class="col-sm-6" style="display:flex">
+
+            <label class="block clearfix" for="form-field-8">Patient Mobile: </label>
+            <label class="block clearfix serverPatient" for="form-field-8" id="ServerPatientMobile"></label>
+
+        </div>
+
+        <div class="col-sm-6" style="display:flex">
+
+            <label class="block clearfix" for="form-field-8">Doctor Name: </label>
+            <label class="block clearfix serverPatient" for="form-field-8" id="ServerDoctorName"></label>
+
+        </div>
+    </div>
+
+    <div class="col-sm-12">
+
+        <span style="padding: 5px 12px;" class="block red" id="GetDataError">
+
+        </span>
+
+    </div>
+
+    <div>
+        @(Html.Kendo().Grid<WPH.Models.Medicine.GetMedicineFromServerViewModel>()
+        .Name("medicineServerGrid")
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Multiple))
+        .PersistSelection(true)
+        .Columns(columns =>
+        {
+            columns.Bound(x => x.MedicineName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("MedicineName").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ConsumptionInstruction).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("Consumption Instruction").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Explanation).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("Explanation").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.MedicineForm).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("Medicine Form").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Number).Filterable(false).Title("Count").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Recived).Filterable(false).Title("Recived").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Rem).Filterable(false).Title("Remaining").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+        })
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            //.Model(model =>
+            //{
+            //    model.Id(p => p.Guid);
+            //})
+            .PageSize(10)
+            //.Read(read => read.Action("GetAllMedicineForDisease", "Visit").Data("GetDiseaseIdForMedicines"))
+            )
+            .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+            .Pageable(pageable => pageable
+            .Input(true)
+            .Refresh(true)
+            .PageSizes(true)
+            .ButtonCount(5)
+            .Numeric(true)) // Enable paging
+            .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+
+        )
+    </div>
+
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        GetVisitFromServer();
+
+    });
+
+    function GetVisitFromServer() {
+
+        var grid = $('#medicineServerGrid').data("kendoGrid");
+
+        $("#GetDataError").text("");
+        $("#ServerPrescriptionNumber").text("");
+        $("#ServerPatientName").text("");
+        $("#ServerDoctorName").text("");
+        $("#ServerPatientMobile").text("");
+
+        grid.dataSource.data([]);
+        grid.setDataSource([]);
+
+        $(".loader").removeClass("hidden");
+        var visitId = $("#prescriptionVisit").attr("data-prescriptionVisitId");// $("#data").attr("data-visitId");
+
+        $.ajax({
+            url: '/Visit/GetVisitFromServer',
+            type: "Post",
+            data: { visitId: visitId },
+            success: function (response) {
+
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+
+                if (response.Message == "Success") {
+                    $("#ServerPrescriptionNumber").text(response.MasterId);
+                    $("#ServerPatientName").text(response.PatientName);
+                    $("#ServerDoctorName").text(response.DoctorName);
+                    $("#ServerPatientMobile").text(response.Mobile);
+
+                    grid.setDataSource(response.Medicines);
+                } else {
+                    $("#GetDataError").text(response.Message);
+                }
+
+            },
+            error: function (response) {
+                console.log(response);
+                console.log(response.data);
+                console.log(response.error);
+
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            }
+        });
+    }
+
+
+    $("#medicineServerGrid").find(".k-pager-refresh").on("click", function () {
+
+        GetVisitFromServer();
+    });
+</script>

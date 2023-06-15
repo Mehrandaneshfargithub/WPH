@@ -1,0 +1,134 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/mainViews/_MainLayout.cshtml";
+}
+
+
+<div class="main-container ace-save-state " id="main-container" >
+
+    <div id="sidebar" class="sidebar h-sidebar navbar-collapse collapse ace-save-state rtl" data-sidebar="true" data-sidebar-scroll="true" data-sidebar-hover="true">
+
+        <ul style="top:0px;background-color:rgba(0, 0, 74,0.9)" class=" nav nav-list  MyFont-Roboto-grid  ">
+
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                <a href="/ApplicationHandler/Index?clinicSectionId=@HttpContextAccessor.HttpContext.Session.GetString("ClinicSectionId")" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa fa-home"></i>
+                    <span class="menu-text"> Home </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                <a href="#" onclick="goToThisLink('/Admin/SectionManagement/ShowSections')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa fa-object-group"></i>
+                    <span class="menu-text"> Sections </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                <a href="#" onclick="goToThisLink('/Admin/SectionManagement/ShowSubsystems')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa fa-sitemap"></i>
+                    <span class="menu-text"> Subsystem </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                <a href="#" onclick="goToThisLink('/Admin/BaseInfoType/Form')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa fa-circle-info"></i>
+                    <span class="menu-text"> Base Info </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                <a href="#" onclick="goToThisLink('/Admin/AdminClinicSectionSetting/Form')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa fa-cogs"></i>
+                    <span class="menu-text"> Lab Setting </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+        
+            <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                <a href="#" onclick="goToThisLink('/Admin/LicenceKeyManagement/Form')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                    <i class="menu-icon fa fa-key"></i>
+                    <span class="menu-text"> Licence Key </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+
+            @*<li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none ">
+                    <a href="#" class="dropdown-toggle" style="background-color: rgba(0, 0, 79,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                        <i class="menu-icon fa fa fa-user-md"></i>
+                        <span class="menu-text"> Doctor </span>
+                        <b class="arrow fa fa-angle-down"></b>
+                    </a>
+
+                    <b class="arrow"></b>
+
+                    <ul class="submenu" style="border-width: 1px; background-color: rgba(0, 0, 74,0.9) ">
+
+                        <li class=" hover " style="background-color: rgba(0, 0, 74,0.9); border: none;  ">
+                            <a href="#" onclick="goToThisLink('/Doctor/Form')" style="background-color: rgba(0, 0, 74,0.9); color: rgb(255,255,250); border: 0 0 0 1px ">
+                                <i class="menu-icon fa"></i>
+                                <span class="menu-text"> Doctors </span>
+                            </a>
+
+                            <b class="arrow"></b>
+                        </li>
+                    </ul>
+                </li>*@
+
+
+        </ul><!-- /.nav-list -->
+
+        <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+            <i id="sidebar-toggle-icon" style="color:white" class="ace-icon fa fa-angle-double-up ace-save-state sidebar-toggle-icon-vertical" data-icon1="ace-icon fa fa-angle-double-up" data-icon2="ace-icon fa fa-angle-double-down"></i>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="main-content-inner">
+
+            <div id="pageContent" class="page-content">
+
+            </div><!-- /.page-content -->
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    function goToThisLink(link) {
+        if (link === null || link === "NULL" || link === "" || link === undefined) {
+            return;
+        }
+
+        $(".loader").removeClass("hidden");
+        $(".sideItem").removeClass("active");
+        $(this).addClass("active");
+        $('.page-content').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+            
+        });
+
+    }
+
+</script>

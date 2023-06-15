@@ -1,0 +1,132 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfoViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.Priority)
+                    @Html.HiddenFor(m => m.TypeId)
+                    @Html.HiddenFor(m => m.ClinicSectionId)
+                    @Html.HiddenFor(m => m.NameHolder)
+                    <label class="block clearfix">
+                        <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Name"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { @class = "keypress", style = "width: 100%",@data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="NameExist hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8"> @Localizer["Desc"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Description")
+                                .Value(Model.Description)
+                                .HtmlAttributes(new { @class="keypress", style = "width: 100%"})
+                            )
+                        </span>
+                        <span id="Description-box" class="emptybox hidden" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+<script>
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+    });
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#Name").select();
+    });
+
+    $('#Name').keydown(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Description').focus();
+        }
+    })
+
+
+    $('#Description').focus(function () {
+
+        $("#Description").select();
+    });
+
+    $('#Description').keydown(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            
+            let unit = $('#UnitModal-header').text();
+            if (unit !== "") {
+                $('#btn-UnitModal-accept').focus();
+                return;
+            }
+
+            let reserve = $('#reserve-modal-header').text();
+            if (reserve !== "") {
+                $('#btn-test-accept').focus();
+                return;
+            }
+
+            let address = $('#AddressModal-header').text();
+            if (address !== "") {
+                $('#btn-address-accept').focus();
+                return;
+            }
+
+            let speciallity = $('#DoctorSpeciallityModal-header').text();
+            if (speciallity !== "") {
+                $('#btn-DoctorSpeciallityModal-accept').focus();
+                return;
+            }
+
+
+            let doctor = $('#DoctorModal-header').text();
+            if (doctor !== "") {
+                $('#btn-doctor-accept').focus();
+                return;
+            }
+
+            let cost = $('#CostTypeModal-header').text();
+            if (cost !== "") {
+                $('#btn-CostTypeModal-accept').focus();
+                return;
+            }
+
+            let Test = $('#new-modalTest-header').text();
+            if (Test !== "") {
+                $('#btn-test-accept').focus();
+                return;
+            }
+
+            if ($('#Guid').val() === "00000000-0000-0000-0000-000000000000")
+                $('#btn-new-accept').focus();
+            else
+                $('#btn-update-accept').focus();
+
+        }
+    })
+</script>

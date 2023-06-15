@@ -1,0 +1,214 @@
+﻿@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div class="col-xs-12" style="display:flex;direction:ltr;padding:0">
+
+    <script>
+
+
+        function AddMedicineToPatient(e) {
+            $(".loader").removeClass("hidden");
+            let MedicineId = [];
+
+            for (let i = 0; i < e.dataItems.length; i++) {
+                MedicineId.push(e.dataItems[i].Value);
+            }
+
+            var PatientId = $('#PatientIdForMedicine').val();
+
+
+            $.ajax(
+                {
+                    type: "Post",
+                    url: "/Patient/AddMedicineToPatient",
+                    data: { MedicineId: MedicineId, PatientId: PatientId },
+                    success: function (data) {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    },
+                });
+
+
+        }
+
+        function RemoveMedicineFromPatient(e) {
+            $(".loader").removeClass("hidden");
+            let MedicineId = [];
+
+            for (let i = 0; i < e.dataItems.length; i++) {
+                MedicineId.push(e.dataItems[i].Value);
+            }
+
+            var PatientId = $('#PatientIdForMedicine').val();
+
+
+            $.ajax(
+                {
+                    type: "Post",
+                    url: "/Patient/RemoveMedicineFromPatient",
+                    data: { MedicineId: MedicineId, PatientId: PatientId },
+                    success: function (data) {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    },
+                });
+
+        }
+
+        function GetPatientIdForMedicineRecord() {
+
+            var Id = $('#PatientIdForMedicine').val();
+
+            return {
+                Id: Id
+            };
+        }
+
+    </script>
+
+
+    <div class="col-xs-6 MyFont-Sarchia-grid" style="padding:0;margin-right:1rem">
+        <label for="AllDisease" id="employees">@Localizer["AllMedicines"]</label>
+        <br />
+        <div style="clear:both;">
+            @(Html.Kendo().ListBox()
+               .Name("AllMedicine")
+               .Toolbar(toolbar =>
+               {
+                   toolbar.Position(ListBoxToolbarPosition.Right);
+                   toolbar.Tools(tools => tools
+                       .TransferTo()
+                       .TransferFrom()
+                       .TransferAllTo()
+                       .TransferAllFrom()
+                   );
+               })
+               .ConnectWith("PatientMedicine")
+               .DataSource(source =>
+               {
+                   source.Read(read =>
+                   {
+                       read.Action("GetAllMedicineForListBox", "Medicine").Data("GetPatientIdForMedicineRecord");
+                   });
+               })
+               .DataTextField("Text")
+               .DataValueField("Value")
+               .Selectable(ListBoxSelectable.Multiple)
+               .HtmlAttributes(new { style = "width: 100%;font-size:1.4rem", @class = "MyFont-Sarchia-grid" })
+            )
+        </div>
+        <div style="clear:both;">
+            @if ((bool)ViewBag.AccessNewMedicine)
+            {
+                @(Html.Kendo().Button()
+                            .Name("btn-AddMed")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-left btn btn-danger", onclick = "AddMedicine()" })
+                            .Content(Localizer["NewMedicine"]))
+            }
+        </div>
+
+    </div>
+
+    <div class="col-xs-6 MyFont-Sarchia-grid" style="padding:0;margin:0">
+        <label for="PatientDisease">@Localizer["PatientMedicine"]</label>
+        <br />
+        @(Html.Kendo().ListBox()
+                .Name("PatientMedicine")
+                .ConnectWith("AllMedicine")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetAllMedicineForPatient", "Patient").Data("GetPatientIdForMedicineRecord");
+                    });
+                })
+
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .Events(e => e.Add("AddMedicineToPatient")
+                .Remove("RemoveMedicineFromPatient"))
+                .Selectable(ListBoxSelectable.Multiple)
+                .HtmlAttributes(new { style = "width: 100%;font-size:1.4rem", @class = "MyFont-Sarchia-grid" })
+            )
+
+    </div>
+
+</div>
+
+<script>
+
+    function AddMedicine() {
+
+        $("#AddMedicineModal #ERROR_MedicineWrong").addClass("hidden");
+        $("#AddMedicineModal #Name-Exist").addClass("hidden");
+        var link = "/Medicine/AddNewModal";
+
+        $(".loader").removeClass("hidden");
+        $('#AddMedicineModal').modal('toggle');
+        $('#AddMedicineModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+
+    function addMedicineHide() {
+
+        $('#AddMedicineModal').modal('toggle');
+        $('#AddMedicineModal-body').empty();
+
+    }
+
+
+
+    function addNewMedicine() {
+
+        $("#AddMedicineModal #ERROR_MedicineWrong").addClass("hidden");
+        $("#AddMedicineModal #Name-Exist").addClass("hidden");
+        $(".loader").removeClass("hidden");
+
+        let link = "/Medicine/AddOrUpdate";
+        var data = $("#addNewMedicineForm").serialize();
+
+        if (data == "")
+            return;
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#AddMedicineModal #Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    }
+                    else {
+
+                        $("#AllMedicine").data("kendoListBox").dataSource.read();
+
+                        $('#AddMedicineModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddMedicineModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    }
+                } else {
+
+                    $("#AddMedicineModal #ERROR_MedicineWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+
+
+    }
+
+</script>

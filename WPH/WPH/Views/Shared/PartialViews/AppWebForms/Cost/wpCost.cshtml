@@ -1,0 +1,638 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newCostText" class="hidden">@Localizer["New"] @Localizer["Cost"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newCostText" class="hidden">@Localizer["Cost"] @Localizer["New"]</h3>
+    }
+    <h3 id="editCostText" class="hidden">@Localizer["Edit"] @Localizer["Cost"]</h3>
+
+}
+
+
+<style>
+
+
+    @@media (max-width:767px) {
+        .modal-dialog {
+            width: 70vw;
+            margin: 30px auto
+        }
+
+        .modal-content {
+            -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,.5)
+        }
+
+        .modal-sm {
+            width: 300px
+        }
+
+        #CostModal-body {
+            width: 90vw;
+        }
+
+        #CostTypeModal-body {
+            width: 90vw;
+        }
+    }
+
+    @@media (min-width:768px) {
+        #CostModal-body {
+            width: 60vw;
+        }
+
+        #CostTypeModal-body {
+            width: 90vw;
+        }
+    }
+</style>
+
+<div class="row page-header">
+    <div class="@pull ">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["Costs"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewCosts)
+    {
+        <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddCost()" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+    <div class="col-xs-6 col-sm-2 MyFont-Roboto-grid" style="padding-left:unset;padding-right:unset;">
+        @(Html.Kendo().DropDownList()
+            .Name("sections")
+            .BindTo(Model.sections)
+            .DataTextField("Name")
+            .DataValueField("Id")
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "SectionChange()" })
+            )
+    </div>
+</div><!-- /.page-header -->
+
+
+<h3 id="type-id" class="hidden">@ViewBag.BaseInfoTypeId</h3>
+<input class="hidden" type="text" id="cost-type-id" data-Value="" />
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@ViewBag.FromToId</h1>
+
+<div class="space-10"></div>
+
+<div class="row MyFont-Roboto-grid">
+
+    <div class="col-xs-12 col-sm-9">
+
+        <div class="col-xs-12 col-sm-6 col-md-2" style="padding-left:unset;padding-right:unset;margin-bottom:1rem">
+            @(Html.Kendo().DropDownList()
+                .Name("periods")
+                .BindTo(Model.periods)
+                .DataTextField("Name")
+                .DataValueField("Id")
+                .Events(e =>
+                {
+                e.Select("onSelectPeriodInCost");
+                })
+                .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+                )
+        </div>
+
+
+        <div class="col-sm-12 col-md-10" style="padding:0">
+            <div class="row MyFont-Roboto-grid">
+                <div class="col-xs-12" style="padding:0">
+
+                    <div id="DateFromDiv" class="col-xs-12 col-sm-5 hidden">
+
+                        <div class="col-xs-4 " style="text-align:left">
+                            <h5 class="MyFont-Roboto-grid">@Localizer["From"] @Localizer["Date"]</h5>
+                        </div>
+
+                        <div class="col-xs-8" style="padding:0">
+                            @(Html.Kendo().DatePicker()
+                        .Name("KendoFromDate")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+
+                        </div>
+                    </div>
+
+                    <div id="DateToDiv" class="col-xs-12 col-sm-5 hidden">
+
+                        <div class="col-xs-4" style="text-align:left">
+                            <h5 class="MyFont-Roboto-grid">@Localizer["To"] @Localizer["Date"]</h5>
+                        </div>
+
+                        <div class="col-xs-8" style="padding:0">
+
+                            @(Html.Kendo().DatePicker()
+                        .Name("KendoDateTo")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                        </div>
+
+                    </div>
+
+                    <div id="SearchBtnDiv" class="col-xs-1 hidden">
+
+                        @(Html.Kendo().Button()
+                    .Name("btn-search-visit")
+                    .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary pull-right", onclick = "btnSearchClick()" })
+                    .Content("<i class='fa fa-search'></i>"))
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+   
+
+    <div class="col-xs-12 col-sm-3" style="padding:0">
+        <div class="col-xs-5" style="padding:0 0 0 1rem;text-align:left">
+            <h4 style="transform: translateY(-20%);font-size:1.5rem" class="MyFont-Roboto-grid">@Localizer["CostType"]</h4>
+        </div>
+
+        <div class=" col-xs-5" style="padding:0">
+
+            @(Html.Kendo().DropDownList()
+            .Name("CostTypes")
+            .OptionLabel(" ")
+            .DataTextField("Name")
+            .DataValueField("Guid")
+            .DataSource(source =>
+            {
+            source.Read(read =>
+            {
+            read.Action("GetAllCostTypes", "BaseInfo");
+            })
+            .ServerFiltering(false);
+            })
+            .Events(e =>
+            {
+            e.Select("onSelectCostTypeInCost");
+            })
+            .HtmlAttributes(new { @class = "pull-left", style = "font-size:1.5rem;width:100%" })
+            )
+
+        </div>
+
+        @if ((bool)ViewBag.AccessNewCostType)
+        {
+            <div class="col-xs-2" style="padding:0 1rem 0 0">
+                <a id="add-cost-type" class="btn btn-xs btn-danger pull-right" style="display: inline-block;" href="#">
+                    <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+
+    function GetPeriodAndCostTypeInCost() {
+        var costTypeId = $('#cost-type-id').attr('data-Value');
+        var periodId = $('#period-id').attr('data-Value');
+        if (costTypeId === null || costTypeId === "") {
+            costTypeId = "00000000-0000-0000-0000-000000000000";
+        }
+
+        var period = $("#sections").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+
+        var fromDate = $("#KendoFromDate").data("kendoDatePicker");
+        var toDate = $("#KendoDateTo").data("kendoDatePicker");
+
+        var frDate = fromDate.value();
+        var tDate = toDate.value();
+        let frMonth = frDate.getMonth() + 1;
+        let frDay = frDate.getDate();
+        let toMonth = tDate.getMonth() + 1;
+        let toDay = tDate.getDate();
+
+        if (frMonth < 10)
+            frMonth = "0" + frMonth;
+        if (toMonth < 10)
+            toMonth = "0" + toMonth;
+        if (frDay < 10)
+            frDay = "0" + frDay;
+        if (toDay < 10)
+            toDay = "0" + toDay;
+
+        let from = frDate.getFullYear() + "-" + frMonth + "-" + frDay;
+        let too = tDate.getFullYear() + "-" + toMonth + "-" + toDay;
+
+        return {
+            clinicSectionId: periodValue,
+            costTypeId: costTypeId,
+            periodId: periodId,
+            dateFrom: from,
+            dateTo: too
+        };
+    }
+
+</script>
+
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Cost/dgCostGrid.cshtml")
+</div>
+
+
+        <div id="CostModal" class="modal fade  @font" data-backdrop=" static" data-keyboard="false" style="@direction">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" onclick="closeCostModal()" aria-hidden="true">&times;</button>
+                        <h3 id="CostModal-header" class="smaller lighter blue no-margin @font">
+                            @Localizer["New"]
+                        </h3>
+                    </div>
+
+                    <div id="CostModal-body" class="modal-body" >
+                    </div>
+
+                    <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_DataNotValid"]
+                    </div>
+
+                    <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_SomeThingWentWrong"]
+                    </div>
+
+                    <div class="modal-footer">
+                        @(Html.Kendo().Button()
+                .Name("btn-CostModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "costClick()" })
+                .Content(Localizer["Ok"]))
+                        @(Html.Kendo().Button()
+                .Name("btn-CostModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right",onclick = "closeCostModal()" })
+                .Content(Localizer["Exit"]))
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="CostTypeModal" class="modal fade @font" data-backdrop=" static" data-keyboard="false" style="@direction">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h3 id="CostTypeModal-header" class="smaller lighter blue no-margin @font">
+                            @Localizer["CostType"] @Localizer["New"]
+                        </h3>
+                    </div>
+
+                    <div id="CostTypeModal-body" class="modal-body">
+                    </div>
+
+                    <div class="modal-footer">
+                        @(Html.Kendo().Button()
+                .Name("btn-CostTypeModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "costTypeClick()" })
+                .Content(Localizer["Ok"]))
+                        @(Html.Kendo().Button()
+                .Name("btn-CostTypeModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+        <script type="text/javascript">
+
+
+            $(document).ready(function () {
+
+                var fromDate = $("#KendoFromDate").data("kendoDatePicker");
+                fromDate.element.focus();
+                fromDate.element.select();
+
+                
+
+
+            });
+
+
+            
+            
+            function closeCostModal() {
+
+                $('#CostModal').modal('toggle');
+                $('#CostModal-body').empty();
+
+            }
+
+            function PeriodsChange() {
+
+                var period = $("#periods").data("kendoDropDownList");
+
+                var periodValue = period.value();
+
+                var fromTo = $("#FromTo").text();
+
+                if (periodValue === fromTo) {
+                    $("#DateFromDiv").removeClass("hidden");
+                    $("#DateToDiv").removeClass("hidden");
+                    $("#SearchBtnDiv").removeClass("hidden");
+                    let date = $("#KendoFromDate").data("kendoDatePicker");
+                    date.element.focus();
+                    date.element.select();
+                }
+
+                else {
+                    $("#DateFromDiv").addClass("hidden");
+                    $("#DateToDiv").addClass("hidden");
+                    $("#SearchBtnDiv").addClass("hidden");
+                    $("#kendoCostGrid").find(".k-i-reload").click();
+                }
+            }
+
+            function SectionChange() {
+
+                $("#kendoCostGrid").find(".k-i-reload").click();
+            }
+
+            $('#KendoFromDate').keypress(function (e) {
+
+                if (e.which === 13 || e.which === 9) {
+                    let date = $("#KendoDateTo").data("kendoDatePicker");
+                    date.element.focus();
+                }
+            });
+
+            $('#KendoFromDate').focus(function (e) {
+
+                let date = $("#KendoFromDate").data("kendoDatePicker");
+                date.element.select();
+            });
+
+            $('#KendoDateTo').keypress(function (e) {
+
+                if (e.which === 13 || e.which === 9) {
+                    $("#btn-search-visit").focus();
+                }
+            });
+
+
+            $('#KendoDateTo').focus(function (e) {
+
+                let date = $("#KendoDateTo").data("kendoDatePicker");
+                date.element.select();
+            });
+
+            function btnSearchClick() {
+
+                $("#kendoCostGrid").find(".k-i-reload").click();
+            }
+
+            $('#add-cost-type').on("click", function () {
+
+                var link = "/BaseInfo/AddNewModal";
+                var BaseInfoTypeId = $("#type-id").text();
+                $(".loader").removeClass("hidden");
+                $('#CostTypeModal').modal('toggle');
+                $('#CostTypeModal-body').load(link, function () {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#TypeId").val(BaseInfoTypeId);
+                });
+            });
+
+
+
+            function AddCost() {
+
+                $("#CostModal #ERROR_Data").addClass("hidden");
+                $("#CostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+                let header = $("#newCostText").text();
+
+                $("#CostModal-header").text(header);
+
+                var link = $("#GridAddLink").attr("data-Value");
+                $(".loader").removeClass("hidden");
+                $('#CostModal').modal('toggle');
+                $('#CostModal-body').load(link, function () {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                });
+            }
+
+            function EditCost(element) {
+
+                $("#CostModal #ERROR_Data").addClass("hidden");
+                $("#CostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+                let header = $("#editCostText").text();
+
+                $("#CostModal-header").text(header);
+
+                var link = $("#GridEditLink").attr("data-Value");
+                var Id = $(element).attr('data-id');
+                $(".loader").removeClass("hidden");
+                $('#CostModal').modal('toggle');
+                $('#CostModal-body').load(link + Id, function () {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                });
+            }
+
+            function costClick() {
+                $("#CostModal #ERROR_Data").addClass("hidden");
+                $("#CostModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+                $('.emptybox').addClass('hidden');
+                var isEmmpty = true;
+                $('.emptybox').each(function () {
+                    if ($(this).attr('data-isEssential') === 'true') {
+                        var empty = $(this).attr('id');
+                        if ($('[data-checkEmpty="' + empty + '"]').val() !== undefined) {
+                            let text = $('[data-checkEmpty="' + empty + '"]').val().replace(/ /g, '');
+                            if (text === "") {
+                                $(this).removeClass('hidden');
+                                isEmmpty = false;
+                                return;
+                            }
+                        }
+                    }
+                });
+
+                if (isEmmpty === false) {
+                    return;
+                }
+
+                var costDate = $("#KendoCostDate").data("kendoDatePicker");
+                var Date = costDate.value();
+
+                let cMonth = Date.getMonth() + 1;
+                let cDay = Date.getDate();
+
+                if (cMonth < 10)
+                    cMonth = "0" + cMonth;
+
+                if (cDay < 10)
+                    cDay = "0" + cDay;
+
+                let from = Date.getFullYear() + "-" + cMonth + "-" + cDay;
+
+                $("#CostDate").val(from);
+
+                var link = "/Cost/AddOrUpdate";
+
+                var costDate = $("#CostDate").val();
+
+                $(".loader").removeClass("hidden");
+                $.ajax({
+                    type: "Post",
+                    url: link,
+                    data: {
+                        Guid: $("#Guid").val(),
+                        Id: $("#Id").val(),
+                        ClinicSectionId: $("#ClinicSectionId").val(),
+                        CostTypeName: $("#CostTypeName").val(),
+                        CostDateDay: cDay,
+                        CostDateMonth: cMonth,
+                        CostDateYear: Date.getFullYear(),
+                        Price: $("#Price").val(),
+                        CurrencyId: $("#CurrencyId").val(),
+                        Explanation: $("#Explanation").val(),
+                        InvoiceNum: $("#InvoiceNum").val(),
+                        SaleInvoiceId: $("#SaleInvoiceId").val(),
+                        PurchaseInvoiceId: $("#PurchaseInvoiceId").val(),
+                    },
+                    success: function (response) {
+                        if (response !== 0) {
+                            if (response === "ValueIsRepeated") {
+
+                                $('#Name-Exist').removeClass('hidden');
+
+                                $(".loader").fadeIn("slow");
+                                $(".loader").addClass("hidden");
+                            } else if (response === "DataNotValid") {
+
+                                $("#CostModal #ERROR_Data").removeClass("hidden");
+                                $(".loader").fadeIn("slow");
+                                $(".loader").addClass("hidden");
+
+                            } else {
+                                $('#CostModal').modal('toggle');
+                                $('#CostModal-body').empty();
+                                $(".loader").fadeIn("slow");
+                                $(".loader").addClass("hidden");
+                                $(".k-pager-refresh")[0].click();
+                            }
+                        } else {
+
+                            $("#CostModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                            $(".loader").fadeIn("slow");
+                            $(".loader").addClass("hidden");
+                        }
+                    }
+
+                });
+            }
+
+
+            function costTypeClick() {
+
+                $('.emptybox').addClass('hidden');
+                var isEmmpty = true;
+                $('.emptybox').each(function () {
+                    if ($(this).attr('data-isEssential') === 'true') {
+                        var empty = $(this).attr('id');
+                        if ($('[data-checkEmpty="' + empty + '"]').val() !== undefined) {
+                            let text = $('[data-checkEmpty="' + empty + '"]').val().replace(/ /g, '');
+                            if (text === "") {
+                                $(this).removeClass('hidden');
+                                isEmmpty = false;
+                                return;
+                            }
+                        }
+                    }
+                });
+
+                if (isEmmpty === false) {
+                    return;
+                }
+
+                var link = "/BaseInfo/AddOrUpdate";
+
+                var data = $("#addNewForm").serialize();
+
+                $(".loader").removeClass("hidden");
+                $.ajax({
+                    type: "Post",
+                    url: link,
+                    data: data,
+                    success: function (response) {
+                        if (response !== 0) {
+                            if (response === "ValueIsRepeated") {
+
+                                $('#Name-Exist').removeClass('hidden');
+
+                                $(".loader").fadeIn("slow");
+                                $(".loader").addClass("hidden");
+                            } else {
+
+                                $('#CostTypeModal').modal('toggle');
+                                $('#CostTypeModal-body').empty();
+                                $(".loader").fadeIn("slow");
+                                $(".loader").addClass("hidden");
+                                $("#CostTypes").data("kendoDropDownList").dataSource.read();
+
+                            }
+                        }
+                    },
+                    error: function (response) {
+
+                        $('#CostTypeModal').modal('toggle');
+                        $('#CostTypeModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        alert("Refresh Page");
+                        console.log(response);
+
+                    }
+                });
+            }
+
+        </script>

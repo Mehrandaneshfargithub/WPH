@@ -1,0 +1,1196 @@
+﻿@model Guid
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", pull_rev = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " ";
+        <h3 id="newServiceText" class="hidden">@Localizer["New"] @Localizer["Service"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = " direction:rtl; ";
+        <h3 id="newServiceText" class="hidden">@Localizer["Service"] @Localizer["New"]</h3>
+    }
+}
+
+<style>
+    .center_screen {
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        position: absolute !important;
+    }
+</style>
+
+<div id="signup-box" class="signup-box no-border" style="@dir">
+    <div class="widget-body">
+        <div class="widget-main" style="overflow:hidden;">
+            <form id="addPayVisitForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="TxtReceptionId" value="@Model" />
+                    <input type="hidden" id="TxtReserveDetailId" value="" />
+                    @if ((bool)ViewBag.AccessNewPayVisit)
+                    {
+                        <div class="col-sm-12 shadow-border" style="margin:0">
+                            <h4 class="MyFont-Roboto" style="border-bottom: dotted 1px #808080">  @Localizer["VisitPrice"] </h4>
+                            <div class="col-sm-12 " style="display:flex;align-items: flex-end;">
+                                <div class="col-sm-4">
+                                    <label class="block clearfix">
+                                        <label for="form-field-8">@Localizer["Price"]: </label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().NumericTextBox<decimal>()
+                                            .Name("Price")
+                                            .Min(1)
+                                            .Value(decimal.Parse(ViewBag.VisitPrice ?? "1"))
+                                            .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Price-Ubox", id = "TxtVisitPrice" })
+                                            )
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-3">
+                                </div>
+
+                                <div class="col-sm-1">
+
+                                    @(Html.Kendo().Button()
+                                    .Name("btn-AddPayVisit-accept")
+                                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary ", onclick = "AcceptAddPayVisit()" })
+                                    .Content(Localizer["Add"]))
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="col-sm-5">
+                                    <span id="Price-Ubox" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                        @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                    </span>
+                                </div>
+                                <div class="col-sm-3">  </div>
+                                <div class="col-sm-1">  </div>
+                            </div>
+                        </div>
+                    }
+
+                </fieldset>
+            </form>
+
+            <div class="space-10 "> </div>
+
+            @if ((bool)(ViewBag.CanConsumeProduct ?? false))
+            {
+                <form id="addProducVisitForm">
+                    <fieldset>
+                        <div class="col-sm-12 shadow-border" style="margin:0">
+                            <h4 class="MyFont-Roboto" style="border-bottom: dotted 1px #808080">  @Localizer["Medicine"] </h4>
+                            <div class="col-sm-12 " style="display:flex;align-items: flex-end;">
+                                <div class="col-sm-4">
+                                    <label class="block clearfix">
+                                        <label for="form-field-8">@Localizer["Name"]</label>
+                                        <span class="block input-icon input-icon-right">
+                                            @{
+                                                string widthP = " 100% ";
+                                                if ((bool)(ViewBag.AccessNewMedicineProduct ?? false))
+                                                {
+                                                    widthP = " 80% ";
+                                                    <a href="\\#" class=" @pull btn btn-danger" data-value="Stitch" onclick="NewMedicineProduct(this)" style=" padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                                                }
+                                            }
+                                            <input id="Product-Name" class="boldText" style="width: @widthP; margin: 0" />
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <label class="block clearfix">
+                                        <label for="form-field-8">@Localizer["Num"]</label>
+                                        <span class="block input-icon input-icon-right">
+                                            <input id="ProductValue" class="boldText" style="width: 100%; margin: 0" />
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="col-sm-1">
+
+                                    @(Html.Kendo().Button()
+                                    .Name("btn-add-product")
+                                    .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;margin-bottom:5px;", type = "button", @class = "k-primary", onclick = "addProduct()" })
+                                    .Content(Localizer["Add"]))
+
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            }
+            <div class="space-10 "> </div>
+
+            @if ((bool)(ViewBag.CanConsumeService ?? false))
+            {
+                <form id="addServiceVisitForm">
+                    <fieldset>
+                        <div class="col-sm-12" style="padding:0.5rem">
+                            <div class="col-sm-12 shadow-border" style="margin:0">
+                                <h4 class="MyFont-Roboto" style="border-bottom: dotted 1px #808080"> @Localizer["Services"]</h4>
+
+                                <div class="col-sm-12 " style="display:flex;align-items: flex-end;">
+
+                                    <div class="col-sm-3">
+                                        <label class="block clearfix">
+                                            <label for="form-field-8">@Localizer["Other"]</label>
+                                            <span class="block input-icon input-icon-right">
+                                                @{
+                                                    string width = " 100% ";
+                                                    if ((bool)(ViewBag.AccessNewService ?? false))
+                                                    {
+                                                        <a href="\\#" class="  @pull btn btn-danger" data-value="Other" onclick="NewService(this)" style=" padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                                                        width = " 80% ";
+                                                    }
+                                                }
+                                                <input id="ServiceName" class="boldText" style="width: @width; margin: 0" />
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <div class="col-sm-4">
+
+                                        <div class="col-sm-6">
+                                            <label class="block clearfix">
+                                                <label for="form-field-8">@Localizer["Price"]</label>
+                                                <span class="block input-icon input-icon-right">
+                                                    <input id="ServicePrice" class="boldText" style="width: 100%; margin: 0" />
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <label class="block clearfix">
+                                                <label for="form-field-8">@Localizer["Num"]</label>
+                                                <span class="block input-icon input-icon-right">
+                                                    <input id="ServiceValue" class="boldText" style="width: 100%; margin: 0" />
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-4">
+
+                                        <div class="col-sm-6">
+                                            <label class="block clearfix">
+                                                <label for="form-field-8"># @Localizer["Discount"]</label>
+                                                <span class="block input-icon input-icon-right">
+                                                    <input id="DiscountAmount" class="boldText" style="width: 100%; margin: 0" />
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <label class="block clearfix">
+                                                <label for="form-field-8">% @Localizer["Discount"]</label>
+                                                <span class="block input-icon input-icon-right">
+                                                    <input id="DiscountPercent" class="boldText" style="width: 100%; margin: 0" />
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-1">
+
+                                        @(Html.Kendo().Button()
+                                        .Name("btn-add-service")
+                                        .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;margin-bottom:5px;", type = "button", @class = "k-primary", onclick = "addService()" })
+                                        .Content(Localizer["Add"]))
+
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-12 " style="display:flex;align-items: flex-end;">
+
+                                    <div class="col-sm-4">
+                                        <label id="lbl_show_price" style="color:gray">
+                                        </label>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <label id="lbl_show_total" style="color:gray">
+                                        </label>
+                                    </div>
+
+                                    <div class="col-sm-4">
+
+                                        <div class="col-sm-6">
+                                            <label id="lbl_show_discount_amount" style="color:gray">
+                                            </label>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <label id="lbl_show_discount_percent" style="color:gray">
+                                            </label>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-1">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            }
+            <div class="space-10"> </div>
+
+            @{
+                string pay_title = Localizer["PayService"];
+                string remove_title = Localizer["RemoveService"];
+            }
+
+            <div class="col-sm-12">
+
+                @(Html.Kendo().Grid<WPH.Models.ReceptionService.ReceptionServiceViewModel>()
+                .Name("serviceKendoGrid")
+                .Columns(columns =>
+                {
+                    if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+                    {
+                        //if ((bool)ViewBag.AccessDeletePayVisit || (bool)ViewBag.AccessDeletePayService)
+                        //{
+                        columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                        .ClientTemplate(
+                            "#if(ShowDelete){#<a class='tooltip-error grid-btn'  onClick='DeletePayVisitFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='" + remove_title + "' data-original-title='Delete'> " +
+                                    @"<span class='red'>
+                                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                                    </span>
+                                </a>
+                            #}#");
+                        //}
+
+                        //if ((bool)ViewBag.AccessNewPayVisit || (bool)ViewBag.AccessNewPayService)
+                        //{
+                        columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                        .ClientTemplate(
+                            "#if(ShowPay){#<a class='tooltip-success grid-btn edit' onClick='EditVisitReceptionService(this);' data-id='#=Guid#' data-rel='tooltip' title='" + pay_title + "' data-original-title='Edit'> " +
+                                    @"<span class='green'>
+                                        <i class='ace-icon fa fa-credit-card bigger-120'></i>
+                                    </span>
+                                </a>
+                            #}#");
+                        //}
+
+                        columns.Bound(x => x.Rem).Format("{0:n0}").Filterable(false).Title(Localizer["Remained"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                        columns.Bound(x => x.ServiceStatus).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Status"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).ClientTemplate("#= LineItems_Databound(ServiceStatus)#");
+                        columns.Bound(x => x.Total).Format("{0:n0}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Total"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                        columns.Bound(x => x.Price).Format("{0:n0}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Price"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                        columns.Bound(x => x.Number).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Number"]).HtmlAttributes( new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                        columns.Bound(x => x.ServiceName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                        columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+                        columns.Bound(x => x.Guid).Hidden();
+                        columns.Bound(x => x.ShowDelete).Hidden();
+                        columns.Bound(x => x.ShowPay).Hidden();
+
+                    }
+                    else
+                    {
+                        columns.Bound(x => x.ShowDelete).Hidden();
+                        columns.Bound(x => x.ShowPay).Hidden();
+                        columns.Bound(x => x.Guid).Hidden();
+                        columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+                        columns.Bound(x => x.ServiceName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+                        columns.Bound(x => x.Number).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Number"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+                        columns.Bound(x => x.Price).Format("{0:n0}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Price"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+                        columns.Bound(x => x.Total).Format("{0:n0}").Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Total"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+                        columns.Bound(x => x.ServiceStatus).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Status"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).ClientTemplate("#= LineItems_Databound(ServiceStatus)#");
+                        columns.Bound(x => x.Rem).Format("{0:n0}").Filterable(false).Title(Localizer["Remained"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+                        if ((bool)ViewBag.AccessNewPayVisit || (bool)ViewBag.AccessNewPayService)
+                        {
+                            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                            .ClientTemplate(
+                                "#if(ShowPay){#<a class='tooltip-success grid-btn edit' onClick='EditVisitReceptionService(this)' data-id='#=Guid#' data-rel='tooltip' title='" + pay_title + "' data-original-title='Edit'> " +
+                                    @"<span class='green'>
+                                        <i class='ace-icon fa fa-credit-card bigger-120'></i>
+                                    </span>
+                                </a>
+                            #}#");
+
+                        }
+
+                        if ((bool)ViewBag.AccessDeletePayVisit || (bool)ViewBag.AccessDeletePayService)
+                        {
+                            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+                            .ClientTemplate(
+                                "#if(ShowDelete){#<a class='tooltip-error grid-btn' onClick='DeletePayVisitFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='" + remove_title + "' data-original-title='Delete'> " +
+                                    @"<span class='red'>
+                                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                                    </span>
+                                </a>
+                            #}#");
+                        }
+
+                    }
+                })
+
+                .DataSource(dataSource => dataSource
+                .Ajax()
+                .ServerOperation(false)
+                .Model(model =>
+                {
+                    model.Id(p => p.Guid);
+                })
+                    .PageSize(10)
+                    .Read(read => read.Action("GetAll", "ReceptionService", new { receptionId = Model }))
+                )
+                .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+                .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+                .Pageable(pageable => pageable
+                .Input(true)
+                .Refresh(true)
+                .PageSizes(true)
+                .ButtonCount(3)
+                .Numeric(true)) // Enable paging
+                .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" })
+                )
+
+            </div>
+
+            <div class="col-sm-12">
+
+                <div class="@pull">
+                    @if ((bool)(ViewBag.AccessNewPayVisit ?? false) && (bool)(ViewBag.AccessNewPayService ?? false))
+                    {
+                        @(Html.Kendo().Button()
+                        .Name("btn-payAllVisit-accept")
+                        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary "})
+                        .Content(Localizer["PayAll"]))
+                    }
+                </div>
+
+            </div>
+
+            <div class="space-24"></div>
+
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<div id="AddNewProductModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddNewProductModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddNewProductModal-header" class="smaller lighter blue no-margin @font">
+
+                    @Localizer["Product"] - @Localizer["New"]
+
+                </h3>
+            </div>
+
+            <div id="AddNewProductModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_Barcode" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["RepeatedBarcode"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProductModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProductModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeAddNewProductModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="CreateNewServiceModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog center_screen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeCreateNewServiceModal()" aria-hidden="true">&times;</button>
+                <h3 id="CreateNewServiceModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="CreateNewServiceModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                .Name("btn-CreateNewServiceModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-CreateNewServiceModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeCreateNewServiceModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="DeletePayVisitModal" class="modal fade @font" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm center_screen">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="CloseDeletePayVisitModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeletePayVisitModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                    .Name("btn-DeletePayVisitModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-DeletePayVisitModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "CloseDeletePayVisitModal()" })
+                    .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function CloseDeletePayVisitModal() {
+
+        $('#DeletePayVisitModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+    }
+
+    function LineItems_Databound(status) {
+        if (status == 'Paid') {
+            return "<div style='background:lightgreen;border-radius: 5px;'>" + status + " </div>";
+        } else {
+            return "<div style='background:pink;border-radius: 5px;'>" + status + " </div>";
+        }
+    }
+
+    $(document).ready(function () {
+
+        $("#serviceKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#serviceKendoGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+        $('#my-modal-Receive #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#my-modal-Receive #NotEnoughProductCount').addClass('hidden');
+        $('#my-modal-Receive #InvalidReception').addClass('hidden');
+        $('#my-modal-Receive #InvalidReceptionService').addClass('hidden');
+        $('#my-modal-Receive #ERROR_Data').addClass('hidden');
+
+        //setTimeout(function () {
+        //    //$('#UProductId').data("kendoDropDownList").focus();
+        //}, 200);
+
+    });
+
+    ///////////////////////////////////////////////////////product
+
+    $("#Product-Name").kendoDropDownList({
+        dataTextField: "Name",
+        dataValueField: "Guid",
+        filter: "contains",
+        dataSource: {
+            serverFiltering: false,
+            transport: {
+                read: {
+                    url: "/Product/GetAllProductByMaterialType?MaterialType=medicine",
+                }
+            }
+        }
+    });
+
+    $("#ProductValue").kendoNumericTextBox({
+
+    });
+
+    function NewMedicineProduct(element) {
+
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#my-modal-Receive #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#my-modal-Receive #NotEnoughProductCount').addClass('hidden');
+        $('#my-modal-Receive #InvalidReception').addClass('hidden');
+        $('#my-modal-Receive #InvalidReceptionService').addClass('hidden');
+        $('#my-modal-Receive #ERROR_Data').addClass('hidden');
+
+        var link = "/Product/AddAndNewModal";
+        $(".loader").removeClass("hidden");
+
+        $('#AddNewProductModal').modal('toggle');
+        $('#AddNewProductModal-body').load(link + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+
+    $('#btn-AddNewProductModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddNewProductModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddNewProductModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-AddNewProductModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Product/AddOrUpdate";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+
+        var product = {
+            Name: $("#ProductName").val(),
+            ProducerName: $("#ProducerName").val(),
+            ProductTypeName: $("#ProductTypeName").val(),
+            Barcode: $("#Barcode").val(),
+        };
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                product: product
+            },
+            success: function (response) {
+                $('#btn-AddNewProductModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#ProductName-Exist').removeClass('hidden');
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddNewProductModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "RepeatedBarcode") {
+
+                        $("#AddNewProductModal #ERROR_Barcode").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddNewProductModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddNewProductModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#Product-Name").data("kendoDropDownList").dataSource.read();
+                        let pr = $("#Product-Name").data("kendoDropDownList");
+                        pr.bind("dataBound", function () {
+                            pr.value(response);
+                        });
+                    }
+                } else {
+
+                    $("#AddNewProductModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAddNewProductModal() {
+
+        $('#AddNewProductModal').modal('hide');
+        $('#AddNewProductModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+
+    function addProduct() {
+
+        $('#my-modal-Receive #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#my-modal-Receive #NotEnoughProductCount').addClass('hidden');
+        $('#my-modal-Receive #InvalidReception').addClass('hidden');
+        $('#my-modal-Receive #InvalidReceptionService').addClass('hidden');
+        $('#my-modal-Receive #ERROR_Data').addClass('hidden');
+
+        let SerNum = $("#ProductValue").data("kendoNumericTextBox").value();
+        if (SerNum === null || SerNum < 1) {
+            SerNum = 1;
+        }
+        let receptionId = $("#TxtReceptionId").val();
+        let ProductId = $("#Product-Name").val();
+        let Product = $("#Product-Name").data("kendoDropDownList");
+        var dataItem = Product.dataItem();
+
+
+        $.ajax({
+            type: "Post",
+            data:
+            {
+                ReceptionId: receptionId,
+                Number: SerNum,
+                Price: dataItem.Price,
+                ProductId: ProductId,
+                ProductIdDMS: dataItem.Id
+            },
+            url: "/Reserves/AddReceptionService",
+            success: function (response) {
+                if (response === 0) {
+
+                    $('#my-modal-Receive #ERROR_SomeThingWentWrong').removeClass('hidden');
+
+                } else if (response === 'NotEnoughProductCount') {
+
+                    bootbox.alert({
+                        message: " @Localizer["NotEnoughProductCount"]",
+                        className: 'bootbox-class'
+
+                    });
+
+                } else {
+
+                    $("#serviceKendoGrid .k-pager-refresh")[0].click();
+                    //calendar1.refetchEvents();
+                    //RefreshReservePrice(("#TxtReserveDetailId").val());
+                }
+                //$("#Product .k-i-reload").click();
+
+            }
+        });
+
+    }
+
+    $("#ServiceValue").on("input", function (e) {
+
+        let price = $("#ServicePrice").val();
+        //var dataItem = Service.dataItem();
+        if (price) {
+
+            let SerNum = $(e.target).val();
+            var total = price * SerNum;
+
+            $("#lbl_show_total").text(total);
+        }
+
+        //let Service = $("#ServiceName").data("kendoDropDownList");
+        //var dataItem = Service.dataItem();
+        //if (dataItem) {
+
+        //    let SerNum = $(e.target).val();
+        //    var total = dataItem.Price * SerNum;
+
+        //    $("#lbl_show_total").text(total);
+        //}
+    })
+
+    $("#DiscountPercent").on("input", function (e) {
+
+        let Service = $("#ServiceName").data("kendoDropDownList");
+        var dataItem = Service.dataItem();
+        if (dataItem) {
+
+            let SerNum = $('#ServiceValue').val();
+            let discount = $(e.target).val();
+            var total = (dataItem.Price * SerNum * discount) / 100;
+
+            $("#lbl_show_discount_percent").text(total);
+        }
+    })
+
+    function changeService() {
+
+        let Service = $("#ServiceName").data("kendoDropDownList");
+        var dataItem = Service.dataItem();
+
+        //$("#lbl_show_price").text(dataItem.Price);
+
+        $("#ServicePrice").data("kendoNumericTextBox").value(dataItem.Price);
+
+
+    }
+
+
+    /////////////////////////////////////////////////////service
+
+    function AcceptAddPayVisit() {
+
+        $("#my-modal-Receive #ERROR_Data").addClass("hidden");
+        $("#my-modal-Receive #Date-valid").addClass("hidden");
+        $("#my-modal-Receive #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#my-modal-Receive .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#addPayVisitForm.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Visit/AddPayVisit";
+
+        let purchaseInvoice = {
+            ReceptionId: $("#TxtReceptionId").val(),
+            VisitPrice: $("#TxtVisitPrice").val(),
+        };
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: purchaseInvoice,
+            success: function (response) {
+
+                if (response !== 0) {
+                    if (response === "ERROR_Data") {
+
+                        $('#my-modal-Receive #ERROR_Data').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#serviceKendoGrid .k-pager-refresh")[0].click();
+
+                        //calendar1.refetchEvents();
+                        //RefreshReservePrice(("#TxtReserveDetailId").val());
+                    }
+                } else {
+
+                    $('#my-modal-Receive #ERROR_SomeThingWentWrong').removeClass('hidden');
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+
+
+    };
+
+
+    $("#ServiceName").kendoDropDownList({
+        dataTextField: "Name",
+        dataValueField: "Guid",
+        optionLabel: " ",
+        filter: "contains",
+        change: changeService,
+        dataSource: {
+            serverFiltering: false,
+            transport: {
+                read: {
+                    url: "/Service/GetAllSpeceficServices?ServiceName=Other",
+                }
+            }
+        }
+    });
+
+    $("#DiscountAmount").kendoNumericTextBox({
+        min: 0
+    });
+
+    $("#ServicePrice").kendoNumericTextBox({
+        min: 0
+    });
+
+    $("#DiscountPercent").kendoNumericTextBox({
+        min: 0
+    });
+
+    $("#ServiceValue").kendoNumericTextBox({
+        min: 0
+    });
+
+    var txt;
+    function NewService(element) {
+
+        txt = $(element).attr('data-value');
+
+        if (txt != 'Other')
+            return;
+
+        $("#CreateNewServiceModal #ERROR_Data").addClass("hidden");
+        $("#CreateNewServiceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#my-modal-Receive #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#my-modal-Receive #NotEnoughProductCount').addClass('hidden');
+        $('#my-modal-Receive #InvalidReception').addClass('hidden');
+        $('#my-modal-Receive #InvalidReceptionService').addClass('hidden');
+        $('#my-modal-Receive #ERROR_Data').addClass('hidden');
+
+        var link = `/Service/SingleNewModal?typeName=${txt}`;
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newServiceText").text();
+        $('#CreateNewServiceModal-header').text(header);
+
+        $('#CreateNewServiceModal').modal('toggle');
+        $('#CreateNewServiceModal-body').load(link + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    $('#btn-CreateNewServiceModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#CreateNewServiceModal #ERROR_Data").addClass("hidden");
+        $("#CreateNewServiceModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#CreateNewServiceModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#CreateNewServiceModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-CreateNewServiceModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Service/AddOrUpdate";
+        var data = $("#addNewServiceForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-CreateNewServiceModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#CreateNewServiceModal #Name-Exist').removeClass('hidden');
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else if (response === "DataNotValid") {
+
+                        $("#CreateNewServiceModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#CreateNewServiceModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#CreateNewServiceModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+
+                        $("#ServiceName").data("kendoDropDownList").dataSource.read();
+                        let pr = $("#ServiceName").data("kendoDropDownList");
+                        pr.bind("dataBound", function () {
+                            pr.value(response);
+                        });
+
+                    }
+                } else {
+
+                    $("#CreateNewServiceModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeCreateNewServiceModal() {
+
+        $('#CreateNewServiceModal').modal('hide');
+        $('#CreateNewServiceModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+
+    function addService() {
+
+        $('#my-modal-Receive #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#my-modal-Receive #NotEnoughProductCount').addClass('hidden');
+        $('#my-modal-Receive #InvalidReception').addClass('hidden');
+        $('#my-modal-Receive #InvalidReceptionService').addClass('hidden');
+        $('#my-modal-Receive #ERROR_Data').addClass('hidden');
+
+        let SerNum = $("#ServiceValue").data("kendoNumericTextBox").value();
+        if (SerNum === null || SerNum < 1) {
+            SerNum = 1;
+        }
+        let receptionId = $("#TxtReceptionId").val();
+        let ServiceId = $("#ServiceName").val();
+        let Service = $("#ServiceName").data("kendoDropDownList");
+        var dataItem = Service.dataItem();
+        var Discount = $("#DiscountAmount").data("kendoNumericTextBox");
+        var DiscountPercent = $("#DiscountPercent").data("kendoNumericTextBox");
+        let price = $("#ServicePrice").val();
+        if (ServiceId == '')
+            return;
+
+        $.ajax({
+            type: "Post",
+            data:
+            {
+                ReceptionId: receptionId,
+                ServiceId: ServiceId,
+                Number: SerNum,
+                Price: price,
+                Discount: Discount.value(),
+                DiscountPercent: DiscountPercent.value()
+            },
+            url: "/Reserves/AddReceptionService",
+            success: function (response) {
+                if (response === 0) {
+
+                    $('#my-modal-Receive #ERROR_SomeThingWentWrong').removeClass('hidden');
+
+                } else if (response === 'NotEnoughProductCount') {
+
+                    bootbox.alert({
+                        message: " @Localizer["NotEnoughProductCount"]",
+                        className: 'bootbox-class'
+
+                    });
+
+                } else {
+
+                    $("#serviceKendoGrid .k-pager-refresh")[0].click();
+
+                    $("#ServiceValue").data("kendoNumericTextBox").value(0);
+                    Discount.value(0);
+                    DiscountPercent.value(0);
+
+
+                    $("#lbl_show_discount_percent").text('');
+                    $("#lbl_show_total").text('');
+                    //calendar1.refetchEvents();
+                    //RefreshReservePrice(("#TxtReserveDetailId").val());
+                }
+                //$("#Other .k-i-reload").click();
+            }
+        });
+
+    }
+
+    $('#btn-payAllVisit-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $('#my-modal-Receive #ERROR_SomeThingWentWrong').addClass('hidden');
+        $('#my-modal-Receive #NotEnoughProductCount').addClass('hidden');
+        $('#my-modal-Receive #InvalidReception').addClass('hidden');
+        $('#my-modal-Receive #InvalidReceptionService').addClass('hidden');
+        $('#my-modal-Receive #ERROR_Data').addClass('hidden');
+
+        var link = "/Visit/PayAllVisit";
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                receptionId: $("#TxtReceptionId").val()
+            },
+            success: function (response) {
+                $('#btn-payAllVisit-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "DataNotValid") {
+
+                        $("#my-modal-Receive #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "InvalidReception") {
+
+                        $("#my-modal-Receive #InvalidReception").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        $("#serviceKendoGrid .k-pager-refresh")[0].click();
+                    }
+                } else {
+
+                    $("#my-modal-Receive #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+
+    function DeletePayVisitFunction(element) {
+
+        $("#DeletePayVisitModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeletePayVisitModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeletePayVisitModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeletePayVisitModal-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-DeletePayVisitModal-accept').on("click", function (e) {
+        $(this).attr("disabled", true);
+
+        $("#DeletePayVisitModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeletePayVisitModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/Visit/RemovePayVisit";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-DeletePayVisitModal-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeletePayVisitModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#serviceKendoGrid .k-pager-refresh")[0].click();
+
+                    //calendar1.refetchEvents();
+                    //RefreshReservePrice(("#TxtReserveDetailId").val());
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeletePayVisitModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#DeletePayVisitModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+</script>

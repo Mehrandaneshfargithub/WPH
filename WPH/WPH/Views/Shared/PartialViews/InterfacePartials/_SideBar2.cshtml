@@ -1,0 +1,32 @@
+﻿@*@model IEnumerable<WPH.Models.CustomDataModels.UserManagment.SubSystemViewModel>
+<div id="sidebar2" class="sidebar h-sidebar navbar-collapse collapse @{
+    
+        String horizontalSideBar = ViewBag.HorizontalSideBar;
+    
+        if (horizontalSideBar == "minimumSideBar")
+        {
+            @:menu-min
+        }
+            }
+            ace-save-state" data-sidebar="true" data-sidebar-scroll="true" data-sidebar-hover="true">
+   
+
+    <ul class="nav nav-list MyFont-Merriweather-grid">
+        @{
+
+            foreach (var item in Model)
+            {
+                if (item.Parent == 0 && item.Active == true)
+                {
+                    @UserManagmentGlobalHelper.subSystemChildrenGeneratorHorizontal(Model, item, ViewBag.Highlight, ViewBag.Hover)               
+                }
+            }
+        }
+    </ul>
+
+    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+        <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state sidebar-toggle-icon-horizontal" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
+    </div>
+</div>*@
+
+

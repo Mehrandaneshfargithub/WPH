@@ -1,0 +1,295 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+    }
+
+}
+
+
+
+<div class="row page-header">
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["PatientToAnotherSectionReport"]
+        </h1>
+
+    </div>
+
+</div><!-- /.page-header -->
+
+
+<div id="signup-box" class="signup-box no-border @font">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+
+                    <div class="col-xs-12" style="@direction ">
+
+                        <div class="col-xs-6" style="padding:0">
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Section"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("Section")
+                                        .DataValueField("Guid")
+                                        .DataTextField("Name")
+                                        .Filter("contains")
+                                        .OptionLabel(" ")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllParentClinicSections", "ClinicSection");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%" })
+
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["DateFrom"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DatePicker()
+                                          .Name("FromDate")
+                                          .Format("dd/MM/yyyy")
+                                          .Value(DateTime.Now)
+                                          .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="col-xs-6" style="padding: 0; display: flex; align-items: end">
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["DateTo"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DatePicker()
+                                          .Name("ToDate")
+                                          .Format("dd/MM/yyyy")
+                                          .Value(DateTime.Now)
+                                          .HtmlAttributes(new { style = "width: 100%"})
+                                        )
+                                    </span>
+
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6" style="padding-bottom:0.5rem">
+                                @if ((bool)ViewBag.AccessPrintFundReportFromSections)
+                                {
+                                    @(Html.Kendo().Button()
+                                        .Name("btn-SalaryReport-accept")
+                                        .HtmlAttributes(new { style = "font-size:15px;height:35px;", type = "button", @class = $"k-primary ", onclick = "AcceptReport()" })
+                                        .Content(Localizer["Ok"]))
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+<div class="col-sm-12">
+
+    <div class="col-xs-12" style="padding-top:1rem;display: flex;align-items: flex-end; @direction ">
+
+        <div class="col-xs-6 @font" style="padding:0">
+
+            <div class="col-sm-6">
+
+
+
+            </div>
+
+            <div class="col-sm-6">
+
+            </div>
+
+        </div>
+
+        <div class="col-xs-6" style="padding:0">
+            <div class="col-sm-6">
+
+            </div>
+
+            <div class="col-sm-6">
+
+               
+
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+<script>
+
+    function BackToHospitalPatient() {
+        $(".loader").removeClass("hidden");
+
+        let link = "/HospitalPatient/Form";
+
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    $('#FromDate').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            let date = $("#ToDate").data("kendoDatePicker");
+            date.element.focus();
+        }
+    });
+
+    $('#FromDate').focus(function (e) {
+
+        let date = $("#FromDate").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+    $('#ToDate').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $("#btn-CostReport-accept").focus();
+        }
+
+    });
+
+
+    $('#ToDate').focus(function (e) {
+
+        let date = $("#ToDate").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+
+    function draw2(imgData) {
+
+        "use strict";
+
+        var dataUrl = [];
+        for (let index = 0; index < imgData.allb.length; index++) {
+
+            var pf = "data:image/jpeg;base64," + imgData.allb[index];
+
+            dataUrl.push(pf)
+
+        }
+
+        printJS({ printable: dataUrl, type: 'image' });
+    }
+
+
+    function GetPeriodForPatientToAnotherSection() {
+
+        var fromDate = $("#FromDate").data("kendoDatePicker");
+        var toDate = $("#ToDate").data("kendoDatePicker");
+
+        var frDate = fromDate.value();
+        var tDate = toDate.value();
+        let frMonth = frDate.getMonth() + 1;
+        let frDay = frDate.getDate();
+        let toMonth = tDate.getMonth() + 1;
+        let toDay = tDate.getDate();
+
+        if (frMonth < 10)
+            frMonth = "0" + frMonth;
+        if (toMonth < 10)
+            toMonth = "0" + toMonth;
+        if (frDay < 10)
+            frDay = "0" + frDay;
+        if (toDay < 10)
+            toDay = "0" + toDay;
+
+        let from = frDate.getFullYear() + "-" + frMonth + "-" + frDay;
+        let too = tDate.getFullYear() + "-" + toMonth + "-" + toDay;
+
+        var period = $("#Section").data("kendoDropDownList");
+
+        var periodValue = period.value();
+        var periodText = period.text();
+
+        let section = { Id: periodValue, Name: periodText }
+
+        return {
+
+            dateFrom: from,
+            dateTo: too,
+            section: section,
+        };
+    }
+
+    function AcceptReport() {
+
+        $(".loader").removeClass("hidden");
+
+        var data = GetPeriodForPatientToAnotherSection();
+
+        link = "/HospitalPatient/PrintPatientToAnotherSectionReport";
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            url: link,
+            type: "Post",
+            data: data,
+            success: function (response) {
+
+                draw2(response);
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            },
+            error: function (response) {
+                console.log(response);
+                console.log(response.data);
+                console.log(response.error);
+            }
+        });
+
+    }
+
+</script>

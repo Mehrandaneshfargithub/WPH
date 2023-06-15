@@ -1,0 +1,566 @@
+﻿@model WPH.Models.CustomDataModels.Visit.VisitViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "",  direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        direction = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        direction = " direction:rtl; ";
+    }
+
+}
+
+<div id="signup-box" class="signup-box no-border" >
+    <div class="widget-body" >
+        <div class="widget-main " style="margin-top: 0; padding: 0 1rem">
+            <form id="addNewForm" autocomplete="off" >
+                <fieldset>
+                    @(Html.Kendo().Button()
+                                .Name("btn-queue-pasand")
+                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick= "Pasand()" })
+                                .Content(Localizer["Ok"]))
+                    @(Html.Kendo().Button()
+                                .Name("btn-queue-patient-record")
+                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-left", onclick= "QueuDiseaseRecord()" })
+                                .Content(Localizer["DiseaseRecord"]))
+                    @(Html.Kendo().Button()
+                                .Name("btn-queue-medicine-record")
+                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-left", onclick= "QueuMedicineRecord()" })
+                                .Content(Localizer["MedicineRecord"]))
+
+                    <div id="visitDiv" class="hidden">
+                        @Html.HiddenFor(m => m.Guid, new { @id = "Guid" })
+                        @Html.HiddenFor(m => m.ClinicSectionId, new { @id = "ClinicSectionId" })
+                        @Html.HiddenFor(m => m.ReserveDetailId, new { @id = "ReserveDetailId" })
+                        @Html.HiddenFor(m => m.StatusId, new { @id = "StatusId" })
+                        @Html.HiddenFor(m => m.VisitDate, new { @id = "VisitDate" })
+                        @Html.HiddenFor(m => m.VisitNum, new { @id = "VisitNum" })
+                        @Html.HiddenFor(m => m.VisitTime, new { @id = "VisitTime" })
+                        @Html.HiddenFor(m => m.UniqueVisitNum, new { @id = "UniqueVisitNum" })
+                        @Html.HiddenFor(m => m.Index, new { @id = "Index" })
+                        @Html.HiddenFor(m => m.ReserveDetail.PatientId, new { @id = "PatientId" })
+
+                    </div>
+                </fieldset>
+            </form>
+
+            
+
+                @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/PatientVariable/wpVariablesSection.cshtml", "Show For Secretor")
+
+            
+
+            @{
+                if (Model.AllClinicSectionChoosenValues != null)
+                {
+                    foreach (var value in Model.AllClinicSectionChoosenValues)
+                    {
+                        if (value.FillBySecretary)
+                        {
+                            if (value.PatientVariableVariableType == "Text")
+                            {
+                                <div class="col-sm-12 block input-icon input-icon-right">
+                                    <label class="block clearfix" style="text-align:left;margin-top:0.5rem">
+                                        <label for="form-field-8">: @value.PatientVariableVariableName</label>
+                                        <span class="block input-icon input-icon-right">
+                                            @(Html.Kendo().TextBox()
+                                            .Name(value.VariableNameForView)
+                                            .Value(value.Value)
+                                            .HtmlAttributes(new
+                                            {
+                                                style = "font-size:1.5rem;width:100%;text-align:left",
+                                                @data_property = value.PatientVariableId,
+                                                @data_variable = "queuVariables",
+                                                @data_textField = "textField",
+                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                                @data_type = "text"
+                                            })
+                                            )
+                                        </span>
+                                    </label>
+                                </div>
+                            }
+                            else if (value.PatientVariableVariableType == "Int")
+                            {
+                                <div class="col-sm-12 block input-icon input-icon-right" style="text-align:left;direction:ltr;margin-top:0.5rem">
+                                    <label for="form-field-8">@value.PatientVariableVariableName :</label>
+                                    @(Html.Kendo().NumericTextBox<int>()
+                                    .Name(value.VariableNameForView)
+                                    .Value(Convert.ToInt32(Convert.ToDecimal(value.Value)))
+                                    .Format("# " + value.PatientVariable.VariableUnit)
+                                    .HtmlAttributes(new
+                                    {
+                                        style = "font-size:1.5rem;width:100%",
+                                        @data_property = value.PatientVariableId,
+                                        @data_variable = "queuVariables",
+                                        @data_textField = "textField",
+                                        @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                        @data_type = "int"
+                                    })
+                                    )
+                                </div>
+                            }
+                            else if (value.PatientVariableVariableType == "Decimal")
+                            {
+                                <div class="col-sm-12 block input-icon input-icon-right" style="text-align:left;direction:ltr;margin-top:0.5rem">
+
+                                    <label for="form-field-8">@value.PatientVariableVariableName :</label>
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name(value.VariableNameForView)
+                                    .Value(Convert.ToDecimal(value.Value))
+                                    .Format("#.0 " + value.PatientVariable.VariableUnit)
+                                    .HtmlAttributes(new
+                                    {
+                                        style = "font-size:1.5rem;width:100%",
+                                        @data_property = value.PatientVariableId,
+                                        @data_variable = "queuVariables",
+                                        @data_textField = "textField",
+                                        @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                        @data_type = "decimal"
+                                    })
+                                    )
+                                </div>
+                                @*</label>*@
+                            }
+                        }
+                    }
+
+                    foreach (var value in Model.AllClinicSectionChoosenValues)
+                    {
+                        if (value.FillBySecretary)
+                        {
+                            if (value.PatientVariableVariableType == "Bool")
+                            {
+                                if (value.Value == "true")
+                                {
+                                    @(Html.Kendo().CheckBox()
+                                    .Name(value.VariableNameForView)
+                                    .Label(value.PatientVariableVariableName)
+                                    .Checked(true)
+                                    .HtmlAttributes(new
+                                            {
+                                                @class = "kendoCheckbox",
+                                                style = "font-size:5rem;margin:2rem;transform:translate(0,-20%)",
+                                                @data_property = value.PatientVariableId,
+                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                                @data_variable = "queuVariables",
+                                                @data_type = "checkbox"
+                                            }))
+                                }
+                                else
+                                {
+                                    @(Html.Kendo().CheckBox()
+                                    .Name(value.VariableNameForView)
+                                    .Label(value.PatientVariableVariableName)
+                                    .HtmlAttributes(new
+                                            {
+                                                @class = "kendoCheckbox",
+                                                style = "font-size:5rem;margin:2rem;transform:translate(0,-20%)",
+                                                @data_property = value.PatientVariableId,
+                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                                @data_variable = "queuVariables",
+                                                @data_type = "checkbox"
+                                            }))
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        </div>
+    </div>
+</div>
+
+
+<div class="col-xs-12" style="text-align:right;border-bottom:dotted 1px #d4d4d4;margin-top:2rem;padding-bottom:0.5rem">
+    <h3 class="@font">
+        @Localizer["TestResult"]
+    </h3>
+</div>
+
+<script>
+
+    function OnUploadVisitFile(e) {
+
+        var dataArrays = [];
+        //var fileManager = $("#filemanager").data("kendoFileManager");
+        var fileNameArrays = [];
+        //var path = fileManager.path();
+
+        let pateintId = $("#PatientId").val();
+        let visitId = $("#Guid").val();
+
+        for (let i = 0; i < e.files.length; i++) {
+
+            if (e.files[i].rawFile.type.match(/image.*/)) {
+                e.preventDefault();
+                var reader = new FileReader();
+
+                reader.onload = function (readerEvent) {
+                    var image = new Image();
+                    image.onload = function (imageEvent) {
+                        // Resize the image
+                        var canvas = document.createElement('canvas'),
+                            max_size = 800,
+                            width = image.width,
+                            height = image.height;
+
+                        if (width > max_size) {
+                            let div = width / max_size;
+                            width = width / div;
+                            height = height / div;
+                        }
+                        if (height > max_size) {
+
+                            let div = height / max_size;
+                            width = width / div;
+                            height = height / div;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+
+                        var dataUrl = canvas.toDataURL('image/jpeg');
+                        $.ajax({
+                            url: "/Patient/Async_Save",
+                            data: { file: dataUrl, fileName: e.files[i].rawFile.name, patientId: pateintId, visitId: visitId },
+                            type: 'POST',
+                            success: function (data) {
+
+                                GetAllVisitImages();
+                            }
+                        });
+                    }
+                    image.src = readerEvent.target.result;
+                }
+                reader.readAsDataURL(e.files[i].rawFile);
+            }
+        }
+    }
+
+    function OnUploadPatientFile(e) {
+
+        var dataArrays = [];
+        //var fileManager = $("#filemanager").data("kendoFileManager");
+        var fileNameArrays = [];
+        //var path = fileManager.path();
+
+        let pateintId = $("#PatientId").val();
+
+        for (let i = 0; i < e.files.length; i++) {
+
+            if (e.files[i].rawFile.type.match(/image.*/)) {
+                e.preventDefault();
+                var reader = new FileReader();
+
+                reader.onload = function (readerEvent) {
+                    var image = new Image();
+                    image.onload = function (imageEvent) {
+                        // Resize the image
+                        var canvas = document.createElement('canvas'),
+                            max_size = 800,
+                            width = image.width,
+                            height = image.height;
+
+                        if (width > max_size) {
+                            let div = width / max_size;
+                            width = width / div;
+                            height = height / div;
+                        }
+                        if (height > max_size) {
+
+                            let div = height / max_size;
+                            width = width / div;
+                            height = height / div;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+
+                        var dataUrl = canvas.toDataURL('image/jpeg');
+                        $.ajax({
+                            url: "/Patient/Async_Save",
+                            data: { file: dataUrl, fileName: e.files[i].rawFile.name, patientId: pateintId },
+                            type: 'POST',
+                            success: function (data) {
+                                GetAllPatientImages();
+                            }
+                        });
+                    }
+                    image.src = readerEvent.target.result;
+                }
+                reader.readAsDataURL(e.files[i].rawFile);
+            }
+            else {
+                alert("please select image");
+            }
+        }
+    }
+
+</script>
+
+<div class="col-xs-12" style="margin:1rem 0;display:flex;flex-direction:row;direction:ltr">
+    <div class="col-xs-4" style="margin:0;padding:0">
+
+        @(Html.Kendo().Button()
+            .Name("btn-queue-result-pic")
+            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-left", onclick= "GoToCamera('visit')" })
+            .Content("Take Pic With Camera"))
+
+    </div>
+
+    <div class="col-xs-8" style="margin:0;padding:0">
+
+        @(Html.Kendo().Upload()
+        .Name("files")
+        .Multiple(true)
+        .Async(a => a
+            .Save("Async_Save", "Patient")
+            .Remove("Async_Remove", "Patient")
+            .AutoUpload(true)
+        )
+        .ShowFileList(false)
+        .Events(events => events
+                .Error("onPatientImageError")
+                .Complete("onVisitImageComplete")
+                .Upload("OnUploadVisitFile")
+            )
+        .HtmlAttributes(new { @id = "visitFiles" })
+    )
+
+    </div>
+
+
+</div>
+
+
+
+
+<div id="VisitImages" class="col-xs-12" style="margin:1rem 0">
+
+
+</div>
+
+
+<div class="col-xs-12" style="text-align:right;border-bottom:dotted 1px #d4d4d4;margin:1rem 0;padding-bottom:0.5rem">
+    <h3 class="@font">
+        @Localizer["All"] @Localizer["Files"]
+    </h3>
+</div>
+
+<div class="col-xs-12" style="margin: 0;display:flex;flex-direction:row;direction:ltr">
+    <div class="col-xs-4" style="margin:0;padding:0">
+
+        @(Html.Kendo().Button()
+            .Name("btn-queue-file-pic")
+            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-left", onclick= "GoToCamera('patient')" })
+            .Content("Take Pic With Camera"))
+
+    </div>
+
+    <div class="col-xs-8" style="margin:0;padding:0">
+
+        @(Html.Kendo().Upload()
+        .Name("files")
+        .Multiple(true)
+        .Async(a => a
+            .Save("Async_Save", "Patient")
+            .Remove("Async_Remove", "Patient")
+            .AutoUpload(true)
+        )
+        .ShowFileList(false)
+        .Events(events => events
+                .Error("onPatientImageError")
+                .Complete("onPatientImageComplete")
+                .Upload("OnUploadPatientFile")
+            )
+    )
+
+    </div>
+
+
+</div>
+
+
+<div id="PatientImages" class="col-xs-12" style="margin:1rem 0">
+
+</div>
+
+<div>
+    @(Html.Kendo().Window()
+        .Name("window")
+        //.Title("Image Preview")
+        .Visible(false)
+        .Content(@<text>
+                    <img id="imagePreview" src="#" alt="Image Preview" height="500" />
+        </text>)
+        .Draggable()
+        .Resizable()
+        .Actions(actions => actions.Pin().Minimize().Maximize().Close())
+            )
+
+</div>
+
+
+
+
+
+<h3 class="hidden" id="waitQu">@Model.ReserveDetail.Patient.UserName - @Localizer["WaitingQueue"]</h3>
+
+<script src="~/Content/Js/QueueModal.js"></script>
+
+<style>
+
+    /* CSS comes here */
+    #video {
+        border: 1px solid black;
+    }
+
+    #photo {
+        border: 1px solid black;
+    }
+
+    #canvas {
+        display: none;
+    }
+
+    .camera {
+        display: inline-block;
+    }
+
+    .output {
+        display: none;
+    }
+
+    #startbutton {
+        display: block;
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+        bottom: 36px;
+        padding: 5px;
+        background-color: #6a67ce;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        color: rgba(255, 255, 255, 1.0);
+        cursor: pointer;
+    }
+
+    .contentarea {
+        font-size: 16px;
+        font-family: Arial;
+        text-align: center;
+    }
+</style>
+
+<script>
+
+    var Height;
+    var Weight;
+    var BloodPressureDIA;
+    var BloodPressureSYS;
+    var BodyTemperature;
+    var video ;
+    var canvas ;
+    var photo ;
+    var startbutton;
+    var width = 0; // We will scale the photo width to this
+    var height = 0; // This will be computed based on the input stream
+    var streaming = false;
+    var imagebase64data;
+    var startButtonDiv;
+    var output;
+    var camera;
+    var type;
+    var KurdishKey = [1632, 1633, 1634, 1635, 1636, 1637, 1638, 1639, 1640, 1641, 1602, 96, 1608, 1749, 1610, 1585, 1685, 1578, 1591, 1740, 1742, 1574, 1569
+        , 1581, 1593, 1734, 1572, 1662, 1579, 1575, 1570, 1587, 1588, 1583, 1584, 1601, 1573, 1711, 1594, 1607, 8204, 1688, 1571, 1705, 1603, 1604
+        , 1717, 1586, 1590, 1582, 1589, 1580, 1670, 1700, 1592, 1576, 1609, 1606, 1577, 1605, 1600
+    ];
+
+    var EnglishKey = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "q", "Q", "w", "e", "E", "r", "R", "t", "T", "y", "Y", "u", "U", "i", "I", "o", "O", "p", "P", "a"
+        , "A", "s", "S", "d", "D", "f", "F", "g", "G", "h", "H", "j", "J", "k", "K", "l", "L", "z", "Z", "x", "X", "c", "C", "v", "V", "b", "B", "n", "N", "m", "M"];
+
+
+    $(document).ready(function () {
+        createVariables();
+        $("#exit").kendoButton({
+            click: patientQueuHide,
+        });
+
+        let hed = $("#waitQu").text();
+
+        @*$('#qeue-modal-header').text('@Model.ReserveDetail.Patient.Name' + ' - ' +'@Localizer["WaitingQueue"]');*@
+        $('#qeue-modal-header').text(hed);
+
+        GetAllVisitImages();
+        GetAllPatientImages();
+
+        var allTexts = $('[data-textField]');
+        for (let i = 0; i < allTexts.length; i++) {
+
+            if (i === allTexts.length-1) {
+                $(allTexts[i]).keypress(function (e) {
+                    let index = KurdishKey.indexOf(e.which);
+                    if (e.which === 13 || e.which === 9) {
+                        $("#btn-qeue-accept").focus();
+                    }
+                    else if (index !== -1) {
+                        e.preventDefault();
+                        let index1 = EnglishKey[index];
+                        let preVal = $(this).val();
+                        $(this).val(preVal + index1);
+                    }
+                })
+            }
+            else {
+                $(allTexts[i]).keypress(function (e) {
+                    let index = KurdishKey.indexOf(e.which);
+                    if (e.which === 13 || e.which === 9) {
+                        if ($(allTexts[i + 1]).attr('data-type') == 'int' || $(allTexts[i + 1]).attr('data-type') == 'decimal') {
+                            let vari = $(allTexts[i + 1]).data("kendoNumericTextBox");
+                            vari.focus();
+                            $(allTexts[i + 1]).select()
+                        }
+                        else if ($(allTexts[i + 1]).attr('data-type') == 'text') {
+                            $(allTexts[i + 1]).focus();
+                            $(allTexts[i + 1]).select()
+                        }
+                    }
+                    else if(index !== -1) {
+                        e.preventDefault();
+                        let index1 = EnglishKey[index];
+                        let preVal = $(this).val();
+                        $(this).val(preVal + index1);
+                    }
+                })
+            }
+        }
+
+        if (allTexts[0] !== undefined) {
+            setTimeout(function () {
+                if ($(allTexts[0]).attr('data-type') == 'int' || $(allTexts[0]).attr('data-type') == 'decimal') {
+                    let vari = $(allTexts[0]).data("kendoNumericTextBox");
+                    vari.focus();
+                    $(allTexts[0]).select();
+                }
+                else {
+                    $(allTexts[0]).focus();
+                    $(allTexts[0]).select();
+                }
+
+            }, 200);
+        }
+    });
+
+</script>
+

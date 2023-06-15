@@ -1,0 +1,93 @@
+﻿@model IEnumerable<WPH.Models.CustomDataModels.BaseInfo.PeriodsViewModel>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div class="MyFont-Roboto-grid clearfix" id="searchBeginEndDateBox" style="visibility:hidden; font-size:small !important;display:flex;align-items:center; @if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                @:flex-direction: row-reverse;
+            }
+            else {
+                @:flex-direction: row;
+            } ">
+
+    <div class="col-lg-3 col-md-3 col-sm-3" style="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                @:text-align: right;
+            }
+            else {
+                @:text-align: left;
+            }">
+
+        <h5 class="MyFont-Roboto-grid">@Localizer["DontPaySalaryDate"] </h5>
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-3" style="text-align:center;">
+        @(Html.Kendo().DropDownList()
+        .Name("periodsBeginEndDate")
+        .BindTo(Model)
+        .OptionLabel(" ")
+        .DataTextField("Name")
+        .DataValueField("Id")
+        .Events(e =>
+        {
+        e.Select("onSelectPeriodInHumanBeginEndDate");
+        })
+        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChangeSalaryBeginEndDate()" })
+        )
+    </div>
+</div>
+
+
+<div class="MyFont-Roboto-grid hidden clearfix" id="DivFromAndtoBeginEndDate" style="font-size:small !important;display:flex;align-items:center; @if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                @:flex-direction: row-reverse;
+            }
+            else {
+                @:flex-direction: row;
+            } ">
+
+    <div class="col-lg-3 col-md-3 col-sm-3 " style="@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                @:text-align: left;
+            }
+            else {
+                @:text-align: right;
+            }">
+
+        <h5 class="MyFont-Roboto-grid">@Localizer["From"] @Localizer["Date"]</h5>
+
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-3" style="text-align:center; padding-right: 20px !important; padding-left:12px !important; ">
+        @(Html.Kendo().DatePicker()
+        .Name("KendoFromDateBeginEnd")
+        .Value(DateTime.Now)
+        .Format("dd/MM/yyyy")
+        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+        )
+
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2" style="padding-left:1px !important;@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+                @:text-align: left;
+            }
+            else {
+                @:text-align: right;
+            }">
+
+        <h5 class="MyFont-Roboto-grid">@Localizer["To"] @Localizer["Date"]</h5>
+
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-3" style="text-align:center;">
+
+        @(Html.Kendo().DatePicker()
+        .Name("KendoDateToBeginEnd")
+        .Value(DateTime.Now)
+        .Format("dd/MM/yyyy")
+        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+        )
+    </div>
+    <div class="col-lg-1 col-md-1 col-sm-1">
+
+        @(Html.Kendo().Button()
+        .Name("btn-search-BeginEndDate")
+        .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary pull-right", onclick = "btnSearchBeginEndDateClick()" })
+        .Content("<i class='fa fa-search'></i>"))
+
+    </div>
+</div>

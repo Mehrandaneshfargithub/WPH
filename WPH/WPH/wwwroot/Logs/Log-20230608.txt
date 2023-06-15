@@ -1,0 +1,494 @@
+2023-06-08T09:02:21.4082654+03:30  [INF] Worker AnalysisItem at: 06/08/2023 09:02:21 +03:30 (68555833)
+2023-06-08T09:02:21.6280699+03:30  [INF] Worker Analysis at: 06/08/2023 09:02:21 +03:30 (7b79526c)
+2023-06-08T09:02:21.6811422+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:02:21.9619687+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 09:02:21 +03:30 (75e3aab0)
+2023-06-08T09:02:23.3857834+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T09:02:23.3899277+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T09:02:23.3939986+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T09:02:23.5700425+03:30 80000309-0003-fb00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T09:02:26.0010531+03:30 80000309-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T09:02:26.0064054+03:30 80000309-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T09:02:26.0107830+03:30 80000309-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T09:02:26.0180126+03:30 80000309-0003-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T09:02:36.3305292+03:30 80000358-0007-fc00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T09:17:04.2186582+03:30 800002b8-0004-f700-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T09:17:13.4898928+03:30 8000022d-0005-f900-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:17:13.5027061+03:30 8000012a-0004-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:19:28.8509352+03:30 80000371-0007-fc00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:19:29.0647788+03:30 80000371-0007-fc00-b63f-84710c7967bb [ERR] Failed executing DbCommand ("129"ms) [Parameters=["@__clinicSectionId_0='?' (DbType = Guid), @__dateFrom_1='?' (DbType = DateTime), @__dateTo_2='?' (DbType = DateTime), @__type_3='?' (DbType = Int32)"], CommandType='Text', CommandTimeout='30']"
+""SELECT [p0].[Guid], [p0].[InvoiceNum], [p0].[InvoiceDate], [p0].[Description], [p0].[MainInvoiceNum], [p0].[TotalPrice], CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [PurchaseInvoicePay] AS [p]
+        WHERE ([p0].[Guid] = [p].[InvoiceId]) AND ([p].[FullPay] IS NOT NULL AND ([p].[FullPay] = CAST(1 AS bit)))) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END, [u].[Name], [s].[GUID], [u].[Guid], [t].[Amount], [t].[CurrencyName], [t].[Guid], [t].[Id], [t0].[Price], [t0].[CurrencyName], [t0].[Guid], [t0].[Id]
+FROM [PurchaseInvoice] AS [p0]
+LEFT JOIN [Supplier] AS [s] ON [p0].[SupplierId] = [s].[GUID]
+LEFT JOIN [User] AS [u] ON [s].[GUID] = [u].[Guid]
+LEFT JOIN (
+    SELECT [p1].[Amount], [b].[Name] AS [CurrencyName], [p1].[Guid], [b].[Id], [p1].[PurchaseInvoiceId]
+    FROM [PurchaseInvoiceDiscount] AS [p1]
+    LEFT JOIN [dbo].[BaseInfoGeneral] AS [b] ON [p1].[CurrencyId] = [b].[Id]
+) AS [t] ON [p0].[Guid] = [t].[PurchaseInvoiceId]
+LEFT JOIN (
+    SELECT [c].[Price], [b0].[Name] AS [CurrencyName], [c].[Guid], [b0].[Id], [c].[PurchaseInvoiceId]
+    FROM [Cost] AS [c]
+    LEFT JOIN [dbo].[BaseInfoGeneral] AS [b0] ON [c].[CurrencyId] = [b0].[Id]
+) AS [t0] ON [p0].[Guid] = [t0].[PurchaseInvoiceId]
+WHERE ((([p0].[ClinicSectionId] = @__clinicSectionId_0) AND ([p0].[InvoiceDate] >= @__dateFrom_1)) AND ([p0].[InvoiceDate] <= @__dateTo_2)) AND ([p0].[TypeId] = @__type_3)
+ORDER BY [p0].[Guid], [s].[GUID], [u].[Guid], [t].[Guid], [t].[Id], [t0].[Guid], [t0].[Id]" (627a98df)
+2023-06-08T09:19:29.2618201+03:30 80000371-0007-fc00-b63f-84710c7967bb [ERR] An exception occurred while iterating over the results of a query for context type '"DataLayer.EntityModels.WASContext"'."
+""Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'TypeId'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+ClientConnectionId:aef2020e-af97-43b2-93fa-6a7fac0b7b55
+Error Number:207,State:1,Class:16" (f5c7ac34)
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'TypeId'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.SelectEnumerableIterator`2.ToList()
+   at WPH.MvcMockingServices.InfraStructure.PurchaseInvoiceMvcMockingService.GetAllPurchaseInvoices(Guid clinicSectionId, PurchaseInvoiceFilterViewModel filterViewModel, IStringLocalizer`1 _localizer) in C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH\MvcMockingServices\InfraStructure\PurchaseInvoiceMvcMockingService.cs:line 259
+ClientConnectionId:aef2020e-af97-43b2-93fa-6a7fac0b7b55
+Error Number:207,State:1,Class:16
+2023-06-08T09:19:29.4542169+03:30 80000371-0007-fc00-b63f-84710c7967bb [INF] Controller: PurchaseInvoice	 Action: GetAll	 Message: Invalid column name 'TypeId'. (282f4591)
+2023-06-08T09:19:44.8473284+03:30 80000371-0007-fc00-b63f-84710c7967bb [ERR] An unhandled exception has occurred while executing the request. (48a46595)
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'TypeId'.
+   at WPH.Controllers.PurchaseInvoice.PurchaseInvoiceController.GetAll(DataSourceRequest request, PurchaseInvoiceFilterViewModel filterViewModel) in C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH\Controllers\PurchaseInvoice\PurchaseInvoiceController.cs:line 216
+   at lambda_method1398(Closure , Object , Object[] )
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.SyncActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|24_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.ResponseCompression.ResponseCompressionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+ClientConnectionId:aef2020e-af97-43b2-93fa-6a7fac0b7b55
+Error Number:207,State:1,Class:16
+2023-06-08T09:22:16.0878802+03:30 8000030b-0003-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T09:24:32.4852345+03:30 80000223-0002-fd00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:25:04.1850936+03:30 8000018d-0007-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:25:26.0639684+03:30 800002ff-0005-fa00-b63f-84710c7967bb [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. (96eb03fe)
+2023-06-08T09:25:57.5613712+03:30 80000231-0005-f900-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:26:54.1937830+03:30 8000022c-0002-fd00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:35:42.0860406+03:30 80000309-0001-fc00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:36:47.0048936+03:30 80000308-0005-fa00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:36:47.0190253+03:30 80000308-0005-fa00-b63f-84710c7967bb [ERR] Failed executing DbCommand ("3"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT TOP(1) [p].[Consideration], [p].[CurrencyId], [p].[ExpireDate], [p].[FirstPrice], [p].[Guid], [p].[MoneyConvertId], [p].[PurchaseCurrencyName], [p].[PurchasePrice], [p].[SaleType], [p].[SellingCurrencyId], [p].[SellingCurrencyName], [p].[SellingPrice], [p].[Stock], [p].[TotalStock]
+FROM (
+    SELECT PurchaseInvoiceDetails.Guid Guid, ExpireDate , RemainingNum Stock, 0.0 TotalStock, PurchasePrice, PurchaseCurrency.Name PurchaseCurrencyName,'PurchaseInvoiceDetail' SaleType,Consideration ,PurchaseInvoiceDetails.CurrencyId CurrencyIdSellingPrice  FirstPrice, ,PurchaseInvoiceDetailSale.CurrencyId SellingCurrencyId, PurchaseInvoiceDetailSale.Name SellingCurrencyName, PurchaseInvoiceDetailSale.MoneyConvertId MoneyConvertId ,SellingPrice FROM dbo.PurchaseInvoiceDetails INNER JOIN dbo.BaseInfoGeneral PurchaseCurrency ON PurchaseCurrency.Id = PurchaseInvoiceDetails.CurrencyId LEFT JOIN (SELECT PurchaseInvoiceDetailId, PurchaseInvoiceDetailSalePrice.CurrencyId, SaleCurrency.Name, PurchaseInvoiceDetailSalePrice.MoneyConvertId
+    					           FROM dbo.PurchaseInvoiceDetailSalePrice PurchaseInvoiceDetailSalePrice
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleCurrency ON SaleCurrency.Id = PurchaseInvoiceDetailSalePrice.CurrencyId
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleType ON SaleType.Id = PurchaseInvoiceDetailSalePrice.TypeId 
+    					           WHERE PurchaseInvoiceDetailSalePrice.CurrencyId = 11  AND SaleType.Name = 'retailPrice')PurchaseInvoiceDetailSale ON PurchaseInvoiceDetailSale.PurchaseInvoiceDetailId = PurchaseInvoiceDetails.Guid WHERE Guid = '82a570be-c9fa-ed11-9dca-000c29c340db'
+) AS [p]" (627a98df)
+2023-06-08T09:36:47.0340241+03:30 80000308-0005-fa00-b63f-84710c7967bb [ERR] An exception occurred while iterating over the results of a query for context type '"DataLayer.EntityModels.WASContext"'."
+""Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15" (f5c7ac34)
+Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source)
+   at DataLayer.Repositories.Infrastructure.PurchaseInvoiceDetailRepository.GetProductDetailsFromExpireList(Guid invoiceId, String invoiceType, String SaleType, Nullable`1 SellCurrencyId, Boolean latestPrice, Guid productId)
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15
+2023-06-08T09:37:23.4712053+03:30 8000030a-0005-fa00-b63f-84710c7967bb [ERR] Failed executing DbCommand ("3"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT TOP(1) [p].[Consideration], [p].[CurrencyId], [p].[ExpireDate], [p].[FirstPrice], [p].[Guid], [p].[MoneyConvertId], [p].[PurchaseCurrencyName], [p].[PurchasePrice], [p].[SaleType], [p].[SellingCurrencyId], [p].[SellingCurrencyName], [p].[SellingPrice], [p].[Stock], [p].[TotalStock]
+FROM (
+    SELECT PurchaseInvoiceDetails.Guid Guid, ExpireDate , RemainingNum Stock, 0.0 TotalStock, PurchasePrice, PurchaseCurrency.Name PurchaseCurrencyName,'PurchaseInvoiceDetail' SaleType,Consideration ,PurchaseInvoiceDetails.CurrencyId CurrencyIdSellingPrice  FirstPrice, ,PurchaseInvoiceDetailSale.CurrencyId SellingCurrencyId, PurchaseInvoiceDetailSale.Name SellingCurrencyName, PurchaseInvoiceDetailSale.MoneyConvertId MoneyConvertId ,SellingPrice FROM dbo.PurchaseInvoiceDetails INNER JOIN dbo.BaseInfoGeneral PurchaseCurrency ON PurchaseCurrency.Id = PurchaseInvoiceDetails.CurrencyId LEFT JOIN (SELECT PurchaseInvoiceDetailId, PurchaseInvoiceDetailSalePrice.CurrencyId, SaleCurrency.Name, PurchaseInvoiceDetailSalePrice.MoneyConvertId
+    					           FROM dbo.PurchaseInvoiceDetailSalePrice PurchaseInvoiceDetailSalePrice
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleCurrency ON SaleCurrency.Id = PurchaseInvoiceDetailSalePrice.CurrencyId
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleType ON SaleType.Id = PurchaseInvoiceDetailSalePrice.TypeId 
+    					           WHERE PurchaseInvoiceDetailSalePrice.CurrencyId = 11  AND SaleType.Name = 'retailPrice')PurchaseInvoiceDetailSale ON PurchaseInvoiceDetailSale.PurchaseInvoiceDetailId = PurchaseInvoiceDetails.Guid WHERE Guid = '82a570be-c9fa-ed11-9dca-000c29c340db'
+) AS [p]" (627a98df)
+2023-06-08T09:37:23.4879426+03:30 8000030a-0005-fa00-b63f-84710c7967bb [ERR] An exception occurred while iterating over the results of a query for context type '"DataLayer.EntityModels.WASContext"'."
+""Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15" (f5c7ac34)
+Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source)
+   at DataLayer.Repositories.Infrastructure.PurchaseInvoiceDetailRepository.GetProductDetailsFromExpireList(Guid invoiceId, String invoiceType, String SaleType, Nullable`1 SellCurrencyId, Boolean latestPrice, Guid productId)
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15
+2023-06-08T09:37:25.1758728+03:30 8000030b-0005-fa00-b63f-84710c7967bb [ERR] Failed executing DbCommand ("3"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT TOP(1) [p].[Consideration], [p].[CurrencyId], [p].[ExpireDate], [p].[FirstPrice], [p].[Guid], [p].[MoneyConvertId], [p].[PurchaseCurrencyName], [p].[PurchasePrice], [p].[SaleType], [p].[SellingCurrencyId], [p].[SellingCurrencyName], [p].[SellingPrice], [p].[Stock], [p].[TotalStock]
+FROM (
+    SELECT PurchaseInvoiceDetails.Guid Guid, ExpireDate , RemainingNum Stock, 0.0 TotalStock, PurchasePrice, PurchaseCurrency.Name PurchaseCurrencyName,'PurchaseInvoiceDetail' SaleType,Consideration ,PurchaseInvoiceDetails.CurrencyId CurrencyIdSellingPrice  FirstPrice, ,PurchaseInvoiceDetailSale.CurrencyId SellingCurrencyId, PurchaseInvoiceDetailSale.Name SellingCurrencyName, PurchaseInvoiceDetailSale.MoneyConvertId MoneyConvertId ,SellingPrice FROM dbo.PurchaseInvoiceDetails INNER JOIN dbo.BaseInfoGeneral PurchaseCurrency ON PurchaseCurrency.Id = PurchaseInvoiceDetails.CurrencyId LEFT JOIN (SELECT PurchaseInvoiceDetailId, PurchaseInvoiceDetailSalePrice.CurrencyId, SaleCurrency.Name, PurchaseInvoiceDetailSalePrice.MoneyConvertId
+    					           FROM dbo.PurchaseInvoiceDetailSalePrice PurchaseInvoiceDetailSalePrice
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleCurrency ON SaleCurrency.Id = PurchaseInvoiceDetailSalePrice.CurrencyId
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleType ON SaleType.Id = PurchaseInvoiceDetailSalePrice.TypeId 
+    					           WHERE PurchaseInvoiceDetailSalePrice.CurrencyId = 11  AND SaleType.Name = 'retailPrice')PurchaseInvoiceDetailSale ON PurchaseInvoiceDetailSale.PurchaseInvoiceDetailId = PurchaseInvoiceDetails.Guid WHERE Guid = '82a570be-c9fa-ed11-9dca-000c29c340db'
+) AS [p]" (627a98df)
+2023-06-08T09:37:25.1929177+03:30 8000030b-0005-fa00-b63f-84710c7967bb [ERR] An exception occurred while iterating over the results of a query for context type '"DataLayer.EntityModels.WASContext"'."
+""Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15" (f5c7ac34)
+Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source)
+   at DataLayer.Repositories.Infrastructure.PurchaseInvoiceDetailRepository.GetProductDetailsFromExpireList(Guid invoiceId, String invoiceType, String SaleType, Nullable`1 SellCurrencyId, Boolean latestPrice, Guid productId)
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15
+2023-06-08T09:38:56.2786308+03:30 8000030c-0005-fa00-b63f-84710c7967bb [ERR] Failed executing DbCommand ("2"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT TOP(1) [p].[Consideration], [p].[CurrencyId], [p].[ExpireDate], [p].[FirstPrice], [p].[Guid], [p].[MoneyConvertId], [p].[PurchaseCurrencyName], [p].[PurchasePrice], [p].[SaleType], [p].[SellingCurrencyId], [p].[SellingCurrencyName], [p].[SellingPrice], [p].[Stock], [p].[TotalStock]
+FROM (
+    SELECT PurchaseInvoiceDetails.Guid Guid, ExpireDate , RemainingNum Stock, 0.0 TotalStock, PurchasePrice, PurchaseCurrency.Name PurchaseCurrencyName,'PurchaseInvoiceDetail' SaleType,Consideration ,PurchaseInvoiceDetails.CurrencyId CurrencyIdSellingPrice  FirstPrice, ,PurchaseInvoiceDetailSale.CurrencyId SellingCurrencyId, PurchaseInvoiceDetailSale.Name SellingCurrencyName, PurchaseInvoiceDetailSale.MoneyConvertId MoneyConvertId ,SellingPrice FROM dbo.PurchaseInvoiceDetails INNER JOIN dbo.BaseInfoGeneral PurchaseCurrency ON PurchaseCurrency.Id = PurchaseInvoiceDetails.CurrencyId LEFT JOIN (SELECT PurchaseInvoiceDetailId, PurchaseInvoiceDetailSalePrice.CurrencyId, SaleCurrency.Name, PurchaseInvoiceDetailSalePrice.MoneyConvertId
+    					           FROM dbo.PurchaseInvoiceDetailSalePrice PurchaseInvoiceDetailSalePrice
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleCurrency ON SaleCurrency.Id = PurchaseInvoiceDetailSalePrice.CurrencyId
+                                   LEFT JOIN dbo.BaseInfoGeneral SaleType ON SaleType.Id = PurchaseInvoiceDetailSalePrice.TypeId 
+    					           WHERE PurchaseInvoiceDetailSalePrice.CurrencyId = 11  AND SaleType.Name = 'retailPrice')PurchaseInvoiceDetailSale ON PurchaseInvoiceDetailSale.PurchaseInvoiceDetailId = PurchaseInvoiceDetails.Guid WHERE Guid = '82a570be-c9fa-ed11-9dca-000c29c340db'
+) AS [p]" (627a98df)
+2023-06-08T09:38:56.2888423+03:30 8000030c-0005-fa00-b63f-84710c7967bb [ERR] An exception occurred while iterating over the results of a query for context type '"DataLayer.EntityModels.WASContext"'."
+""Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15" (f5c7ac34)
+Microsoft.Data.SqlClient.SqlException (0x80131904): Incorrect syntax near 'FirstPrice'.
+Incorrect syntax near 'PurchaseInvoiceDetailSale'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(DbContext _, Boolean result)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+   at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+   at System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source)
+   at DataLayer.Repositories.Infrastructure.PurchaseInvoiceDetailRepository.GetProductDetailsFromExpireList(Guid invoiceId, String invoiceType, String SaleType, Nullable`1 SellCurrencyId, Boolean latestPrice, Guid productId)
+ClientConnectionId:7099d3d8-2255-4377-9a1d-e6af9fbf13c6
+Error Number:102,State:1,Class:15
+2023-06-08T09:41:48.2224858+03:30 8000030d-0005-fa00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:42:26.2312790+03:30 800001b6-0006-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:45:07.9336612+03:30 800001dc-0006-fc00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:45:38.2201611+03:30 800001df-0006-fc00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:53:22.8596794+03:30 80000315-0005-ff00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T09:54:19.0227964+03:30 8000031f-0003-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T09:54:38.5942934+03:30 8000025b-0005-f900-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T10:01:44.4530119+03:30  [INF] Worker AnalysisItem at: 06/08/2023 10:01:44 +03:30 (68555833)
+2023-06-08T10:01:44.6883870+03:30  [INF] Worker Analysis at: 06/08/2023 10:01:44 +03:30 (7b79526c)
+2023-06-08T10:01:44.7433397+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:01:44.9071639+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 10:01:44 +03:30 (75e3aab0)
+2023-06-08T10:01:46.3759125+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T10:01:46.3803426+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T10:01:46.3843105+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T10:01:46.4947054+03:30 8000013a-0004-fb00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T10:01:48.5480135+03:30 8000013a-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:01:48.5526717+03:30 8000013a-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:01:48.5575268+03:30 8000013a-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:01:48.5628344+03:30 8000013a-0004-fb00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:02:00.4706690+03:30 80000261-0005-f900-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:02:07.4646109+03:30 8000026c-0005-f900-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:02:34.5230640+03:30 8000009c-0007-fa00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T10:07:13.5884490+03:30 80000142-0004-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:11:51.6991631+03:30 80000107-0000-fa00-b63f-84710c7967bb [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. (96eb03fe)
+2023-06-08T10:12:23.6391373+03:30 800002ac-0000-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:12:23.8658507+03:30 8000033d-0006-ff00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:14:28.4431191+03:30 80000347-0005-fa00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:16:27.7756462+03:30 80000334-0005-ff00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:19:49.1807460+03:30 80000379-0006-ff00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:20:07.0108115+03:30 800002b4-0005-f900-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:48:26.8918110+03:30  [INF] Worker AnalysisItem at: 06/08/2023 10:48:26 +03:30 (68555833)
+2023-06-08T10:48:27.0991493+03:30  [INF] Worker Analysis at: 06/08/2023 10:48:27 +03:30 (7b79526c)
+2023-06-08T10:48:27.1585459+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:48:27.3524860+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 10:48:27 +03:30 (75e3aab0)
+2023-06-08T10:48:28.5156071+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T10:48:28.5191385+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T10:48:28.5233448+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T10:48:28.6531297+03:30 8000030d-0001-fc00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T10:48:30.3023229+03:30 8000030d-0001-fc00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:48:30.3070030+03:30 8000030d-0001-fc00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:48:30.3108218+03:30 8000030d-0001-fc00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:48:30.3145299+03:30 8000030d-0001-fc00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T10:48:36.5566254+03:30 8000014e-0004-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:48:43.6066068+03:30 80000328-0003-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T10:49:33.8605808+03:30 80000336-0003-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T10:49:33.8660479+03:30 8000032c-0007-fd00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T13:57:43.0737058+03:30  [INF] Worker AnalysisItem at: 06/08/2023 13:57:43 +03:30 (68555833)
+2023-06-08T13:57:43.3484503+03:30  [INF] Worker Analysis at: 06/08/2023 13:57:43 +03:30 (7b79526c)
+2023-06-08T13:57:43.4286472+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T13:57:43.6519181+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 13:57:43 +03:30 (75e3aab0)
+2023-06-08T13:57:44.9623270+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T13:57:44.9657248+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T13:57:44.9690363+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T13:57:45.1191128+03:30 80000375-0005-ff00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T13:57:47.1906281+03:30 80000375-0005-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T13:57:47.1955852+03:30 80000375-0005-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T13:57:47.2002852+03:30 80000375-0005-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T13:57:47.2052940+03:30 80000375-0005-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T13:57:58.9961921+03:30 8000034a-0007-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T13:58:06.8814683+03:30 80000353-0007-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T13:58:45.2692353+03:30 800001d4-0006-fb00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T13:58:58.5398380+03:30 800001d5-0006-fb00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T22:26:49.4526014+03:30  [INF] Worker AnalysisItem at: 06/08/2023 22:26:49 +03:30 (68555833)
+2023-06-08T22:26:49.6724783+03:30  [INF] Worker Analysis at: 06/08/2023 22:26:49 +03:30 (7b79526c)
+2023-06-08T22:26:49.7273672+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T22:26:49.9205634+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 22:26:49 +03:30 (75e3aab0)
+2023-06-08T22:26:53.0716223+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T22:26:53.0752730+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T22:26:53.0789418+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T22:26:53.2053643+03:30 80000006-0003-ff00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T22:26:55.1900109+03:30 80000006-0003-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:26:55.1953587+03:30 80000006-0003-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:26:55.1997410+03:30 80000006-0003-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:26:55.2043886+03:30 80000006-0003-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:27:09.6101555+03:30 80000005-0007-fe00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T22:27:30.9398766+03:30 80000004-0001-fb00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T22:33:11.1407899+03:30 80000008-0002-ff00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T22:33:11.5459762+03:30 80000008-0002-ff00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T22:43:49.6888969+03:30 80000019-0005-fc00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T22:46:53.1432977+03:30  [INF] Worker AnalysisItem at: 06/08/2023 22:46:53 +03:30 (68555833)
+2023-06-08T22:46:53.3279587+03:30  [INF] Worker Analysis at: 06/08/2023 22:46:53 +03:30 (7b79526c)
+2023-06-08T22:46:53.3805825+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T22:46:53.5524415+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 22:46:53 +03:30 (75e3aab0)
+2023-06-08T22:46:54.9188929+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T22:46:54.9220350+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T22:46:54.9264092+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T22:46:55.0460376+03:30 80000008-0000-ff00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T22:46:57.1468203+03:30 80000008-0000-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:46:57.1518043+03:30 80000008-0000-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:46:57.1555460+03:30 80000008-0000-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:46:57.1591862+03:30 80000008-0000-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T22:47:41.2783275+03:30 80000025-0006-fc00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T22:48:11.0973249+03:30 80000011-0004-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T22:51:23.6014429+03:30 8000003f-0006-fc00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T22:54:03.6427598+03:30 8000001f-0005-fc00-b63f-84710c7967bb [INF] Controller: PurchaseInvoiceDetail	 Action: GetPurchaseInvoiceDetailSalePrice	 Message: Object reference not set to an instance of an object. (8f8675f4)
+2023-06-08T22:54:03.8204798+03:30 8000001f-0005-fc00-b63f-84710c7967bb [ERR] An unhandled exception has occurred while executing the request. (48a46595)
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at WPH.Controllers.PurchaseInvoiceDetail.PurchaseInvoiceDetailController.GetPurchaseInvoiceDetailSalePrice(Guid PurchaseInvoiceDetailId, Int32 CurrencyId, String PriceType, String SaleType)
+   at lambda_method1307(Closure , Object , Object[] )
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.SyncActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|24_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.ResponseCompression.ResponseCompressionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+2023-06-08T22:54:47.9031900+03:30 80000012-0001-fb00-b63f-84710c7967bb [INF] Controller: PurchaseInvoiceDetail	 Action: GetPurchaseInvoiceDetailSalePrice	 Message: Object reference not set to an instance of an object. (8f8675f4)
+2023-06-08T22:54:48.0004817+03:30 80000012-0001-fb00-b63f-84710c7967bb [ERR] An unhandled exception has occurred while executing the request. (48a46595)
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at WPH.Controllers.PurchaseInvoiceDetail.PurchaseInvoiceDetailController.GetPurchaseInvoiceDetailSalePrice(Guid PurchaseInvoiceDetailId, Int32 CurrencyId, String PriceType, String SaleType)
+   at lambda_method1307(Closure , Object , Object[] )
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.SyncActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|24_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.ResponseCompression.ResponseCompressionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+2023-06-08T22:59:10.0444300+03:30 80000012-0000-fd00-b63f-84710c7967bb [INF] Controller: PurchaseInvoiceDetail	 Action: GetPurchaseInvoiceDetailSalePrice	 Message: Object reference not set to an instance of an object. (8f8675f4)
+2023-06-08T22:59:10.1672343+03:30 80000012-0000-fd00-b63f-84710c7967bb [ERR] An unhandled exception has occurred while executing the request. (48a46595)
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at WPH.Controllers.PurchaseInvoiceDetail.PurchaseInvoiceDetailController.GetPurchaseInvoiceDetailSalePrice(Guid PurchaseInvoiceDetailId, Int32 CurrencyId, String PriceType, String SaleType)
+   at lambda_method1307(Closure , Object , Object[] )
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.SyncActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Logged|12_1(ControllerActionInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|24_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Session.SessionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.ResponseCompression.ResponseCompressionMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+2023-06-08T23:02:23.2721447+03:30  [INF] Worker AnalysisItem at: 06/08/2023 23:02:23 +03:30 (68555833)
+2023-06-08T23:02:23.5932018+03:30  [INF] Worker Analysis at: 06/08/2023 23:02:23 +03:30 (7b79526c)
+2023-06-08T23:02:23.6721306+03:30  [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T23:02:23.8907370+03:30  [INF] Worker GroupAnalysis at: 06/08/2023 23:02:23 +03:30 (75e3aab0)
+2023-06-08T23:02:25.3362696+03:30  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2023-06-08T23:02:25.3400579+03:30  [INF] Hosting environment: "Development" (c3307c92)
+2023-06-08T23:02:25.3469485+03:30  [INF] Content root path: "C:\Users\Mehran\source\repos\Clinic\WAS\WPH\WPH" (b5d60022)
+2023-06-08T23:02:25.4796654+03:30 80000035-0002-ff00-b63f-84710c7967bb [WRN] Failed to determine the https port for redirect. (ca76cc21)
+2023-06-08T23:02:27.8293578+03:30 80000035-0002-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T23:02:27.8353916+03:30 80000035-0002-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Price"' on entity type '"FN_MedicineNumModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T23:02:27.8413912+03:30 80000035-0002-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"Num"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T23:02:27.8472559+03:30 80000035-0002-ff00-b63f-84710c7967bb [WRN] No type was specified for the decimal property '"SalesPrice"' on entity type '"FN_SaleFromProducerModel"'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType()', specify precision and scale using 'HasPrecision()' or configure a value converter using 'HasConversion()'. (5c92c1c4)
+2023-06-08T23:03:32.3344270+03:30 8000001b-0007-fd00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T23:03:57.1143283+03:30 80000058-0006-fc00-b63f-84710c7967bb [INF] The main page has been accessed (8ff6bc04)
+2023-06-08T23:04:48.6913353+03:30 80000020-0003-fe00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)
+2023-06-08T23:15:41.3890030+03:30 80000069-0006-fc00-b63f-84710c7967bb [WRN] Compiling a query which loads related collections for more than one collection navigation either via 'Include' or through projection but no 'QuerySplittingBehavior' has been configured. By default Entity Framework will use 'QuerySplittingBehavior.SingleQuery' which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))' (74d62de4)
+2023-06-08T23:18:15.4275869+03:30 8000005a-0002-ff00-b63f-84710c7967bb [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results. (f43d926b)

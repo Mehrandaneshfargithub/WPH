@@ -1,0 +1,307 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+    }
+}
+
+@Html.AntiForgeryToken()
+
+<div class="row page-header ">
+    <div class="@pull ">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["LicenceKey"]
+        </h1>
+
+    </div>
+
+    <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+        <a class="btn btn-danger" onClick="AddLicenceKey(this)" href="#" style="padding:0.2rem">
+            @Localizer["New"]
+            <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+        </a>
+    </div>
+
+    <div style="clear:both;padding:10px;">
+        <label class="block clearfix" style="font-size:20px;">
+            <span class="block input-icon input-icon-right">
+                @(Html.Kendo().TextBox()
+                .Name("ComputerKey")
+                .Enable(false)
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+            </span>
+
+        </label>
+    </div>
+
+</div><!-- /.page-header -->
+
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Areas/Admin/Views/Shared/PartialViews/AppWebForms/LicenceKeyManagement/dgLicenceKeyManagementGrid.cshtml")
+</div>
+
+
+<div id="LicenceKeyModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="width:70%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeLicenceKeyModal()" aria-hidden="true">&times;</button>
+                <h3 id="LicenceKeyModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["LicenceKey"]
+                </h3>
+            </div>
+            <div id="LicenceKeyModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-LicenceKeyModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-LicenceKeyModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeLicenceKeyModal()" })
+                    .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="DeleteLicenceKeyModal" class="modal fade MyFont-Roboto-grid" data-backdrop="static" data-keyboard="false" style="">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller MyFont-Roboto-grid'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteLicenceKeyModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteLicenceKeyModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteLicenceKeyModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "Get",
+            url: "/UserHandler/GetSerial",
+            success: function (response) {
+                $("#ComputerKey").val(response);
+            }
+        });
+
+    });
+
+    function AddLicenceKey(e) {
+        $("#LicenceKeyModal #ERROR_Data").addClass("hidden");
+        $("#LicenceKeyModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#Mobile-wrong").addClass('hidden');
+
+        //let header = $("#newHeader").text();
+        var link = "/Admin/LicenceKeyManagement/AddNewModal";
+
+        //$('#LicenceKeyModal-header').text(header);
+
+        $(".loader").removeClass("hidden");
+        $('#LicenceKeyModal').modal('toggle');
+        $('#LicenceKeyModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function LicenceKeyDeleteFunction(element) {
+        $("#DeleteLicenceKeyModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteLicenceKeyModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteLicenceKeyModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeleteLicenceKeyModal-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-DeleteLicenceKeyModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteLicenceKeyModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteLicenceKeyModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+
+        var link = "/Admin/LicenceKeyManagement/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-DeleteLicenceKeyModal-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteLicenceKeyModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#licenceKeyKendoGrid .k-pager-refresh")[0].click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteLicenceKeyModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+                    $("#DeleteLicenceKeyModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    $('#btn-LicenceKeyModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#LicenceKeyModal #ERROR_Data").addClass("hidden");
+        $("#LicenceKeyModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() !== undefined) {
+                    let text = $('[data-checkEmpty="' + empty + '"]').val().replace(/ /g, '');
+                    if (text === "") {
+                        $(this).removeClass('hidden');
+                        $('#btn-LicenceKeyModal-accept').removeAttr("disabled");
+                        isEmmpty = false;
+                        return;
+                    }
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var data = $("#addNewLicenceKeyForm").serialize();
+        var link = "/Admin/LicenceKeyManagement/AddOrUpdate";
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-LicenceKeyModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else if (response === "DataNotValid") {
+
+                        $("#LicenceKeyModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#LicenceKeyModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#LicenceKeyModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#licenceKeyKendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#LicenceKeyModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+
+    function closeLicenceKeyModal() {
+        $('#LicenceKeyModal').modal('toggle');
+        $('#LicenceKeyModal-body').empty();
+    }
+
+</script>

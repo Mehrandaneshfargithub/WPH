@@ -1,0 +1,343 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", pull = "", direction = "", pull_rev = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        pull_rev = " pull-right ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        pull_rev = " pull-left ";
+    }
+}
+
+<script>
+
+    function FilterProductItems(e) {
+        e.preventDefault();
+
+        var txt = e.filter.value;
+        var filter_list = FilterProductLists(product_list, txt);
+
+        $("#ProductId").data("kendoDropDownList").dataSource.data(filter_list);
+    }
+
+</script>
+
+
+<div class="row page-header">
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["TransfersReport"]
+        </h1>
+
+    </div>
+
+    <div class="@pull_rev" style="margin:0 2rem;transform:translateY(-10%)">
+        <a class="" onClick="BackToTransfer()" style="padding:0.2rem;cursor:pointer;font-size: 20px;">
+            <span>
+                <i class="ace-icon fa fa-arrow-left align-top bigger-125"></i>
+            </span>
+        </a>
+    </div>
+</div><!-- /.page-header -->
+
+
+<div id="signup-box" class="signup-box no-border @font">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewForm">
+                <fieldset>
+
+                    <div class="col-xs-12" style="@direction">
+
+                        <div class="col-xs-6" style="padding:0">
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["SourceClinicSection"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("SourceClinicSectionId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Guid")
+                                        .OptionLabel(" ")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetSourceClinicSections", "Transfer");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem;"})
+                                            )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["DestinationClinicSection"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("DestinationClinicSectionId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Guid")
+                                        .OptionLabel(" ")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetUserDestinationClinicSections", "Transfer");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem;"})
+                                            )
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-6" style="padding:0">
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["ReceiverName"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ReceiverName")
+                                        .DataTextField("Name")
+                                        .DataValueField("Value")
+                                        .OptionLabel(" ")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetReceiversName", "Transfer");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem;"})
+                                            )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-xs-12" style="@direction">
+
+                        <div class="col-xs-6" style="padding:0">
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["DateFrom"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DatePicker()
+                                          .Name("FromDate")
+                                          .Format("dd/MM/yyyy")
+                                          .Value(DateTime.Now)
+                                          .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["DateTo"] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DatePicker()
+                                          .Name("ToDate")
+                                          .Format("dd/MM/yyyy")
+                                          .Value(DateTime.Now)
+                                          .HtmlAttributes(new { style = "width: 100%"})
+                                        )
+                                    </span>
+
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="col-xs-6" style="padding:0">
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Product"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ProductId")
+                                        .DataTextField("FullName")
+                                        .DataValueField("Guid")
+                                        .Filter("contains")
+                                        .OptionLabel(" ")
+                                        .Events(x => x.Filtering("FilterProductItems"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetLimitedProductsName", "Product");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="col-sm-6" style="padding:0 1rem">
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+<div class="col-sm-12">
+
+    @(Html.Kendo().Button()
+        .Name("btn-TransferReport-accept")
+        .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = $"k-primary {pull}", onclick = "AcceptTransferReport()" })
+        .Content(Localizer["Ok"]))
+
+</div>
+
+
+<script>
+
+    var product_list = [];
+    $(document).ready(function () {
+
+        GetAllProductList().done(function (data) {
+
+            product_list = data;
+        });
+
+    });
+
+    function BackToTransfer() {
+        $(".loader").removeClass("hidden");
+
+        let link = "/Transfer/Form";
+
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    $('#FromDate').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            let date = $("#ToDate").data("kendoDatePicker");
+            date.element.focus();
+        }
+    });
+
+    $('#FromDate').focus(function (e) {
+
+        let date = $("#FromDate").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+    $('#ToDate').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $("#btn-TransferReport-accept").focus();
+        }
+
+    });
+
+
+    $('#ToDate').focus(function (e) {
+
+        let date = $("#ToDate").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+
+    function draw2(imgData) {
+
+        "use strict";
+
+        var dataUrl = [];
+        for (let index = 0; index < imgData.allb.length; index++) {
+
+            var pf = "data:image/jpeg;base64," + imgData.allb[index];
+
+            dataUrl.push(pf)
+
+        }
+
+        printJS({ printable: dataUrl, type: 'image' });
+    }
+
+
+    function AcceptTransferReport() {
+
+        $(".loader").removeClass("hidden");
+
+        //let detail = $("#Detail").prop('checked');
+
+        var data = {
+            TxtFromDate: $("#FromDate").val(),
+            TxtToDate: $("#ToDate").val(),
+            ReceiverName: $("#ReceiverName").val(),
+            ProductId: $("#ProductId").val(),
+            SourceClinicSectionId: $("#SourceClinicSectionId").val(),
+            DestinationClinicSectionId: $("#DestinationClinicSectionId").val(),
+            //Detail: detail
+        };
+
+        link = "/Transfer/PrintTransferReport";
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            url: link,
+            type: "Post",
+            data: data,
+            success: function (response) {
+
+                draw2(response);
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            },
+            error: function (response) {
+                console.log(response);
+                console.log(response.data);
+                console.log(response.error);
+            }
+        });
+
+    }
+
+</script>

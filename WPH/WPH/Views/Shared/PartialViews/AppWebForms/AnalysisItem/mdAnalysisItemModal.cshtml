@@ -1,0 +1,1083 @@
+﻿
+@model WPH.Models.CustomDataModels.AnalysisItem.AnalysisItemViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<style>
+    #divOptionalTypeRecordes input {
+        height: 18px;
+    }
+
+    #divOptionalTypeRecordes .k-select {
+        line-height: 1.2em;
+    }
+
+    #divNumType .k-input, #divOptionalTypeRecordes .k-input {
+        line-height: 1.05em;
+        height: 17px;
+        padding: .11857143em 0;
+    }
+
+    #divNumType .k-numerictextbox .k-link {
+        height: 0.7em;
+    }
+
+    #divNumType label {
+        margin-bottom: 0px;
+    }
+
+    #divOptionalTypeRecordes .btnDelOptionalRec {
+        line-height: 0.8px;
+        padding: 0px;
+        margin-top: 2px;
+    }
+
+    #divOptionalTypeRecordes label {
+        margin-bottom: 0px;
+    }
+
+    #divOptionalTypeRecordes .glyphicon {
+        top: 0px;
+    }
+</style>
+
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewFormAnalysisItem">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid, new { id = "Guid" })
+                    @Html.HiddenFor(m => m.Id, new { id = "Id" })
+                    @Html.HiddenFor(m => m.CreatedUserId)
+                    @Html.HiddenFor(m => m.CreatedDate)
+                    @Html.HiddenFor(m => m.AnalysisId)
+                    @Html.HiddenFor(m => m.NormalValues)
+                    @Html.HiddenFor(m => m.Priority)
+                    @Html.HiddenFor(m => m.IsButton)
+                    @Html.HiddenFor(m => m.AnalysisItemValuesRanges_Value, new { id = "AnalysisItemValuesRanges_Value" })
+                    @Html.HiddenFor(m => m.BaseInfoGeneralName, new { id = "BaseInfoGeneralName" })
+
+
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Section"] : </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DropDownList()
+                                  .Name("ClinicSectionId")
+                                  .DataTextField("Name")
+                                  .DataValueField("Guid")
+                                  //.Filter("contains")
+                                  .DataSource(source =>
+                                  {
+                                      source.Read(read =>
+                                      {
+                                          read.Action("GetAllLabAndXRayClinicSectionsForUser", "ClinicSection");
+                                      })
+                                      .ServerFiltering(false);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%;" })
+                            )
+                            </span>
+                        </label>
+                    </div>
+
+
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <label class="block clearfix">
+                            <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["AnalysisItemName"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { @class = "keypress", style = "width: 100%", @data_checkEmpty = "AnalysisItemName-box", id = "AnalysisItemName" })
+                                )
+                            </span>
+                            <span id="AnalysisItemName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                            <span id="AnalysisItemName-Exist" class="NameExist hidden" data-isEssential="true" style="color:red;">
+                                @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Code"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                            .Name("Code")
+                            .Value(Model.Code)
+                            .HtmlAttributes(new { @class = "keypress", style = "width: 100%", id = "AnalysisItemCode" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Abbreviation"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                            .Name("Abbreviation")
+                            .Value(Model.Abbreviation)
+                            .HtmlAttributes(new { @class = "keypress", style = "width: 100%", id = "AnalysisItemAbbreviation" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-8">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Unit"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DropDownList()
+                                .Name("UnitId")
+                                .DataTextField("Name")
+                                .DataValueField("Guid")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetAllUnitsForAnalysisItem", "BaseInfo");
+                                    })
+                                    .ServerFiltering(false);
+                                })
+                                .HtmlAttributes(new { style = "width: 100%;", onchange = "UnitChange()" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-md-1 col-sm-1 col-xs-4">
+                        <a id="add-Unit" class="btn btn-xs btn-danger pull-right" style="display: inline-block;margin-top: 26px;" href="#">
+                            <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["AnalysisNote"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                            .Name("Note")
+                            .Value(Model.Note)
+                            .HtmlAttributes(new { @class = "keypress", style = "width: 100%", id = "AnalysisItemNote" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["NormalRange"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                @(Html.Kendo().TextArea()
+                                    .Name("NormalValuesArea")
+                                    .Value(Model.NormalValues)
+                                    .Rows(2)
+                                    .HtmlAttributes(new { @class = "keypress", style = "width: 100%;text-align:left;direction:ltr", @data_checkEmpty = "NormalValues-box", id = "AnalysisItemNormalValuesArea" })
+                                )
+                            </span>
+                            <span id="NormalValues-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <label class="block clearfix">
+                            <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Amount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("Amount")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    .Value(Model.Amount)
+                                    .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Amount-box" })
+                                )
+                            </span>
+                            <span id="Amount-box" class="emptybox hidden" data-isEssential="true" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+
+
+                    @{
+
+                        var hid = "";
+                        if (ViewBag.useDollar == "false")
+                        {
+
+                            hid = "hidden";
+
+                        }
+                        <div class="col-md-6 col-sm-6 col-xs-12 @hid">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Type"] @Localizer["Currency"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DropDownList()
+                                                        .Name("AmountCurrencyId")
+                                                        .DataTextField("Name")
+                                                        .DataValueField("Id")
+                                                        //.Filter("contains")
+                                                        .DataSource(source =>
+                                                        {
+                                                            source.Read(read =>
+                                                            {
+                                                                read.Action("GetAllCurrencies", "BaseInfo");
+                                                            })
+                                                            .ServerFiltering(false);
+                                                        })
+                                                        .HtmlAttributes(new { style = "width: 100%;", onchange = "CurrencyCh()" })
+                                                    )
+                                </span>
+                            </label>
+                        </div>
+
+
+                        if (HttpContextAccessor.HttpContext.Session.GetString("ClinicSectionName") != "Radiology")
+                        {
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Type"] @Localizer["AnalysisItem"] : </label>
+                                    @(Html.Kendo().DropDownList()
+                                        .Name("ValueTypeId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllValueTypeForAnalysisItem", "BaseInfo");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .Value(Model.ValueTypeId.ToString())
+                                        .HtmlAttributes(new { style = "width: 100%;", onchange = "ValueTypeChange()" })
+                            )
+                                </label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-12 col-sm-12 col-xs-12 hidden">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Type"] @Localizer["AnalysisItem"] : </label>
+                                    @(Html.Kendo().DropDownList()
+                                        .Name("ValueTypeId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllValueTypeForAnalysisItem", "BaseInfo");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;", onchange = "ValueTypeChange()" })
+                            )
+                                </label>
+                            </div>
+                        }
+
+                    }
+
+                <div id="divNumType" class="col-md-12 col-sm-12 col-xs-12" style="display:none">
+
+                    <div class="row">
+                        <label for="form-field-8" class="col-md-3">Minimum Value Fro Male : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("AnalysisItemMinMaxValues.MMinValue")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Value(Model.AnalysisItemMinMaxValues?.MMinValue)
+                                    .HtmlAttributes(new { style = "width: 100%", id = "M_minValue", @data_checkEmpty = "MminValue-box" })
+                                    )
+                        </span>
+                        <label for="form-field-8" class="col-md-3">Maximum Value For Male : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("AnalysisItemMinMaxValues.MMaxValue")
+                                    .Format("#.##")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Value(Model.AnalysisItemMinMaxValues?.MMaxValue)
+                                    .HtmlAttributes(new { style = "width: 100%", id = "M_maxValue", @data_checkEmpty = "MmaxValue-box" })
+                                    )
+                        </span>
+                    </div>
+                    <div class="row">
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="MminValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="MmaxValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="row">
+                        <label for="form-field-8" class="col-md-3">Minimum Value Fro Female : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                            .Name("AnalysisItemMinMaxValues.FMinValue")
+                            .Format("#.##")
+                            .Min(0)
+                            .Max(10000000)
+                            .Value(Model.AnalysisItemMinMaxValues?.FMinValue)
+                            .HtmlAttributes(new { style = "width: 100%", id = "F_minValue", @data_checkEmpty = "FminValue-box" })
+                                    )
+                        </span>
+                        <label for="form-field-8" class="col-md-3">Maximum Value For Female : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                            .Name("AnalysisItemMinMaxValues.FMaxValue")
+                            .Format("#.##")
+                            .Min(0)
+                            .Max(10000000)
+                            .Value(Model.AnalysisItemMinMaxValues?.FMaxValue)
+                            .HtmlAttributes(new { style = "width: 100%", id = "F_maxValue", @data_checkEmpty = "FmaxValue-box" })
+                                    )
+                        </span>
+                    </div>
+                    <div class="row">
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="FminValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="FmaxValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="row">
+                        <label for="form-field-8" class="col-md-3">Minimum Value Fro Children : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                            .Name("AnalysisItemMinMaxValues.CMinValue")
+                            .Format("#.##")
+                            .Min(0)
+                            .Max(10000000)
+                            .Value(Model.AnalysisItemMinMaxValues?.CMinValue)
+                            .HtmlAttributes(new { style = "width: 100%", id = "C_minValue", @data_checkEmpty = "CminValue-box" })
+                                    )
+                        </span>
+                        <label for="form-field-8" class="col-md-3">Maximum Value For Children : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("AnalysisItemMinMaxValues.CMaxValue")
+                                .Format("#.##")
+                                .Min(0)
+                                .Max(10000000)
+                                .Value(Model.AnalysisItemMinMaxValues?.CMaxValue)
+                                .HtmlAttributes(new { style = "width: 100%", id = "C_maxValue", @data_checkEmpty = "CmaxValue-box" })
+                                    )
+                        </span>
+                    </div>
+                    <div class="row">
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="CminValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="CmaxValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="row">
+                        <label for="form-field-8" class="col-md-3">Minimum Value Fro Baby : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("AnalysisItemMinMaxValues.BMinValue")
+                                .Format("#.##")
+                                .Min(0)
+                                .Max(10000000)
+                                .Value(Model.AnalysisItemMinMaxValues?.BMinValue)
+                                .HtmlAttributes(new { style = "width: 100%", id = "B_minValue", @data_checkEmpty = "BminValue-box" })
+                                    )
+                        </span>
+                        <label for="form-field-8" class="col-md-3">Maximum Value For Baby : </label>
+                        <span class="block input-icon input-icon-right col-md-3">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("AnalysisItemMinMaxValues.BMaxValue")
+                                .Format("#.##")
+                                .Min(0)
+                                .Max(10000000)
+                                .Value(Model.AnalysisItemMinMaxValues?.BMaxValue)
+                                .HtmlAttributes(new { style = "width: 100%", id = "B_maxValue", @data_checkEmpty = "BmaxValue-box" })
+                                    )
+                        </span>
+                    </div>
+                    <div class="row">
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="BminValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                        <span class="block col-md-3">
+
+                        </span>
+                        <span class="block col-md-3">
+                            <span id="BmaxValue-box" class="emptybox hidden" data-isEssential="false" style="color:red">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </span>
+                    </div>
+
+
+                </div>
+                    @if (Model.ValueTypeName == "Text")
+                    {
+                        <script>
+                            $('#divOptionalType').css('display', 'none');
+                            $('#divNumType').css('display', 'none');
+                        </script>
+                    }
+                    else if (Model.ValueTypeName == "Numerical")
+                    {
+                        <script>
+                            $('#divOptionalType').css('display', 'none');
+                            $('#divNumType').css('display', 'block');
+                        </script>
+                    }
+                    else if (Model.ValueTypeName == "Optional")
+                    {
+                        <script>
+                            $('#divOptionalType').css('display', 'block');
+                            $('#divNumType').css('display', 'none');
+                        </script>
+                    }
+                    <div class="col-md-12 col-sm-12 col-xs-12" id="divOptionalType" style="display:none;">
+                        <div class="row" id="divOptionalTypeMain" style="max-height:150px;overflow:auto">
+                            <div class="row" id="divOptionalTypeRecordes" style="margin:0px">
+                                <div class="col-md-12 col-sm-12 col-xs-12" style="margin:0px">
+                                    <div class="col-md-8 col-sm-8 col-xs-12" style="padding:0px">
+                                        <div class="col-md-12 col-sm-12 col-xs-12" style="padding:0px">
+                                            <div class="col-md-4 col-sm-4 col-xs-4" style="padding:0px">
+                                                <label for="form-field-8" class="col-md-6">Value : </label>
+                                                <span class="block input-icon input-icon-right col-md-6" style="padding:0px">
+                                                    @(Html.Kendo().TextBox()
+                                                    .Name("Value")
+                                                    .HtmlAttributes(new { @class = "keypress", style = "width: 100%" })
+                                                    )
+                                                </span>
+                                            </div>
+                                            <div class="col-md-6 col-sm-6 col-xs-6" style="padding:0px">
+                                                <label class="block clearfix">
+                                                    <label for="form-field-8" class="col-md-7">Default Value : </label>
+                                                    <span class="col-md-5" style="padding:0px">
+                                                        @(Html.Kendo().DropDownList()
+                                                        .Name("Default")
+                                                        .BindTo(new List<SelectListItem>
+                                                        {
+                                                        new SelectListItem{
+                                                        Text = @Localizer["Yes"],
+                                                        Value = "1"
+                                                        },
+                                                        new SelectListItem{
+                                                        Text = @Localizer["No"],
+                                                        Value = "0"
+                                                        }
+                                                        })
+                                                        .HtmlAttributes(new { style = "width: 100%;", onchange = "DefaultChange()" })
+                                                        )
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="col-md-2 col-sm-2 col-xs-2">
+                                                <a id="add-analysisItemValuesRange" class="btn btn-xs btn-danger pull-right btnDelOptionalRec" style="display: inline-block;" onclick="analysisItemValuesRangeAddRow()" href="#">
+                                                    <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="padding:0px">
+                                            <div id="divAlert" class="row" style="margin-top:10px;display:none">
+                                                <div class="col-md-12">
+                                                    <span id="spanAlert" style="color:red">Just One Value Can Be Default</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4 col-xs-12" id="divAnalysisItemValuesRangeAdded" style="border:1px solid #ccc;border-radius:3px;height:120px;">
+                                        @if (Model.AnalysisItemValuesRanges != null)
+                                        {
+                                            foreach (var AnalysisItemValuesRanges in Model.AnalysisItemValuesRanges)
+                                            {
+                                                string DefaultName = AnalysisItemValuesRanges.Default == true ? "(Default)" : "";
+                                                string ValueDef = AnalysisItemValuesRanges.Value + "_" + (AnalysisItemValuesRanges.Default == true ? "1" : "0");
+                                                string Default = AnalysisItemValuesRanges.Default == true ? "1" : "0";
+                                                <div class="row" style="padding:0px">
+                                                    <div class="col-md-10"><span>@AnalysisItemValuesRanges.Value</span><span>@DefaultName</span><span style="display:none" id="spanName">@ValueDef</span><span style="display:none" id="spanDefault">@Default</span></div>
+                                                    <div class="col-md-1"><a class="btn btn-xs btn-danger pull-right btnDelOptionalRec" style="display: inline-block;" onclick="analysisItemValuesRangeDelRow($(this))" href="#"><i class="fa fa-trash"></i></a></div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<h3 id="useDollar" class="hidden"> @ViewBag.useDollar </h3>
+
+<div id="UnitModal" class="modal fade @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } " data-backdrop="static" data-keyboard="false" style="z-index: 555555;@if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en") {
+            @:direction:rtl
+                }">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeUnitModal()" aria-hidden="true">&times;</button>
+                <h3 id="UnitModal-header" class="smaller lighter blue no-margin @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                                                                    @:MyFont-Roboto-grid
+                                                                                  } else {
+                                                                                    @:MyFont-Sarchia-grid
+                                                                                        } ">
+                    @Localizer["Unit"] @Localizer["New"]
+                </h3>
+            </div>
+            <div id="UnitModal-body" class="modal-body">
+            </div>
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-UnitModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "UnitClick()" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-UnitModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeUnitModal()" })
+                    .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 id="areu" class="hidden">@Localizer["AreYouSure"]</h3>
+<h3 id="Oklbl" class="hidden">@Localizer["Ok"]</h3>
+<h3 id="Exitlbl" class="hidden">@Localizer["Exit"]</h3>
+
+<script>
+
+
+    var decimals = @Html.Raw(Json.Serialize(Model.AllDecimalAmount));
+    var dinarDecimal;
+    var dollarDecimal;
+    var euroDecimal;
+    var pondDecimal;
+    var format;
+
+
+
+    $(document).ready(function () {
+
+        var amountCurrencyId = $("#AmountCurrencyId").data("kendoDropDownList");
+
+        if (amountCurrencyId !== null && amountCurrencyId !== undefined) {
+            amountCurrencyId.value(@ViewBag.CurrencyTypeId);
+        }
+
+        let unit = $("#UnitId").data("kendoDropDownList");
+
+        if (unit !== null && unit !== undefined) {
+            unit.value(@Html.Raw(Json.Serialize(Model.UnitId)));
+        }
+
+        if (decimals !== null && decimals !== undefined) {
+            for (let i = 0; i < decimals.length; i++) {
+            if (decimals[i].ClinicSectionSettingSName === "DinarDecimalAmount")
+                dinarDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "DollarDecimalAmount" )
+                dollarDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "EuroDecimalAmount" )
+                euroDecimal = parseInt(decimals[i].SValue);
+            else if(decimals[i].ClinicSectionSettingSName === "PondDecimalAmount" )
+                pondDecimal = parseInt(decimals[i].SValue);
+        }
+        }
+
+
+
+        $('#add-Unit').on("click", function () {
+            var link = "/BaseInfo/AddNewModal";
+            $(".loader").removeClass("hidden");
+            $('#UnitModal').modal('toggle');
+            $('#UnitModal-body').load(link, function () {
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            });
+        });
+
+        CurrencyCh();
+
+
+
+    });
+
+
+    function CurrencyCh() {
+
+        var currency = $("#AmountCurrencyId").data("kendoDropDownList");
+        //let text = currency.text();
+
+        if (currency !== null && currency !== undefined) {
+            if (currency.text() === "IQD")
+                format = "n" + dinarDecimal;
+            else if (currency.text() === "$")
+                format = "n" + dollarDecimal;
+            else if (currency.text() === "€")
+                format = "n" + euroDecimal;
+            else if (currency.text() === "£")
+                format = "n" + pondDecimal;
+        }
+        else {
+            format = "n0";
+        }
+
+
+
+        let priceBox = $("#Amount").data("kendoNumericTextBox");
+        priceBox.setOptions({ format: format });
+
+        priceBox.focus();
+    }
+
+    function ValueTypeChange() {
+        ValueType = $('#ValueTypeId').data("kendoDropDownList");
+
+        if (ValueType !== null && ValueType !== undefined) {
+
+            ValueTypeId = ValueType.text();
+            switch (ValueTypeId) {
+                case "Text":
+                    {
+                        $('#divNumType').hide(500);
+                        $('#divOptionalType').hide(1000);
+                        break;
+                    }
+                case "Numerical":
+                    {
+                        let M_minValue = $("#M_minValue").data("kendoNumericTextBox");
+                        M_minValue.focus();
+                        $('#divNumType').show(1000);
+                        $('#divOptionalType').hide(1000);
+                        break;
+                    }
+                case "Optional": {
+                    let Value = $('#Value').data("kendoTextBox");
+                    Value.focus();
+                    $('#divNumType').hide(500);
+                    $('#divOptionalType').show(1000);
+                    $('#Value').focus(function () {
+                        $('#Value').css('background-color', '#fff');
+                    });
+                    break;
+                }
+                default:
+            }
+
+        }
+
+
+    }
+
+    $('#AnalysisItemName').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#AnalysisItemCode').focus();
+        }
+    });
+
+    $('#AnalysisItemName').focus(function (e) {
+        $('#AnalysisItemName').select();
+    });
+
+    $('#AnalysisItemCode').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#AnalysisItemAbbreviation').focus();
+        }
+    });
+
+
+    $('#AnalysisItemCode').focus(function (e) {
+        $('#AnalysisItemCode').select();
+    });
+
+
+    $('#AnalysisItemAbbreviation').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let UnitId = $("#UnitId").data("kendoDropDownList");
+            UnitId.focus();
+            UnitId.open();
+        }
+    });
+
+    $('#AnalysisItemAbbreviation').focus(function (e) {
+        $('#AnalysisItemAbbreviation').select();
+    });
+
+
+    $('#UnitId').parent().keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#AnalysisItemNote').focus();
+        }
+    });
+
+
+    function UnitChange() {
+        $('#AnalysisItemNote').focus();
+    }
+
+    $('#AnalysisItemNote').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#AnalysisItemNormalValuesArea').focus();
+        }
+    });
+
+    $('#AnalysisItemNote').focus(function (e) {
+        $('#AnalysisItemNote').select();
+    });
+
+    $('#AnalysisItemNormalValuesArea').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#Amount').focus();
+        }
+    });
+
+
+    // $('#Amount').focus(function (e) {
+    //    $('#Amount').select();
+    //});
+
+    $('#Amount').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+
+            let usedollar = $("#useDollar").text();
+
+            if (usedollar === "true") {
+                let AmountCurrencyId = $("#AmountCurrencyId").data("kendoDropDownList");
+                if (AmountCurrencyId !== null && AmountCurrencyId !== undefined) {
+                    AmountCurrencyId.focus();
+                    AmountCurrencyId.open();
+                }
+            }
+            else {
+                $('#btn-newAnalysisItem-accept').focus();
+            }
+
+
+        }
+    });
+
+    $('#Amount').focus(function (e) {
+        var input = $(this);
+        setTimeout(function() {
+            input.select();
+        });
+
+    });
+
+    $('#AmountCurrencyId').parent().keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let ValueTypeId = $("#ValueTypeId").data("kendoDropDownList");
+
+            if (ValueTypeId !== null && ValueTypeId !== undefined) {
+                ValueTypeId.focus();
+                ValueTypeId.open();
+            }
+
+
+        }
+    });
+
+    $('#ValueTypeId').parent().keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+
+            $('#btn-newAnalysisItem-accept').focus();
+
+        }
+    });
+
+    $('#M_minValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let M_maxValue = $("#M_maxValue").data("kendoNumericTextBox");
+            M_maxValue.focus();
+        }
+    });
+
+    $('#M_maxValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let F_minValue = $("#F_minValue").data("kendoNumericTextBox");
+            F_minValue.focus();
+        }
+    });
+
+    $('#F_minValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let F_maxValue = $("#F_maxValue").data("kendoNumericTextBox");
+            F_maxValue.focus();
+        }
+    });
+
+    $('#F_maxValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let C_minValue = $("#C_minValue").data("kendoNumericTextBox");
+            C_minValue.focus();
+        }
+    });
+
+    $('#C_minValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let C_maxValue = $("#C_maxValue").data("kendoNumericTextBox");
+            C_maxValue.focus();
+        }
+    });
+
+    $('#C_maxValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let B_minValue = $("#B_minValue").data("kendoNumericTextBox");
+            B_minValue.focus();
+        }
+    });
+
+    $('#B_minValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let B_maxValue = $("#B_maxValue").data("kendoNumericTextBox");
+            B_maxValue.focus();
+        }
+    });
+
+    $('#B_maxValue').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            $('#btn-AnalysisModal-accept').focus();
+        }
+    });
+
+    $('#Value').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+            let Default = $("#Default").data("kendoDropDownList");
+            Default.focus();
+        }
+    });
+
+    function DefaultChange() {
+        $('#add-analysisItemValuesRange').focus();
+    }
+
+    function CurrencyChange() {
+        let ValueTypeId = $("#ValueTypeId").data("kendoDropDownList");
+        ValueTypeId.focus();
+    }
+
+    $('#AnalysisItemName').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+    });
+
+
+    $('#AnalysisItemNormalValuesArea').focus(function () {
+        $("#NormalValues-Exist").addClass('hidden');
+        $("#NormalValues-box").addClass('hidden');
+    });
+
+
+
+    function analysisItemValuesRangeClick() {
+        var divMain = $('#divOptionalTypeRecordes').clone();
+        $('#divOptionalTypeMain').append(divMain);
+    };
+
+    function analysisItemValuesRangeDelRow(object) {
+
+        let areu = $("#areu").text();
+        let ok = $("#Oklbl").text();
+        let exit = $("#Exitlbl").text();
+
+        bootbox.confirm({
+            message: areu,
+            className: 'bootbox-class',
+            buttons: {
+                confirm: {
+                    label: ok,
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: exit,
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    Obj = object.parent().parent();
+                    Obj.remove();
+                }
+                else {
+                }
+            }
+        })
+    }
+
+    function checkInfo() {
+        Value = $('#Value').val();
+        if (Value=='') {
+            return 1;
+        }
+        return 0;
+    }
+
+    function analysisItemValuesRangeAddRow() {
+        //Obj = object.parent().parent();
+        //let ObjDefault = Obj.find('#Default');
+        //let ObjValue = Obj.find('#Value');
+        ObjDefault = $('#Default');
+        ObjValue = $('#Value');
+        DefaultIsSave = false;
+        DefaultVal = $('#divAnalysisItemValuesRangeAdded #spanDefault');
+        DefaultVal.each(function (index, value) {
+            Val = value.innerHTML;
+            if (Val=="1") {
+                DefaultIsSave = true;
+            }
+        });
+        check = checkInfo();
+        if (check == 0) {
+            if (ObjDefault.val() == "1") {
+                //    boolExist = ObjExist.includes("1");
+                if (!DefaultIsSave) {
+                    //ObjExist.push(ObjDefault.val());
+                    objDefaultName = ObjDefault.val() == "1" ? "(Default)" : "";
+                    str = '<div class=\"row\" style=\"padding:0px\"><div class=\"col-md-10\"><span>' + ObjValue.val() + '</span><span>' + objDefaultName + '</span><span style=\"display:none\" id=\"spanName\">' + ObjValue.val() + '_' + ObjDefault.val() + '</span><span style=\"display:none\" id=\"spanDefault\">' + ObjDefault.val() + '</span></div>';
+                    str += "<div class=\"col-md-1\"><a class=\"btn btn-xs btn-danger pull-right btnDelOptionalRec\" style=\"display: inline-block;\" onclick=\"analysisItemValuesRangeDelRow($(this))\" href=\"#\"><i class=\"fa fa-trash\"></i></a></div></div>";
+                    $('#divAnalysisItemValuesRangeAdded').append(str);
+                    $('#Value').val('');
+                }
+                else {
+                    $('#spanAlert').html('Just one vale can be default');
+                    $('#divAlert').show();
+                    divAlertHide();
+                }
+            }
+            else {
+                //ObjExist.push(ObjDefault.val());
+                //objDefaultName = ObjDefault.val() == "1" ? "(پیش فرض)" : "";
+                str = '<div class=\"row\" style=\"padding:0px\"><div class=\"col-md-10\"><span>' + ObjValue.val() + '</span><span style=\"display:none\" id=\"spanName\">' + ObjValue.val() + '_' + ObjDefault.val() + '</span><span style=\"display:none\" id=\"spanDefault\">' + ObjDefault.val() + '</span></div>';
+                str += "<div class=\"col-md-1\"><a class=\"btn btn-xs btn-danger pull-right btnDelOptionalRec\" style=\"display: inline-block;\" onclick=\"analysisItemValuesRangeDelRow($(this))\" href=\"#\"><i class=\"fa fa-trash\"></i></a></div></div>";
+                $('#divAnalysisItemValuesRangeAdded').append(str);
+                $('#Value').val('');
+            }
+
+            let Default = $("#Default").data("kendoDropDownList");
+            Default.value("0");
+            Default.attr('disabled', true);
+        }
+        else
+        {
+            $('#spanAlert').html('Please fill the value');
+            $('#Value').focus();
+            $('#divAlert').show();
+            divAlertHide();
+        }
+    }
+
+    function divAlertHide() {
+        setTimeout(function () {
+            $('#divAlert').hide();
+        }, 4000);
+    }
+
+
+
+    function UnitClick() {
+        if ($("#Name").val() === "" || $("#Name").val() === " ") {
+            $("#Name-box").removeClass('hidden');
+            return;
+        }
+
+
+        _TypeId = $("#unitId").attr("data-Value");
+        var unit = { Name: $("#Name").val(), Description: $('#Description').val(), TypeId: _TypeId }
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $.ajax({
+            type: "Post",
+            url: '/BaseInfo/AddOrUpdate',
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                baseinfo: unit
+            },
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    } else {
+                        $('#UnitModal').modal('toggle');
+                        $('#UnitModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#UnitId").data("kendoDropDownList").dataSource.read();
+                        let UnitDrop = $("#UnitId").data("kendoDropDownList");
+                        UnitDrop.bind("dataBound", function () {
+                            UnitDrop.value(response);
+                        });
+                        $('#AnalysisItemNote').focus();
+                    }
+                }
+            }
+        });
+    }
+
+
+    function closeUnitModal() {
+        $('#UnitModal').modal('toggle');
+        $('#UnitModal-body').empty();
+    }
+
+
+
+
+
+
+
+</script>

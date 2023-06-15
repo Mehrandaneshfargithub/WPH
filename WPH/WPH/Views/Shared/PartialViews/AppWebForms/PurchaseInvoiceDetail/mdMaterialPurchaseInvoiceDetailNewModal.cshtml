@@ -1,0 +1,774 @@
+﻿@model WPH.Models.PurchaseInvoiceDetail.PurchaseInvoiceDetailViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    var now = DateTime.Now;
+    string font = "", pull = "", pull_rev = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = "  ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " direction:rtl; ";
+    }
+
+    bool can_change = !(bool)(ViewBag.PurchasePaid ?? false);
+    string disabled = can_change ? "" : "disabled";
+
+}
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.Guid, new { id = "DetailGuid" })
+@Html.HiddenFor(m => m.DiscountTxt)
+@Html.HiddenFor(a => a.NumTxt)
+@Html.HiddenFor(a => a.PurchasePriceTxt)
+@Html.HiddenFor(a => a.WholePurchasePriceTxt)
+
+
+<input id="last_currency_id" type="hidden" />
+
+<div class="row @font" style="@dir">
+
+    <script>
+
+        function GetProductId() {
+            return {
+                productId: $("#ProductId").val()
+            }
+        }
+
+        function ProductIdChange(e) {
+
+            $("#purchaseHistoryKendoGrid .k-pager-refresh")[0].click();
+        }
+
+    </script>
+
+
+    <div class="col-sm-12 Grid-Content shadow-border @font" style="margin-bottom:2rem">
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/PurchaseInvoiceDetail/dgPurchaseInvoiceDetailHistoryGrid.cshtml")
+    </div>
+
+    <script>
+
+        function FilterProductItems(e) {
+            e.preventDefault();
+
+            var txt = e.filter.value;
+            var filter_list = FilterProductLists(product_list, txt);
+
+            $("#ProductId").data("kendoDropDownList").dataSource.data(filter_list);
+        }
+
+        function CurrencyIdOpen() {
+
+            var currency = $("#CurrencyId").val();
+            $("#last_currency_id").val(currency);
+        }
+
+        function CurrencyIdChange(e) {
+            var dataItem = this.dataItem(e.item);
+            let main_currency = dataItem.Id;
+            var last = $("#last_currency_id").val();
+
+            if (main_currency == last) {
+                return;
+            }
+
+            $(".loader").removeClass("hidden");
+            $.ajax({
+                type: "Get",
+                url: "/MoneyConvert/GetMoneyConvertBaseCurrencies",
+                data: {
+                    baseCurrencyId: last,
+                    destCurrencyId: main_currency
+                },
+                success: function (response) {
+
+                    if (response == null) {
+
+                        bootbox.alert({
+                            message: " @Localizer["ThereIsNoMoneyConvert"]",
+                            className: 'bootbox-class'
+                        });
+
+                    } else if (response === 0) {
+
+                        bootbox.alert({
+                            message: " @Localizer["SomeThingWentWrong"]",
+                            className: 'bootbox-class'
+                        });
+
+                    } else {
+
+                        let Num = $("#Num").data("kendoNumericTextBox");
+                        let PurchasePrice = $("#PurchasePrice").data("kendoNumericTextBox");
+                        let WholePurchasePrice = $("#WholePurchasePrice").data("kendoNumericTextBox");
+
+                        let base_currency = response.BaseCurrencyId;
+                        let dest_currency = response.DestCurrencyId;
+                        let base_amount = Number(response.BaseAmount);
+                        let dest_amount = Number(response.DestAmount);
+
+                        let fact = 1;
+                        if (main_currency == base_currency) {
+
+                            fact = base_amount / dest_amount;
+
+                        } else if (main_currency == dest_currency) {
+
+                            fact = dest_amount / base_amount;
+                        }
+
+                        let pp = PurchasePrice.value() * fact;
+                        PurchasePrice.value(pp);
+                        WholePurchasePrice.value(Num.value() * pp);
+                        setTimeout(function () {
+                            SetDiscountSharp();
+                        }, 200);
+                    }
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            });
+        }
+
+
+    </script>
+
+    <div class="@pull col-sm-12 ">
+
+        <form id="PurchaseInvoiceDetailForm">
+            <fieldset>
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix ">
+                            <label for="form-field-8">@Localizer["Type"] @Localizer["Currency"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().DropDownList()
+                                .Name("CurrencyId")
+                                .DataTextField("Name")
+                                .DataValueField("Id")
+                                .Enable(can_change)
+                                .Events(e => e.Change("CurrencyIdChange").Open("CurrencyIdOpen"))
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetAllCurrencies", "BaseInfo");
+                                    })
+                                    .ServerFiltering(false);
+                                })
+                                .Value(Model.CurrencyId.ToString())
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3" style="display:flex;align-items:flex-end">
+
+                        @if ((bool)(ViewBag.AccessNewStoreroom ?? false))
+                        {
+                            <div class="col-xs-10" style="padding:0;margin:0">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Product"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ProductId")
+                                        .DataTextField("FullName")
+                                        .DataValueField("Guid")
+                                        .Filter("contains")
+                                        .OptionLabel(" ")
+                                        .Enable(Model.ProductId == null)
+                                        .Events(x => x.Filtering("FilterProductItems").Change("ProductIdChange"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetLimitedMaterialProductsName", "Product", new { productId = Model.ProductId });
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .Value(Model.ProductId.ToString())
+                                        .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Product-box" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+                            if (Model.ProductId == null)
+                            {
+                                <div class="col-sm-2" style="padding:0;margin-bottom:0.5rem">
+                                    <a href="\\#" class="btn btn-danger @pull_rev" onclick="NewProduct()" style=" padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-sm-2" style="padding:0;margin-bottom:0.5rem">
+                                    <a href="\\#" class="btn  @pull_rev" onclick="" style=" padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                                </div>
+                            }
+
+                        }
+                        else
+                        {
+                            <div class="col-sm-12" style="padding:0;margin:0">
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Product"]: </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ProductId")
+                                        .DataTextField("FullName")
+                                        .DataValueField("Guid")
+                                        .Filter("contains")
+                                        .OptionLabel(" ")
+                                        .Enable(can_change)
+                                        .Events(x => x.Filtering("FilterProductItems").Change("ProductIdChange"))
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetLimitedProductsName", "Product");
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .Value(Model.ProductId.ToString())
+                                        .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "Product-box" })
+                                        )
+                                    </span>
+                                </label>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Number"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <input name="Num" id="Num" style="width: 100%;" @disabled data-checkEmpty="Num-box" />
+
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["PurchasePrice"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <input name="PurchasePrice" id="PurchasePrice" style="width: 100%;" @disabled data-checkEmpty="PurchasePrice-box" />
+
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="Product-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="Num-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <span id="PurchasePrice-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="col-sm-12" style="display:flex;align-items:flex-end">
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["TotalPurchasePrice"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <input name="WholePurchasePrice" id="WholePurchasePrice" style="width: 100%;" @disabled data-checkEmpty="WholePurchasePrice-box" />
+
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">% @Localizer["Discount"]: </label>
+                            <span class="block input-icon input-icon-right">
+
+                                <input name="Discount" id="DetailDiscount" style="width: 100%;" @disabled />
+
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3 hidden">
+                        <label class="block clearfix">
+                            <label for="form-field-8"># @Localizer["Discount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().NumericTextBox<decimal>()
+                                .Name("DiscountSharp")
+                                .Culture("en-US")
+                                .Format("#.##")
+                                .Min(0)
+                                .SelectOnFocus(true)
+                                //.Value(0)
+                                .HtmlAttributes(new { style = "width: 100%",@id= "DiscountSharp" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["TotalAfterDiscount"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("TotalAfterDiscount")
+                                .Enable(false)
+                                //.Culture("en-US")
+                                //.Format("#.##")
+                                //.Min(0)
+                                //.SelectOnFocus(true)
+                                //.Value("0")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Consideration"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                .Name("Consideration")
+                                .Value(Model.Consideration)
+                                .Enable(can_change)
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+                        <span id="WholePurchasePrice-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                </div>
+
+                <div class="col-sm-12 space-0"></div>
+
+            </fieldset>
+        </form>
+
+    </div>
+
+</div><!-- /.signup-box -->
+
+
+<div id="AddNewProductModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="overflow:visible; @dir ">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddNewProductModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddNewProductModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["New"] - @Localizer["Product"]
+                </h3>
+            </div>
+
+            <div id="AddNewProductModal-body" class="modal-body" style="width:80rem">
+            </div>
+
+            <div id="ERROR_Barcode" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["RepeatedBarcode"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProduct-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProduct-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeAddNewProductModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<script>
+    $("#Num").kendoNumericTextBox({
+        culture: "en-US",
+        format: "#.##",
+        min: 0,
+        selectOnFocus: true
+    });
+
+
+    $("#PurchasePrice").kendoNumericTextBox({
+        culture: "en-US",
+        format: "#.##",
+        min: 0,
+        selectOnFocus: true
+    });
+
+    $("#WholePurchasePrice").kendoNumericTextBox({
+        culture: "en-US",
+        format: "#.##",
+        min: 0,
+        selectOnFocus: true
+    });
+
+    $("#DetailDiscount").kendoNumericTextBox({
+        culture: "en-US",
+        format: "#.##",
+        min: 0,
+        max: 100,
+        value: 0,
+        selectOnFocus: true
+    });
+</script>
+
+<script>
+
+    var product_list = [];
+    var updated = false;
+
+    $(document).ready(function () {
+
+        $('#Num').data("kendoNumericTextBox").value($("#NumTxt").val());
+        $('#PurchasePrice').data("kendoNumericTextBox").value($("#PurchasePriceTxt").val());
+        $('#DiscountSharp').data("kendoNumericTextBox").value($("#DiscountTxt").val());
+        $('#WholePurchasePrice').data("kendoNumericTextBox").value($("#WholePurchasePriceTxt").val());
+
+        GetAllMaterialProductList().done(function (data) { 
+
+            product_list = data;
+        });
+
+        setTimeout(function () {
+            $('#CurrencyId').data("kendoDropDownList").focus();
+            SetDiscount();
+        }, 200);
+
+    });
+
+    $("#CurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#ProductId').data("kendoDropDownList").focus();
+        }
+    });
+    
+    $("#ProductId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#Num').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Num").on("keypress", function (e) {
+        if (e.which === 13) {
+
+            $('#PurchasePrice').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#Num").focusout(function () {
+
+        var count = $('#Num').val();
+        var whole = $('#PurchasePrice').val();
+        var price = whole * count;
+
+        if (price) {
+            var purchase = $('#WholePurchasePrice').data("kendoNumericTextBox");
+            purchase.value(price);
+        }
+    });
+
+    $("#Num").on("focus", function (e) {
+        $('#Num').select();
+    });
+
+    $("#PurchasePrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#WholePurchasePrice').data("kendoNumericTextBox").focus();
+        }
+    });
+
+    $("#PurchasePrice").on("focus", function (e) {
+        $('#PurchasePrice').select();
+    });
+
+    $("#PurchasePrice").focusout(function () {
+
+        var count = $('#Num').val();
+        var whole = $('#PurchasePrice').val();
+        var price = whole * count;
+
+        if (price) {
+            var purchase = $('#WholePurchasePrice').data("kendoNumericTextBox");
+            purchase.value(price);
+        }
+    });
+
+    $("#WholePurchasePrice").focusout(function () {
+        var count = $('#Num').val();
+        var whole = $('#WholePurchasePrice').val();
+        var price = whole / count;
+
+        if (price) {
+            var purchase = $('#PurchasePrice').data("kendoNumericTextBox");
+            purchase.value(price);
+
+        }
+    });
+
+    $("#WholePurchasePrice").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#DetailDiscount').data("kendoNumericTextBox").focus();
+
+        }
+    });
+
+    $("#WholePurchasePrice").on("focus", function (e) {
+        $('#WholePurchasePrice').select();
+    });
+
+    $("#DetailDiscount").on("keypress", function (e) {
+        if (e.which === 13) {
+            //$('#DiscountSharp').data("kendoNumericTextBox").focus();
+            $('#Consideration').focus();
+        }
+    });
+
+    $("#DetailDiscount").on("focus", function (e) {
+        $('#DetailDiscount').select();
+    });
+
+    $("#DetailDiscount").focusout(function () {
+        SetDiscountSharp();
+    });
+
+    function SetDiscountSharp() {
+        let wholepur = $('#WholePurchasePrice').data("kendoNumericTextBox").value();
+        if (wholepur > 0) {
+            let dis = $('#DetailDiscount').data("kendoNumericTextBox").value();
+            let amount = (dis * wholepur) / 100;
+            $('#DiscountSharp').data("kendoNumericTextBox").value(amount);
+
+            $('#TotalAfterDiscount').val(wholepur - amount);
+        }
+    }
+
+    $("#DiscountSharp").focusout(function () {
+        SetDiscount();
+    });
+
+    function SetDiscount() {
+        let wholepur = $('#WholePurchasePrice').data("kendoNumericTextBox").value();
+        if (wholepur > 0) {
+            let dis = $('#DiscountSharp').data("kendoNumericTextBox").value();
+            let amount = (100 * dis) / wholepur;
+            $('#DetailDiscount').data("kendoNumericTextBox").value(amount);
+
+            $('#TotalAfterDiscount').val(wholepur - dis);
+        }
+    }
+
+    $("#Consideration").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-AddPurchaseInvoiceDetailModal-okAndNew').focus();
+        }
+    });
+    
+    $("#btn-AddPurchaseInvoiceDetailModal-okAndNew").on("keypress", function (e) {
+        
+        if (e.which === 37) {
+            $('#btn-AddPurchaseInvoiceDetailModal-accept').focus();
+        }
+    });
+    
+    $("#btn-AddPurchaseInvoiceDetailModal-accept").on("keypress", function (e) {
+        if (e.which === 37) {
+            $('#btn-AddPurchaseInvoiceDetailModal-close').focus();
+        }
+
+        if (e.which === 39) {
+            $('#btn-AddPurchaseInvoiceDetailModal-okAndNew').focus();
+        }
+    });
+    
+    $("#btn-AddPurchaseInvoiceDetailModal-close").on("keypress", function (e) {
+        if (e.which === 39) {
+            $('#btn-AddPurchaseInvoiceDetailModal-accept').focus();
+        }
+    });
+
+    function NewProduct() {
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = `/MaterialStoreroom/AddAndNewModal`;
+        $(".loader").removeClass("hidden");
+
+
+        $('#AddNewProductModal').modal('toggle');
+        $('#AddNewProductModal-body').load(link + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    $("#btn-AddNewProduct-accept").click(function () {
+        $(this).attr("disabled", true);
+
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddNewProductModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddNewProductModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-AddNewProduct-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/MaterialStoreroom/AddOrUpdate";
+
+        var product = $("#AddNewProductModal #addNewProductForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: product,
+            success: function (response) {
+                $('#btn-AddNewProduct-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#ProductName-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddNewProductModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "RepeatedBarcode") {
+
+                        $("#AddNewProductModal #ERROR_Barcode").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddNewProductModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddNewProductModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        $("#ProductId").data("kendoDropDownList").dataSource.read();
+                        let pr = $("#ProductId").data("kendoDropDownList");
+                        pr.bind("dataBound", function () {
+                            pr.value(response);
+                        });
+
+                        GetAllMaterialProductList().done(function (data) {
+                            product_list = data;
+                        });
+
+                    }
+                } else {
+
+                    $("#AddNewProductModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    })
+
+    function closeAddNewProductModal() {
+
+        $('#AddNewProductModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+        $('#AddNewProductModal-body').empty();
+    }
+
+</script>

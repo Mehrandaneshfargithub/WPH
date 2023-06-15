@@ -1,0 +1,26 @@
+[
+  {
+    "outputFileName": "wwwroot/Content/Js/PatientReceptionAnalysis.min.js",
+    "inputFiles": [
+      "wwwroot/Content/Js/PatientReceptionAnalysis.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/Content/Js/AnalysisResultDetailNew.min.js",
+    "inputFiles": [
+      "wwwroot/Content/Js/AnalysisResultDetailNew.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/Content/Js/PatientReceptionAnalysisNew.min.js",
+    "inputFiles": [
+      "wwwroot/Content/Js/PatientReceptionAnalysisNew.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/Content/Js/ReceptionNew.min.js",
+    "inputFiles": [
+      "wwwroot/Content/Js/ReceptionNew.js"
+    ]
+  }
+]

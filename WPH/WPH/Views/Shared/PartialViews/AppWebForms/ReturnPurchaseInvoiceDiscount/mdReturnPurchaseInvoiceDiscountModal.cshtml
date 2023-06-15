@@ -1,0 +1,108 @@
+﻿@model WPH.Models.ReturnPurchaseInvoiceDiscount.ReturnPurchaseInvoiceDiscountViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewDiscountForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.ReturnPurchaseInvoiceId)
+                    <input type="hidden" id="AmountTxt" value="@Model.AmountTxt" />
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Amount"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().NumericTextBox<decimal>()
+                            .Name("AmountTxt")
+                            .Culture("en-US")
+                            .Format("#.##")
+                            .Min(0)
+                            //.Value(Model.Amount)
+                            .HtmlAttributes(new { style = "width: 100%", title = "Price", @data_checkEmpty = "Amount-box", @id = "DiscountAmount" })
+                            )
+                        </span>
+                        <span id="Amount-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Currency"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().DropDownList()
+                            .Name("CurrencyId")
+                            .DataTextField("Name")
+                            .DataValueField("Id")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllCurrencies", "BaseInfo");
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.CurrencyId.ToString())
+                            .HtmlAttributes(new { style = "width: 100%;", @id = "DiscountCurrencyId" })
+                            )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Description"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Description")
+                            .Value(Model.Description)
+                            .HtmlAttributes(new { style = "width: 100%" , @id = "DiscountDescription" })
+                            )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#DiscountAmount').data("kendoNumericTextBox").value($("#AmountTxt").val());
+
+        setTimeout(function () {
+            let amount = $('#DiscountAmount').data("kendoNumericTextBox");
+            amount.focus();
+        }, 20);
+
+    });
+
+    $("#DiscountAmount").on("keypress", function (e) {
+        if (e.which === 13) {
+            let date = $("#DiscountCurrencyId").data("kendoDropDownList");
+            date.focus();
+        }
+    });
+
+    $("#DiscountCurrencyId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $("#DiscountDescription").focus();
+        }
+    });
+
+    $('#DiscountDescription').keypress(function (e) {
+        if (e.which === 13 || e.which === 9) {
+
+            $('#btn-DiscountModal-accept').focus();
+
+        }
+    });
+
+
+</script>

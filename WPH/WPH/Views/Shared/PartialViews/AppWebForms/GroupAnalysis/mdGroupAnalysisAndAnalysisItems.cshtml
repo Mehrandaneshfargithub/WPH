@@ -1,0 +1,361 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", icon = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        icon = " fa-angle-double-right ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        icon = " fa-angle-double-left ";
+    }
+
+}
+
+<script>
+
+    function OnAnalysisItemSelectInGroupAnalysis(e) {
+        var DataItem = this.dataItem(e.item.index());
+
+        addAnalysisItemToGroup(DataItem.Guid);
+        $("#AnalysisItemSearch").val('');
+    }
+
+    function OnAnalysisSelectInGroupAnalysis(e) {
+        var DataItem = this.dataItem(e.item.index());
+
+        addAnalysisToGroup(DataItem.Guid);
+        $("#AnalysisSearch").val('');
+    }
+
+</script>
+
+
+
+<div class="row Grid-Content shadow-border" style="margin:1rem 0">
+    <div class="row">
+        <div class="col-md-12" style="border-bottom:1px dotted rgba(0,0,0,0.4);margin-bottom:1rem ">
+            <h4 id="analysisTitle" class="@font">
+                @Localizer["All"] @Localizer["Analysis"]
+            </h4>
+        </div>
+        <div class="col-md-2" style="border-left:1px solid rgba(0,0,0,0.4)">
+
+            <div class="row">
+                <div class="col-md-10">
+                    @(Html.Kendo().AutoComplete()
+                      .Name("AnalysisSearch")
+                      .DataTextField("Name")
+                      .Events(events => events.Select("OnAnalysisSelectInGroupAnalysis"))
+                      .Filter("contains")
+                      .HighlightFirst(true)
+                      .ClearButton(false)
+                      .HtmlAttributes(new { @id = "AnalysisSearch", style = "width:100%" })
+                      .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllAnalysesWithoutInGroupAnalysis", "Analysis").Data("GetGroupAnalysisIdInGroupAnalysisItemPage");
+                            })
+                            .ServerFiltering(false);
+                        })
+                    )
+                    @(Html.Kendo().ListBox()
+                          .Name("analysis")
+                          .DataTextField("Name")
+                          .DataValueField("Guid")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllAnalysesWithoutInGroupAnalysis", "Analysis").Data("GetGroupAnalysisIdInGroupAnalysisItemPage");
+                                })
+                                .ServerFiltering(false);
+                            })
+                          .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem" })
+                    )
+                </div>
+                <div class="col-md-2" style="padding:0px">
+                    <a id="add-Analysis" class="k-primary pull-right" style="display: inline-block;" href="#">
+
+                        <i class="fa @icon" style="font-size: 20px;padding: 0px 15px;"></i>
+
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10 Grid-Content" style="padding:0 1rem">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/GroupAnalysisItem/dgGroupAnalysis_AnalysisGrid.cshtml")
+        </div>
+    </div>
+    <div class="row" style="margin-top:5px">
+        <div class="col-md-11 col-sm-11">
+        </div>
+        <div class="col-md-1 col-sm-1">
+            <a id="DeleteAllAnalysis" class="btn btn-xs btn-danger pull-left" style="display: inline-block;" href="#">
+                @Localizer["Delete"] @Localizer["All"]
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row Grid-Content shadow-border @font" style="margin:1rem 0">
+    <div class="row">
+        <div class="col-md-12" style="border-bottom:1px dotted rgba(0,0,0,0.4);margin-bottom:1rem ">
+            <h4 id="analysisItemTitle " class="@font">
+                @Localizer["All"] @Localizer["AnalysisItems"]
+            </h4>
+        </div>
+        <div class="col-md-2" style="border-left:1px solid rgba(0,0,0,0.4)">
+
+            <div class="row">
+                <div class="col-md-10">
+                    @(Html.Kendo().AutoComplete()
+                      .Name("AnalysisItemSearch")
+                      .DataTextField("Name")
+                      .Events(events => events.Select("OnAnalysisItemSelectInGroupAnalysis"))
+                      .Filter("contains")
+                      .HighlightFirst(true)
+                      .ClearButton(false)
+                      .HtmlAttributes(new { @id = "AnalysisItemSearch", style = "width:100%" })
+                      .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllAnalysisItemWithoutInGroupAnalysisItem", "AnalysisItem").Data("GetGroupAnalysisIdInGroupAnalysisItemPage");
+                            })
+                            .ServerFiltering(false);
+                        })
+                    )
+                    @(Html.Kendo().ListBox()
+                          .Name("analysisItem")
+                          .DataTextField("Name")
+                          .DataValueField("Guid")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllAnalysisItemWithoutInGroupAnalysisItem", "AnalysisItem").Data("GetGroupAnalysisIdInGroupAnalysisItemPage");
+                                })
+                                .ServerFiltering(false);
+                            })
+                          .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem" })
+                    )
+                </div>
+                <div class="col-md-2" style="padding:0px">
+                    <a id="add-AnalysisItem" class="k-primary pull-right" style="display: inline-block;" href="#">
+
+                        <i class="fa @icon" style="font-size: 20px;padding: 0px 15px;"></i>
+
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-10 Grid-Content @font" style="padding:0 1rem">
+
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/GroupAnalysisItem/dgGroupAnalysisItemGrid.cshtml")
+
+        </div>
+    </div>
+    <div class="row" style="margin-top:5px">
+        <div class="col-md-11 col-sm-11">
+        </div>
+        <div class="col-md-1 col-sm-1">
+            <a id="DeleteAll" class="btn btn-xs btn-danger pull-left" style="display: inline-block;" href="#">
+                @Localizer["Delete"] @Localizer["All"]
+            </a>
+        </div>
+    </div>
+
+
+</div>
+
+<h3 id="AreYouSure" class="hidden">@Localizer["AreYouSure"]</h3>
+<h3 id="Ok" class="hidden">@Localizer["Ok"]</h3>
+<h3 id="Exit" class="hidden">@Localizer["Exit"]</h3>
+
+<script>
+    var listBoxanalysisItem;
+    var listBoxanalysis;
+
+    $(document).ready(function () {
+
+        listBoxanalysisItem = $("#analysisItem").data("kendoListBox");
+        listBoxanalysis = $("#analysis").data("kendoListBox");
+        //let name = $("#GroupAnalysisItemModal-header").text();
+        //let ana = $("#analysisTitle").text() + " " + name;
+        //$("#analysisTitle").text(ana);
+
+        //let anai = $("#analysisItemTitle").text() + " " + name;
+        //$("#analysisItemTitle").text(anai);
+
+    })
+
+
+    function addAnalysisToGroup(analysisId) {
+        let groupId = $('#btn-GroupAnalysisItemModal-accept').attr('data-GroupId');
+
+        $.ajax({
+            type: "Post",
+            url: '/GroupAnalysis_Analysis/AddAnalysisToGroup',
+            data: { GroupAnalysisId: groupId, AnalysisId: analysisId },
+            success: function (response) {
+                if (response !== 0) {
+                    refreshAnalysis();
+                    $("#kendoGroupAnalysis_AnalysisGrid").find(".k-pager-refresh").click();
+                }
+            }
+        });
+    }
+
+    function addAnalysisItemToGroup(analysisItemId) {
+
+        let groupId = $('#btn-GroupAnalysisItemModal-accept').attr('data-GroupId');
+
+        $.ajax({
+            type: "Post",
+            url: '/GroupAnalysisItem/AddAnalysisItemToGroup',
+            data: { GroupAnalysisId: groupId, AnalysisItemId: analysisItemId },
+            success: function (response) {
+                if (response !== 0) {
+                    refreshAnalysisItems();
+                    $("#kendoGroupAnalysisItemGrid").find(".k-pager-refresh").click();
+                }
+            }
+        });
+    }
+
+
+
+    listBoxanalysisItem.wrapper.find(".k-list").on("dblclick", ".k-item", function (element) {
+        var dataItem = listBoxanalysisItem.dataItem(this);
+        _analysisItemId = dataItem.Guid;
+
+        addAnalysisItemToGroup(_analysisItemId);
+    });
+
+    listBoxanalysis.wrapper.find(".k-list").on("dblclick", ".k-item", function (element) {
+        var dataItem = listBoxanalysis.dataItem(this);
+        _analysisId = dataItem.Guid;
+
+        addAnalysisToGroup(_analysisId);
+    });
+
+
+    $('#add-Analysis').on("click", function () {
+        let selectedItem = listBoxanalysis.wrapper.find(".k-state-selected");
+        var dataItem = listBoxanalysis.dataItem(selectedItem);
+        _analysisId = dataItem.Guid;
+
+        addAnalysisToGroup(_analysisId);
+    });
+
+    $('#add-AnalysisItem').on("click", function () {
+        let selectedItem = listBoxanalysisItem.wrapper.find(".k-state-selected");
+        var dataItem = listBoxanalysisItem.dataItem(selectedItem);
+        let _analysisItemId = dataItem.Guid;
+
+        addAnalysisItemToGroup(_analysisItemId);
+    });
+
+
+    $('#DeleteAllAnalysis').on("click", function () {
+        AreYouSureDeleteAllGroupAnalysis_Analysis();
+    });
+
+    $('#DeleteAll').on("click", function () {
+        AreYouSureDeleteAllGroupAnalysisItem();
+    });
+
+
+    function AreYouSureDeleteAllGroupAnalysis_Analysis() {
+        let ok = $("#Ok").text();
+        let are = $("#AreYouSure").text();
+        let exit = $("#Exit").text();
+
+        bootbox.confirm({
+            message: are,
+            className: 'bootbox-class',
+            buttons: {
+                confirm: {
+                    label: ok,
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: exit,
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.ajax({
+                        type: "Post",
+                        url: '/GroupAnalysis_Analysis/DeleteAllAnalysis_Analysis',
+                        data: { GroupAnalysisId: $('#btn-GroupAnalysisItemModal-accept').attr('data-GroupId') },
+                        success: function (response) {
+                            if (response !== 0) {
+                                $("#kendoGroupAnalysis_AnalysisGrid").find(".k-pager-refresh").click();
+                                refreshAnalysis();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+    }
+
+    function AreYouSureDeleteAllGroupAnalysisItem() {
+        let ok = $("#Ok").text();
+        let are = $("#AreYouSure").text();
+        let exit = $("#Exit").text();
+
+        bootbox.confirm({
+            message: are,
+            className: 'bootbox-class',
+            buttons: {
+                confirm: {
+                    label: ok,
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: exit,
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.ajax({
+                        type: "Post",
+                        url: '/GroupAnalysisItem/DeleteAllAnalysisItem',
+                        data: { GroupAnalysisId: $('#btn-GroupAnalysisItemModal-accept').attr('data-GroupId') },
+                        success: function (response) {
+                            if (response !== 0) {
+                                refreshAnalysisItems();
+                                $("#kendoGroupAnalysisItemGrid").find(".k-pager-refresh").click();
+                            }
+                        }
+                    });
+                }
+            }
+        })
+    }
+
+
+    function refreshAnalysis() {
+        listBoxanalysis.dataSource.read();
+    }
+
+    function refreshAnalysisItems() {
+        listBoxanalysisItem.dataSource.read();
+    }
+
+</script>

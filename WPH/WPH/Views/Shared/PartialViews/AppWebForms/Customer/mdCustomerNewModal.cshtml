@@ -1,0 +1,218 @@
+﻿@model WPH.Models.Customer.CustomerViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<style>
+    .k-nodata{
+        height: 1px !important;
+    }
+</style>
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewCustomerForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.NameHolder)
+
+                    <label class="block clearfix">
+                        <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Name"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Name")
+                                .Value(Model.Name)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Mobile"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                    .Name("PhoneNumber")
+                                    .Value(Model.PhoneNumber)
+                                    .HtmlAttributes(new { style = "width: 100%", @validate_mobile = "Mobile-wrong", maxlength = "11", onkeypress = "return OnlyNumberKey(event)" })
+                                )
+                        </span>
+                        <span id="Mobile-wrong" class="hidden" style="color:red;">
+                            @Localizer["MobileNotCorrect"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        @*<span class="red fa fa-asterisk smaller-60 redStar"></span>*@<label for="form-field-8">@Localizer["Type"] @Localizer["Customer"] : </label>
+                        <span class="block input-icon input-icon-right ">
+                            @(Html.Kendo().AutoComplete()
+                            .Name("CustomerTypeName")
+                            .DataTextField("Name")
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllBaseInfosByBaseInfoTypeName", "BaseInfo",new { TypeName = "CustomerType" });
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.CustomerTypeName)
+                            .HtmlAttributes(new { style = "width:100%;"/*, @data_checkEmpty = "Customer-box"*/ })
+                            )
+                        </span>
+                        <span id="Customer-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        @*<span class="red fa fa-asterisk smaller-60 redStar"></span>*@<label for="form-field-8">@Localizer["City"] : </label>
+                        <span class="block input-icon input-icon-right ">
+                            @(Html.Kendo().AutoComplete()
+                            .Name("CityName")
+                            .DataTextField("Name")
+                            .Filter("contains")
+                            .HighlightFirst(true)
+                            .ClearButton(false)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllBaseInfosByBaseInfoTypeName", "BaseInfo", new { TypeName = "City" });
+                                })
+                                .ServerFiltering(false);
+                            })
+                            .Value(Model.CityName)
+                            .HtmlAttributes(new { style = "width:100%;"/*, @data_checkEmpty = "City-box" */})
+                            )
+                        </span>
+                        <span id="City-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Address"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Address")
+                            .Value(Model.Address)
+                            .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Description"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                            .Name("Description")
+                            .Value(Model.Description)
+                            .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+
+<script>
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Name").focus();
+        }, 200);
+    });
+
+
+    $('#Name').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#Name").select();
+    });
+
+    $('#Name').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#PhoneNumber').focus();
+        }
+    });
+
+    $('#PhoneNumber').on('keypress', function (e) {
+
+        $("#Mobile-wrong").addClass("hidden");
+
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#CustomerTypeName').data("kendoAutoComplete").focus();
+        }
+    });
+
+
+    $('#PhoneNumber').on('input', function (e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+
+    });
+
+
+    $("#CustomerTypeName").on('focus', function (e) {
+
+        let inputAuto = $("#CustomerTypeName").data("kendoAutoComplete");
+        let value = inputAuto.value();
+        inputAuto.search(value);
+    });
+
+    $('#CustomerTypeName').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#CityName').data("kendoAutoComplete").focus();
+        }
+    });
+
+    $("#CityName").on('focus', function (e) {
+
+        let inputAuto = $("#CityName").data("kendoAutoComplete");
+        let value = inputAuto.value();
+        inputAuto.search(value);
+    });
+
+    $('#CityName').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#Address').focus();
+        }
+    });
+
+    $('#Address').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#Description').focus();
+        }
+    });
+
+
+    $('#Description').on('keypress', function (e) {
+
+        if (e.which === 13) {
+
+            $('#btn-addCustomer-accept').focus();
+        }
+    });
+</script>

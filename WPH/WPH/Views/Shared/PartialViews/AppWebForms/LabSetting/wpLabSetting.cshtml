@@ -1,0 +1,430 @@
+﻿@model List<ClinicSectionSettingViewModel>
+
+@using Microsoft.AspNetCore.Http
+@using WPH.Models.CustomDataModels.Clinic
+
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        dir = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        dir = " direction:rtl; ";
+    }
+}
+
+@Html.AntiForgeryToken()
+<div class="row page-header">
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["SoftwareSetting"]
+        </h1>
+    </div>
+</div>
+
+<div id="settingsValue" class="col-sm-12 MyFont-Roboto-grid" style="margin-top: 2rem; @dir">
+
+    <div class="col-sm-6 ">
+
+        <div>
+            <label class="block clearfix" style="margin-top:1rem">
+                <label for="form-field-8">@Localizer["ClinicSection"] : </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().TextBox()
+                    .Name("ClinicSectionNameTxt")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                )
+                </span>
+            </label>
+        </div>
+
+        @{
+            List<ClinicSectionSettingViewModel> image_list = new List<ClinicSectionSettingViewModel>();
+            foreach (var item in Model)
+            {
+
+                <label class="block clearfix" style="margin-top:1rem">
+                    @switch (item.InputType)
+                    {
+                        case "int":
+                            {
+                                <label for="form-field-8">@Localizer[item.SName] : </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<int>()
+                                    .Name(item.SName)
+                                    .Decimals(0)
+                                    .Min(0)
+                                    .Format("0")
+                                    .HtmlAttributes(new { style = "width: 100%", @class = "my_data_value", @data_settingId = item.Id })
+                                    .Value(int.Parse(item.ClinicSectionSettingValues?.FirstOrDefault()?.SValue ?? "0"))
+                                    )
+                                </span>
+                            }
+                            break;
+
+                        case "decimal":
+                            {
+                                <label for="form-field-8">@Localizer[item.SName] : </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name(item.SName)
+                                    .Min(0)
+                                    .Format("{0:n0}")
+                                    .HtmlAttributes(new { style = "width: 100%", @class = "my_data_value", @data_settingId = item.Id })
+                                    .Value(decimal.Parse(item.ClinicSectionSettingValues?.FirstOrDefault()?.SValue ?? "0"))
+                                    )
+                                </span>
+                            }
+                            break;
+
+                        case "bool":
+                            {
+                                @(Html.Kendo().CheckBox()
+                                    .Name(item.SName)
+                                    .Label(Localizer[item.SName])
+                                    .Checked(bool.Parse(item.ClinicSectionSettingValues?.FirstOrDefault()?.SValue ?? "false"))
+                                    .HtmlAttributes(new { @class = "kendoCheckbox my_check_box_value", @data_settingId = item.Id })
+                                    )
+                            }
+                            break;
+
+                        case "image":
+                            image_list.Add(item);
+                            break;
+
+                        default:
+                            {
+                                if (!string.IsNullOrWhiteSpace(item.InputType) && item.InputType.Contains("/"))
+                                {
+                                    var source = item.InputType.Split("/");
+                                    var cont = source[0] ?? "";
+                                    var acti = source[1] ?? "";
+
+                                    <label for="form-field-8">@Localizer[item.SName] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().DropDownList()
+                                        .Name(item.SName)
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .OptionLabel(" ")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action(acti, cont);
+                                            })
+                                            .ServerFiltering(false);
+                                        })
+                                        .Value(item.ClinicSectionSettingValues?.FirstOrDefault()?.SValue ?? "")
+                                        .HtmlAttributes(new { style = "width: 100%", @class = "my_data_value", @data_settingId = item.Id })
+                                        )
+                                    </span>
+                                }
+                                else
+                                {
+                                    <label for="form-field-8">@Localizer[item.SName] : </label>
+                                    <span class="block input-icon input-icon-right">
+                                        @(Html.Kendo().TextBox()
+                                        .Name(item.SName)
+                                        .HtmlAttributes(new { style = "width: 100%", @class= "my_data_value", @data_settingId = item.Id })
+                                        .Value(item.ClinicSectionSettingValues?.FirstOrDefault()?.SValue ?? "")
+                                        )
+                                    </span>
+                                }
+                            }
+                            break;
+                    }
+
+                </label>
+            }
+        }
+
+    </div>
+    <script>
+        function ReadImage(path, img_id) {
+            if (path == null || path == '')
+                return;
+
+            var res = path.split(".");
+            var name = `server.${res[res.length - 1]}`;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", path, true);
+            xhr.responseType = "blob";
+            xhr.onload = function (e) {
+
+                var reader = new FileReader();
+                reader.onload = function (event) {
+
+                    var res = event.target.result;
+                    $(`#${img_id}`).attr('src', res);
+                    $(`#${img_id}`).attr('name', name);
+                }
+                var file = this.response;
+                reader.readAsDataURL(file);
+
+            };
+            xhr.send();
+        }
+    </script>
+
+    @if (image_list.Count > 0)
+    {
+        <div class="col-sm-12 " style="display:flex;margin-top:5px;">
+            @foreach (var item in image_list)
+            {
+                string img_path = item.ClinicSectionSettingValues?.FirstOrDefault()?.SValue.Replace("\\", "/") ?? "";
+                string img_id = $"{item.SName}_img";
+                string img_upload = $"{item.SName}_Upload";
+                string img_box = $"{item.SName}-box";
+                <div class="banner_div_container">
+                    <label for="form-field-8">@Localizer[item.SName] : </label>
+                    <span class="banner_span_container">
+                        <img id="@img_id" data-settingId="@item.Id" class="banner_img" src="" />
+                    </span>
+                    <input type="file" value="" id="@img_upload" style="display: none;">
+
+                    <span id="@img_box" class="emptybox hidden" style="color: red;font-size:11px; ">
+                        @Localizer["ImageNotSelected"]
+                    </span>
+                </div>
+
+                <script>
+
+                    $("#@img_id").click(function (e) {
+                        $('#@img_upload').trigger('click');
+                    });
+
+                    $("#@img_upload").change(function () {
+                        readURLAttachments(this, '@img_id', '#@img_box');
+                    });
+
+                    $(document).ready(function () {
+
+                        ReadImage('@img_path', '@img_id');
+                    });
+
+                </script>
+            }
+
+        </div>
+    }
+
+
+    @if ((bool)ViewBag.AccessEditLabSetting)
+    {
+        <div class="col-sm-12 ">
+
+            @(Html.Kendo().Button()
+            .Name("btn-settingsValue-accept")
+            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "AcceptSettingsValue()" })
+            .Content(Localizer["Ok"]))
+
+        </div>
+    }
+
+
+
+</div>
+
+<input id="sectionId" value="@ViewBag.ClinicSection" type="hidden" />
+
+<div id="snackbar">
+    <span>
+        @Localizer["InformationSavedSuccessfully"]
+    </span>
+</div>
+
+
+<script>
+    var currency;
+    var wizard;
+
+
+    $(document).ready(function () {
+
+        $.ajax({
+            type: "Post",
+            url: "/ClinicSectionSetting/GetClinicSectionName",
+            success: function (data) {
+
+                $("#ClinicSectionNameTxt").val(data);
+
+            },
+
+        });
+
+    })
+
+
+    function dataURLtoFile(dataurl, filename) {
+        var arr = dataurl.split(',');
+        if(dataurl==null || dataurl=='' || arr.length<2)
+            return null;
+        var mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        };
+        return new File([u8arr], filename, { type: mime });
+    }
+
+    function readURLAttachments(input, img_prev, error_box) {
+        var img_tag = document.getElementById(img_prev);
+        if (input.files && input.files.length > 0 && input.files[0].type.match('image')) {
+
+            let img = input.files[0];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                img_tag.src= e.target.result ;
+                img_tag.setAttribute("name", img.name );
+            }
+            reader.readAsDataURL(img);
+
+            $(error_box).addClass("hidden");
+        };
+    };
+
+    async function GetImagesFromDiv(clinicSectionId) {
+
+        var files = [];
+        var images = document.getElementsByClassName("banner_img");
+
+        for (let i = 0; i < images.length; i++) {
+            let img = images[i];
+            var setting_id = $(img).attr("data-settingId");
+            if (setting_id) {
+
+                var item = {
+
+                    ClinicSectionId: clinicSectionId,
+                    SettingId: setting_id,
+                    Banner: dataURLtoFile($(img).attr('src'), $(img).attr('name'))
+                };
+                files.push(item);
+                
+            }
+        };
+        return files;
+    }
+
+    async function AcceptSettingsValue() {
+
+        let clinicSectionId = $("#ClinicSection").val();
+
+        if (clinicSectionId === "") {
+            $("#ClinicSection-box").removeClass("hidden");
+            return;
+        }
+
+        if (parseInt($("#BabyAge").val()) >= parseInt($("#ChildAge").val())) {
+
+            bootbox.alert({
+                        message: "Baby Age Cannot Be More Than Child Age.",
+                        className: 'bootbox-class'
+
+                    });
+            return;
+
+        }
+
+        var _formData = new FormData();
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+
+        _formData.append('__RequestVerificationToken', token.attr('value'));
+
+        var count = 0;
+        $('.my_data_value:input').each(function () {
+
+            if ($(this).attr("data-settingId")) {
+                _formData.append(`cssvmList[${count}].ClinicSectionId`, clinicSectionId);
+                _formData.append(`cssvmList[${count}].SettingId`, $(this).attr("data-settingId"));
+                _formData.append(`cssvmList[${count}].SValue`, $(this).val());
+                count++;
+            }
+        });
+
+
+        $('.my_check_box_value').each(function () {
+
+            if ($(this).attr("id")) {
+                let check = "false";
+                if ($(this).is(":checked"))
+                    check = "true";
+
+                _formData.append(`cssvmList[${count}].ClinicSectionId`, clinicSectionId);
+                _formData.append(`cssvmList[${count}].SettingId`, $(this).attr("data-settingId"));
+                _formData.append(`cssvmList[${count}].SValue`, check);
+                count++;
+            }
+
+        });
+
+        var img_counter = 0;
+
+        //var src = $("#AnalysReport_img").attr('src');
+        //if (src) {
+        //    var file = dataURLtoFile(src, $("#AnalysReport_img").attr('name'));
+        //    _formData.append('banner', file);
+        //}
+
+        var images = document.getElementsByClassName("banner_img");
+        for (let i = 0; i < images.length; i++) {
+            let img = images[i];
+            var setting_id = $(img).attr("data-settingId");
+            if (setting_id) {
+
+                _formData.append(`bannerList[${img_counter}].ClinicSectionId`, clinicSectionId);
+                _formData.append(`bannerList[${img_counter}].SettingId`, setting_id);
+                _formData.append(`bannerList[${img_counter}].Banner`, dataURLtoFile($(img).attr('src'), $(img).attr('name')));
+
+                img_counter++;
+
+            }
+        };
+
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+
+            type: "Post",
+            contentType: "multipart/form-data",
+            dataType: "json",
+            data: _formData,
+            processData: false,
+            contentType: false,
+            url: "/ClinicSectionSetting/SaveClinicSectionSettings",
+            success: function (data) {
+
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+
+            },
+
+        })
+
+        let sectionName = $("#ClinicSectionNameTxt").val();
+
+        $.ajax({
+
+            type: "Post",
+            data: { Name: sectionName },
+            url: "/ClinicSectionSetting/UpdateClinicSectionName",
+
+        })
+    }
+
+</script>
+
+
+

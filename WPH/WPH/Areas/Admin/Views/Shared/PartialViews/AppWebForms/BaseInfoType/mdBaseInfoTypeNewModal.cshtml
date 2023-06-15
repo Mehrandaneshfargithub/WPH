@@ -1,0 +1,81 @@
+﻿@model WPH.Areas.Admin.Models.BaseInfoType.BaseInfoTypeViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewBaseInfoTypeForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Ename"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("EName")
+                                .Value(Model.Ename)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "EName-box" })
+                            )
+                        </span>
+                        <span id="EName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Fname"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("FName")
+                                .Value(Model.Fname)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "FName-box" })
+                            )
+                        </span>
+                        <span id="FName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+
+                    </label>
+
+
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+
+<script>
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#EName").focus();
+        }, 200);
+    });
+
+    $('#EName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $('#FName').focus();
+        }
+    })
+    
+    $('#FName').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+
+            $('#btn-BaseInfoTypeModal-accept').focus();
+        }
+    })
+
+
+</script>
+

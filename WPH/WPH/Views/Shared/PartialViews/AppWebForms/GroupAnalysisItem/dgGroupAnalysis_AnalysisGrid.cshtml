@@ -1,0 +1,102 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string remove_title = Localizer["RemoveAnalysisFromAnalysisGroup"];
+}
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.CustomDataModels.GroupAnalysis_Analysis.GroupAnalysis_AnalysisViewModel>()
+    .Name("kendoGroupAnalysis_AnalysisGrid")
+    .Columns(columns =>
+    {
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            columns.Bound("").Title(string.Empty).Width(10)
+            .ClientTemplate(
+                $@"<a class='tooltip-error grid-btn' onClick='GridGroupAnalysis_AnalysisDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete' data-toggle='modal'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound(x => x.Analysis.ModifiedUserName).Filterable(false).Title(Localizer["Name"] + " " + Localizer["User"] + "(" + Localizer["Modified"] + ")").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.CreatedUserName).Filterable(false).Title(Localizer["Name"] + " " + Localizer["User"] + "(" + Localizer["New"] + ")").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.DiscountCurrencyName).Filterable(false).Title(Localizer["Type"] + " " + Localizer["Currency"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.TotalAmountWithDiscount).Filterable(false).Format("{0:n0}").Title(Localizer["TotalAmount"] + "(" + Localizer["Discount"] + ")").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.Discount).Filterable(false).Title(Localizer["Discount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.TotalAmount).Filterable(false).Format("{0:n0}").Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.Note).Filterable(false).Title(Localizer["AnalysisNote"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound("").Title("Active").Width(10)
+            .ClientTemplate(
+                @"<span class='blue'>
+                    <i style='font-size:18px' class='#if(Analysis.IsActive){#fa fa-check-square#}else{#fa fa-square-o#}#'></i>
+                </span>
+            ");
+            columns.Bound(x => x.Analysis.Abbreviation).Filterable(false).Title(Localizer["Abbreviation"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.Code).Filterable(false).Title(Localizer["Code"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["AnalysisName"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(10).Title("").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Analysis.IsActive).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Analysis.IsActive).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("").Width(10).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(300).Title(Localizer["AnalysisName"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.Code).Filterable(false).Width(300).Title(Localizer["Code"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.Abbreviation).Filterable(false).Width(300).Title(Localizer["Abbreviation"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound("").Title("Active").Width(10)
+            .ClientTemplate(
+                @"<span class='blue'>
+                    <i style='font-size:18px' class='#if(Analysis.IsActive){#fa fa-check-square#}else{#fa fa-square-o#}#'></i>
+                </span>
+            ");
+
+            columns.Bound(x => x.Analysis.Note).Filterable(false).Title(Localizer["AnalysisNote"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.TotalAmount).Filterable(false).Format("{0:n0}").Title(Localizer["Amount"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.Discount).Filterable(false).Title(Localizer["Discount"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound(x => x.Analysis.TotalAmountWithDiscount).Filterable(false).Format("{0:n0}").Title(Localizer["TotalAmount"] + '(' + Localizer["Discount"] + ')').HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.DiscountCurrencyName).Filterable(false).Title(Localizer["Type"] + ' ' + Localizer["Currency"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.CreatedUserName).Filterable(false).Title(Localizer["Name"] + ' ' + Localizer["User"] + '(' + Localizer["New"] + ')').HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Analysis.ModifiedUserName).Filterable(false).Title(Localizer["Name"] + ' ' + Localizer["User"] + '(' + Localizer["Modified"] + ')').HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            columns.Bound("").Title(string.Empty).Width(10)
+            .ClientTemplate(
+                $@"<a class='tooltip-error grid-btn' onClick='GridGroupAnalysis_AnalysisDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='{remove_title}' data-original-title='Delete' data-toggle='modal'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+        }
+
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(100)
+        .Read(read => read.Action("GetAll", "GroupAnalysis_Analysis").Data("GetGroupAnalysisId"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;font-size:1.3rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+

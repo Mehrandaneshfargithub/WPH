@@ -1,0 +1,1318 @@
+﻿@model WPH.Models.Damage.DamageViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    var now = DateTime.Now;
+    string font = "", pull = "", pull_rev = "", dir = "", header_txt = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        pull_rev = " pull-right ";
+        dir = "  ";
+        <h3 id="NewDamageHeader" class="hidden"> @Localizer["New"] - @Localizer["Damage"] </h3>
+        <h3 id="EditDamageHeader" class="hidden"> @Localizer["Edit"] - @Localizer["Damage"] </h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        pull_rev = " pull-left ";
+        dir = " direction:rtl; ";
+        <h3 id="NewDamageHeader" class="hidden"> @Localizer["Damage"] - @Localizer["New"] </h3>
+        <h3 id="EditDamageHeader" class="hidden">@Localizer["Damage"] - @Localizer["Edit"] </h3>
+    }
+
+    if (Model.Guid == Guid.Empty)
+    {
+        header_txt = $"{Localizer["Damage"]} _ {Localizer["New"]}";
+
+    }
+    else
+    {
+        header_txt = $"{Localizer["Damage"]} _ {Localizer["Edit"]}";
+
+    }
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @header_txt
+        </h1>
+
+    </div>
+
+    @*<div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="ExitDamage(this)" href="#" style="padding:0.2rem">
+                @Localizer["Exit"]
+
+            </a>
+        </div>*@
+
+</div><!-- /.page-header -->
+
+
+<div class="row @font" style="@dir">
+    <div class="col-sm-12 shadow-border" style="margin:1rem 0">
+
+        <form id="addNewDamageForm">
+            <fieldset>
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Guid)
+
+                <div class="col-sm-12">
+
+                    <div class="col-sm-3">
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["InvoiceNum"]:</label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                    .Name("InvoiceNumTxt")
+                                    .Enable(false)
+                                    .Value(Model.InvoiceNum)
+                                    .HtmlAttributes(new { style = "width: 100%;" })
+                                    )
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["InvoiceDate"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().DatePicker()
+                                    .Name("InvoiceDateTxt")
+                                    .Value(Model.InvoiceDate ?? now)
+                                    .Format("dd/MM/yyyy")
+                                    .Max(now)
+                                    .Enable((bool)ViewBag.AccessEditDate)
+                                    .HtmlAttributes(new { style = "width: 100%;", onchange = "TryDateWithOutFuture(this)", @data_checkEmpty = "InvoiceDate-box" })
+                                    )
+                                </span>
+                                <span id="InvoiceDate-box" class="emptybox hidden" data-isEssential="true" style="color:red;font-size: 11px;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                                <span id="Date-valid" class="emptybox hidden" style="color:red;">
+                                    @Localizer["DateNotValid"]
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix ">
+                            <label for="form-field-8">@Localizer["CostType"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().AutoComplete()
+                                    .Name("CostTypeTxt")
+                                    .DataTextField("Name")
+                                    .Filter("contains")
+                                    .HighlightFirst(true)
+                                    .ClearButton(false)
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllCostTypes", "BaseInfo");
+                                        })
+                                        .ServerFiltering(false);
+                                    })
+                                    .Value(Model.CostTypeTxt)
+                                    .HtmlAttributes(new { style = "width:100%;", @data_checkEmpty = "CostType-box" })
+                                    )
+                            </span>
+                            <span id="CostType-box" class="emptybox hidden" data-isEssential="true" style="color:red;font-size: 11px;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix ">
+                            <label for="form-field-8">@Localizer["Reason"]: </label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().AutoComplete()
+                                    .Name("ReasonTxt")
+                                    .DataTextField("Name")
+                                    .Filter("contains")
+                                    .HighlightFirst(true)
+                                    .ClearButton(false)
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllReasons", "BaseInfo");
+                                        })
+                                        .ServerFiltering(false);
+                                    })
+                                    .Value(Model.ReasonTxt)
+                                    .HtmlAttributes(new { style = "width:100%;", @data_checkEmpty = "Reason-box" })
+                                    )
+                            </span>
+                            <span id="Reason-box" class="emptybox hidden" data-isEssential="true" style="color:red;font-size: 11px;">
+                                @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label class="block clearfix">
+                            <label for="form-field-8">@Localizer["Description"]:</label>
+                            <span class="block input-icon input-icon-right">
+                                @(Html.Kendo().TextBox()
+                                    .Name("Description")
+                                    .Value(Model.Description)
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                )
+                            </span>
+                        </label>
+                    </div>
+
+
+                </div>
+
+                <div class="col-sm-12" style="display:flex;align-items:flex-end">
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-6">
+
+                        @(Html.Kendo().Button()
+                            .Name("btn-addDamageDamageDetail-exit")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-danger " + pull_rev + "", onclick = "ExitDamage(this)" })
+                            .Content(Localizer["Exit"]))
+                        @(Html.Kendo().Button()
+                            .Name("btn-addDamageDamageDetail-accept")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary " + pull_rev + "" })
+                            .Content(Localizer["Ok"]))
+                        @(Html.Kendo().Button()
+                            .Name("btn-updateDamage-accept")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary hidden " + pull_rev + "" })
+                            .Content(Localizer["Ok"]))
+                        @(Html.Kendo().Button()
+                            .Name("btn-updateDamage-exit-accept")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary hidden " + pull_rev + "" })
+                            .Content($"{Localizer["Ok"]} {Localizer["And"]} {Localizer["Exit"]}"))
+
+                        @if ((bool)ViewBag.AccessNewDamageDetail)
+                        {
+                            @(Html.Kendo().Button()
+                                .Name("btn-DamageDetailNewModal")
+                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary hidden " + pull_rev + "", onclick = "AddDamageDetail()" })
+                                .Content(Localizer["AddProduct"]))
+                        }
+
+                        @(Html.Kendo().Button()
+                            .Name("btn-ShowDiscountsList")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-secondary hidden " + pull_rev+"" })
+                            .Content(Localizer["Discount"]))
+
+                    </div>
+
+                </div>
+
+                <div>
+                    <div id="CantChangeSupplier" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ToChangeSupplierDeleteDetailsFirst"]
+                    </div>
+
+                    <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_DataNotValid"]
+                    </div>
+
+                    <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["InvoiceInUse"]
+                    </div>
+
+                    <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                        <i class="ace-icon fa fa-stop bigger-120"></i>
+                        @Localizer["ERROR_InsertWrong"]
+                    </div>
+                </div>
+
+                <div class="space-24"></div>
+            </fieldset>
+        </form>
+    </div>
+
+
+    <div class="@pull col-sm-12 shadow-border">
+
+        <script>
+
+            function GetDamageId() {
+                return {
+                    damageId: $("#Guid").val()
+                }
+            }
+
+            function GetParametersForSelectDamage() {
+                return {
+                    productId: $("#ProductId").val()
+                }
+            }
+
+        </script>
+
+
+        <div class="col-sm-12 Grid-Content @font">
+            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/DamageDetail/dgDamageDetailGrid.cshtml")
+        </div>
+    </div>
+
+</div><!-- /.signup-box -->
+
+<div id="AddDamageDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir ">
+    <div class="modal-dialog" style="width:60%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddDamageDetailModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddDamageDetailModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["Edit"] @Localizer["Damage"]
+                </h3>
+            </div>
+
+            <div id="AddDamageDetailModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_MoneyConvert" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ThereIsNoMoneyConvert"]
+            </div>
+
+            <div id="NotEnoughProductCount" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NotEnoughProductCount"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-AddDamageDetailModal-okAndNew")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["OkAndNew"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddDamageDetailModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-warning pull-right k-button" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddDamageDetailModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddDamageDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteDamageDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteDamageDetailModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+            </div>
+
+            <div id="AmountOverFlow" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["DiscountIsGreaterThanTheAmount"]
+            </div>
+
+            <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_SomeThingWentWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteDamageDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteDamageDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowDiscountsListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog" style="width:80%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowDiscountsListModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowDiscountsListModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="ShowDiscountsListModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+
+                @(Html.Kendo().Button()
+                .Name("btn-ShowDiscountsList-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowDiscountsListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="ShowDamageDetailListModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir ">
+    <div class="modal-dialog" style="width:85%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeShowDamageDetailListModal()" aria-hidden="true">&times;</button>
+                <h3 id="ShowDamageDetailListModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["DamageDetail"]
+                </h3>
+            </div>
+
+            <div id="ShowDamageDetailListModal-body" class="modal-body" style="">
+            </div>
+
+            <div id="InvoiceInUse" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["InvoiceInUse"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div id="ERROR_NothingSelected" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["NothingSelected"]
+            </div>
+
+            <div id="ERROR_AccessDenied" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["AccessDenied"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                    .Name("btn-ShowDamageDetailListModal-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-ShowDamageDetailListModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeShowDamageDetailListModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<script>
+
+    var product_list = [];
+    var updated = false;
+    var ok_exit = false;
+
+    $(document).ready(function () {
+        SetTotalPrice('@Model.TotalPrice');
+        let invoice = $('#Guid').val();
+
+        if (invoice !== null && invoice !== "" && invoice !== "00000000-0000-0000-0000-000000000000" && invoice !== undefined) {
+            $('#btn-updateDamage-accept').removeClass('hidden');
+            $('#btn-updateDamage-exit-accept').removeClass('hidden');
+            $('#btn-DamageDetailNewModal').removeClass('hidden');
+            $('#btn-ShowDiscountsList').removeClass('hidden');
+            $('#btn-addDamageDamageDetail-accept').addClass('hidden');
+        }
+
+        setTimeout(function () {
+            $("#InvoiceDateTxt").focus();
+        }, 200);
+
+    });
+
+    $("#InvoiceDateTxt").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#CostTypeTxt').data("kendoAutoComplete").focus();
+        }
+    });
+
+    $("#CostTypeTxt").on("focus", function (e) {
+        let reason = $('#CostTypeTxt').data("kendoAutoComplete");
+        let value = reason.value();
+        reason.search(value);
+    });
+
+    $('#CostTypeTxt').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#ReasonTxt').data("kendoAutoComplete").focus();
+        }
+    });
+
+    $("#ReasonTxt").on("focus", function (e) {
+        let reason = $('#ReasonTxt').data("kendoAutoComplete");
+        let value = reason.value();
+        reason.search(value);
+    });
+
+    $('#ReasonTxt').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $("#Description").focus();
+        }
+    });
+
+    $("#Description").on("keypress", function (e) {
+        if (e.which === 13) {
+            if ($('#btn-addDamageDamageDetail-accept').hasClass('hidden')) {
+                $('#btn-updateDamage-accept').focus();
+            }
+            else {
+                $('#btn-addDamageDamageDetail-accept').focus();
+            }
+        }
+    });
+
+    $('#btn-addDamageDamageDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#addNewDamageForm #CantChangeSupplier").addClass("hidden");
+        $("#addNewDamageForm #ERROR_Data").addClass("hidden");
+        $("#addNewDamageForm #Date-valid").addClass("hidden");
+        $("#addNewDamageForm #InvoiceInUse").addClass("hidden");
+        $("#addNewDamageForm #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#addNewDamageForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-addDamageDamageDetail-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Damage/AddOrUpdate";
+
+        let damage = {
+            Guid: $("#Guid").val(),
+            InvoiceDateTxt: $("#InvoiceDateTxt").val(),
+            CostTypeTxt: $("#CostTypeTxt").val(),
+            ReasonTxt: $("#ReasonTxt").val(),
+            Description: $("#Description").val(),
+        };
+
+        var data = damage;
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-addDamageDamageDetail-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+
+                    if (response === "DateNotValid") {
+
+                        $('"#addNewDamageForm #Date-valid"').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "InvoiceInUse") {
+
+                        $("#addNewDamageForm #InvoiceInUse").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "CantChangeSupplier") {
+
+                        $("#addNewDamageForm #CantChangeSupplier").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#addNewDamageForm #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "ThereIsNoMoneyConvert") {
+
+                        bootbox.alert({
+                            message: " @Localizer["ThereIsNoMoneyConvert"]",
+                            className: 'bootbox-class'
+                        });
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response.includes("YouHaveJust")) {
+
+                        bootbox.alert({
+                            message: `${response}`,
+                            className: 'bootbox-class'
+                        });
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        let guid = response.split("_");
+                        $('#Guid').val(guid[0]);
+                        $('#InvoiceNumTxt').val(guid[1]);
+
+                        $('#btn-updateDamage-accept').removeClass('hidden');
+                        $('#btn-updateDamage-exit-accept').removeClass('hidden');
+                        $('#btn-DamageDetailNewModal').removeClass('hidden');
+                        $('#btn-ShowDiscountsList').removeClass('hidden');
+                        $('#btn-addDamageDamageDetail-accept').addClass('hidden');
+                    }
+                } else {
+
+                    $("#addNewDamageForm #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+
+    $("#btn-ShowDiscountsList").on("click", function () {
+
+        $("#ShowDiscountsListModal #ERROR_Data").addClass("hidden");
+        $("#ShowDiscountsListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowDiscountsListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#ShowDiscountsListModal').modal('toggle');
+
+        var link = "/DamageDiscount/Form?damageId=";
+        var Id = $("#Guid").val();
+        $(".loader").removeClass("hidden");
+        $('#ShowDiscountsListModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    });
+
+    function closeShowDiscountsListModal() {
+
+        $('#ShowDiscountsListModal').modal('hide');
+        $('#ShowDiscountsListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+    $("#btn-updateDamage-exit-accept").on("click", function () {
+
+        ok_exit = true;
+        $('#btn-updateDamage-accept').trigger('click');
+    });
+
+    $("#btn-updateDamage-accept").on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#addNewDamageForm #CantChangeSupplier").addClass("hidden");
+        $("#addNewDamageForm #ERROR_Data").addClass("hidden");
+        $("#addNewDamageForm #Date-valid").addClass("hidden");
+        $("#addNewDamageForm #InvoiceInUse").addClass("hidden");
+        $("#addNewDamageForm #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#addNewDamageForm .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#addNewDamageForm .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-updateDamage-accept').removeAttr("disabled");
+                    ok_exit = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/Damage/AddOrUpdate";
+
+        let damage = {
+            Guid: $("#Guid").val(),
+            InvoiceDateTxt: $("#InvoiceDateTxt").val(),
+            CostTypeTxt: $("#CostTypeTxt").val(),
+            ReasonTxt: $("#ReasonTxt").val(),
+            Description: $("#Description").val(),
+        };
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: damage,
+            success: function (response) {
+                $('#btn-updateDamage-accept').removeAttr("disabled");
+
+                if (response === 0) {
+
+                    ok_exit = false;
+                    $("#addNewDamageForm #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    ok_exit = false;
+                    $("#addNewDamageForm #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DateNotValid") {
+
+                    ok_exit = false;
+                    $("#addNewDamageForm #Date-valid").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "CantChangeSupplier") {
+
+                    ok_exit = false;
+                    $("#addNewDamageForm #CantChangeSupplier").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    ok_exit = false;
+                    $("#addNewDamageForm #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    if (ok_exit) {
+                        ExitDamage();
+                    } else {
+                        SetTotalPrice(response);
+                    }
+                }
+            }
+        });
+
+
+    });
+
+
+    function AddDamageDetail() {
+        $("#AddDamageDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddDamageDetailModal #Date-valid").addClass("hidden");
+        $("#AddDamageDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddDamageDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        let header = $("#NewDamageHeader").text();
+        $('#AddDamageDetailModal-header').text(header);
+        $('#AddDamageDetailModal').modal('toggle');
+
+        $('#AddDamageDetailModal-body').empty();
+
+        var link = "/DamageDetail/AddModal";
+
+        $(".loader").removeClass("hidden");
+        $('#AddDamageDetailModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function EditDamageDetail(element) {
+        $("#AddDamageDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddDamageDetailModal #Date-valid").addClass("hidden");
+        $("#AddDamageDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddDamageDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        let header = $("#EditDamageHeader").text();
+        $('#AddDamageDetailModal-header').text(header);
+        $('#AddDamageDetailModal').modal('toggle');
+
+        $('#AddDamageDetailModal-body').empty();
+
+        var link = "/DamageDetail/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+        $('#AddDamageDetailModal-body').load(link + Id + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function closeAddDamageDetailModal() {
+
+        $('#AddDamageDetailModal').modal('hide');
+        $('#AddDamageDetailModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+
+    $('#btn-AddDamageDetailModal-okAndNew').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddDamageDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddDamageDetailModal #Date-valid").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddDamageDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddDamageDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        $('#AddDamageDetailModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddDamageDetailModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-AddDamageDetailModal-okAndNew').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        let damageDetail = {
+
+            Guid: $("#DetailGuid").val(),
+            MasterId: $("#Guid").val(),
+            ProductId: $("#ProductId").val(),
+            PurchaseInvoiceDetailId: $("#PurchaseInvoiceDetailId").val(),
+            TransferDetailId: $("#TransferDetailId").val(),
+            NumTxt: $("#Num").val(),
+            FreeNumTxt: $("#FreeNum").val(),
+            DiscountTxt: $("#DiscountSharp").val(),
+            TotalPriceTxt: $("#TotalPrice").val(),
+        }
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: "/DamageDetail/AddOrUpdate",
+            data: damageDetail,
+            success: function (response) {
+                $('#btn-AddDamageDetailModal-okAndNew').removeAttr("disabled");
+
+                if (response === "NotEnoughProductCount") {
+
+                    $("#AddDamageDetailModal #NotEnoughProductCount").removeClass("hidden");
+
+                    let max = $("#FixMaxRem").val();
+                    let freeMax = $("#FixMaxFreeRem").val();
+                    $("#Num").data("kendoNumericTextBox").value(max);
+                    $("#FreeNum").data("kendoNumericTextBox").value(freeMax);
+                    SetWholePrice();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#AddDamageDetailModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    $("#AddDamageDetailModal #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ThereIsNoMoneyConvert") {
+
+                    $("#AddDamageDetailModal #ERROR_MoneyConvert").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#AddDamageDetailModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === 0) {
+
+                    $("#AddDamageDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#damageDetailKendoGrid .k-pager-refresh")[0].click();
+
+                    $('#AddDamageDetailModal').modal('hide');
+                    $('#AddDamageDetailModal-body').empty();
+                    $(".modal-backdrop:last").remove();
+
+                    setTimeout(function () {
+                        $('#btn-DamageDetailNewModal').trigger('click');
+                    }, 500);
+
+                    SetTotalPrice(response);
+                }
+            }
+        });
+
+    });
+
+    $('#btn-AddDamageDetailModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddDamageDetailModal #AmountOverFlow").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_MoneyConvert").addClass("hidden");
+        $("#AddDamageDetailModal #Date-valid").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_Data").addClass("hidden");
+        $("#AddDamageDetailModal #InvoiceInUse").addClass("hidden");
+        $("#AddDamageDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#AddDamageDetailModal #NotEnoughProductCount").addClass("hidden");
+
+        $('#AddDamageDetailModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddDamageDetailModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    isEmmpty = false;
+                    $('#btn-AddDamageDetailModal-accept').removeAttr("disabled");
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        let damageDetail = {
+
+            Guid: $("#DetailGuid").val(),
+            MasterId: $("#Guid").val(),
+            ProductId: $("#ProductId").val(),
+            PurchaseInvoiceDetailId: $("#PurchaseInvoiceDetailId").val(),
+            TransferDetailId: $("#TransferDetailId").val(),
+            NumTxt: $("#Num").val(),
+            FreeNumTxt: $("#FreeNum").val(),
+            DiscountTxt: $("#DiscountSharp").val(),
+            TotalPriceTxt: $("#TotalPrice").val(),
+        }
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: "/DamageDetail/AddOrUpdate",
+            data: damageDetail,
+            success: function (response) {
+                $('#btn-AddDamageDetailModal-accept').removeAttr("disabled");
+
+                if (response === "NotEnoughProductCount") {
+
+                    $("#AddDamageDetailModal #NotEnoughProductCount").removeClass("hidden");
+
+                    let max = $("#FixMaxRem").val();
+                    let freeMax = $("#FixMaxFreeRem").val();
+                    $("#Num").data("kendoNumericTextBox").value(max);
+                    $("#FreeNum").data("kendoNumericTextBox").value(freeMax);
+                    SetWholePrice();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#AddDamageDetailModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DataNotValid") {
+
+                    $("#AddDamageDetailModal #ERROR_Data").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ThereIsNoMoneyConvert") {
+
+                    $("#AddDamageDetailModal #ERROR_MoneyConvert").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#AddDamageDetailModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === 0) {
+
+                    $("#AddDamageDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#damageDetailKendoGrid .k-pager-refresh")[0].click();
+                    closeAddDamageDetailModal();
+
+                    SetTotalPrice(response);
+                }
+            }
+        });
+
+    });
+
+    function DamageDetailDeleteFunction(element) {
+
+        $("#DeleteDamageDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteDamageDetailModal #AmountOverFlow").addClass("hidden");
+        $("#DeleteDamageDetailModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteDamageDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteDamageDetailModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteDamageDetail-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+    $('#btn-deleteDamageDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteDamageDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteDamageDetailModal #AmountOverFlow").addClass("hidden");
+        $("#DeleteDamageDetailModal #InvoiceInUse").addClass("hidden");
+        $("#DeleteDamageDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+
+        var link = "/DamageDetail/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteDamageDetail-accept').removeAttr("disabled");
+
+                if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+                    $("#DeleteDamageDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong" || response === 0) {
+                    $("#DeleteDamageDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "InvoiceInUse") {
+
+                    $("#DeleteDamageDetailModal #InvoiceInUse").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "DiscountIsGreaterThanTheAmount") {
+
+                    $("#DeleteDamageDetailModal #AmountOverFlow").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+                    $('#DeleteDamageDetailModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#damageDetailKendoGrid .k-pager-refresh")[0].click();
+                    SetTotalPrice(response);
+                }
+            }
+        });
+    });
+
+    function ExitDamage() {
+        $(".loader").removeClass("hidden");
+        var link = "/Damage/Form";
+        $(".page-content").load(link, function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+    }
+
+    function SetTotalPrice(total) {
+
+        let result = "";
+        let res = total.toString().split("#");
+        if (res.length == 3) {
+
+            let price = res[0].split("_");
+            let discount = res[1].split("_");
+            let price_after_discount = res[2].split("_");
+
+            result += `
+                <div class="col-sm-12" style="padding:0px;">
+
+                    <div class="col-sm-4" style="">
+                        <label style=" font-size: 18px;">${$("#TotalTxt").val()}</label>
+                        <div class="elementBox">`;
+            for (let i = 0; i < price.length; i++) {
+                let txt = price[i].split(" ");
+                if (txt.length > 1)
+                    result += `<div class=" elementStyle"> <div style="white-space: nowrap;" class="col-sm-2">${txt[0]}</div>  <div style="white-space: nowrap;" class="col-sm-10">${txt[1]}</div> </div>`;
+            }
+            result += `
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4" style="">
+                        <label style=" font-size: 18px;">${$("#TotalDiscountTxt").val()}</label>
+                        <div class="elementBox">`;
+            for (let i = 0; i < discount.length; i++) {
+                let txt = discount[i].split(" ");
+                if (txt.length > 1)
+                    result += `<div class=" elementStyle"> <div style="white-space: nowrap;" class="col-sm-2">${txt[0]}</div>  <div style="white-space: nowrap;" class="col-sm-10">${txt[1]}</div> </div>`;
+            }
+            result += `
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4" style="">
+                        <label style=" font-size: 18px;">${$("#TotalPriceAfterDiscountTxt").val()}</label>
+                        <div class="elementBox">`;
+            for (let i = 0; i < price_after_discount.length; i++) {
+                let txt = price_after_discount[i].split(" ");
+                if (txt.length > 1)
+                    result += `<div class=" elementStyle"> <div style="white-space: nowrap;" class="col-sm-2">${txt[0]}</div>  <div style="white-space: nowrap;" class="col-sm-10">${txt[1]}</div> </div>`;
+            }
+            result += `
+                        </div>
+                    </div>
+
+                </div>`;
+        }
+        $('#damageDetailTotalPrice').empty();
+
+        var ul = document.getElementById("damageDetailTotalPrice");
+        ul.insertAdjacentHTML('afterbegin', result);
+    }
+
+    function ShowDamageDetailListModal() {
+        $("#ShowDamageDetailListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_NothingSelected").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_AccessDenied").addClass("hidden");
+        $("#ShowDamageDetailListModal #MultiReason-box").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_Data-box").addClass("hidden");
+
+        $('#ShowDamageDetailListModal').modal('toggle');
+        $('#ShowDamageDetailListModal-body').empty();
+
+        var link = "/DamageDetail/SelectModal";
+
+        $(".loader").removeClass("hidden");
+            $('#ShowDamageDetailListModal-body').load(link , function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+
+        });
+    }
+
+    function closeShowDamageDetailListModal() {
+        $("#PurchaseInvoiceDetailId").val("");
+        $("#TransferDetailId").val("");
+        $("#DamageDetailTxt").val("");
+        var productId = $("#ProductId").data("kendoDropDownList");
+        productId.value('');
+
+        $('#ShowDamageDetailListModal').modal('hide');
+        $('#ShowDamageDetailListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+
+    $('#btn-ShowDamageDetailListModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+        var damage;
+        var count = 0;
+
+        $("#ShowDamageDetailListModal #InvoiceInUse").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_NothingSelected").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_AccessDenied").addClass("hidden");
+        $("#ShowDamageDetailListModal #MultiReason-box").addClass("hidden");
+        $("#ShowDamageDetailListModal #ERROR_Data").addClass("hidden");
+
+        $('.select_damage:checkbox:checked').each(function () {
+
+            if (count == 0) {
+                damage = {
+                    MasterId: $("#Guid").val(),
+                    PurchaseInvoiceDetailId: $(this).attr("data-id"),
+                    TransferDetailId: $(this).attr("data-transfer"),
+                    Num: $(this).attr("data-rem"),
+                    Price: $(this).attr("data-price"),
+                    CurrencyName: $(this).attr("data-currency"),
+                    TXT: $(this).attr("data-txt"),
+                };
+                count++;
+            }
+        });
+
+        if (count == 0) {
+
+            $("#ShowDamageDetailListModal #ERROR_NothingSelected").removeClass("hidden");
+            $('#btn-ShowDamageDetailListModal-accept').removeAttr("disabled");
+            return;
+        }
+
+
+        $("#PurchaseInvoiceDetailId").val(damage.PurchaseInvoiceDetailId);
+        $("#TransferDetailId").val(damage.TransferDetailId);
+        $("#DamageDetailTxt").val(damage.TXT);
+
+        let num = $("#Num").data("kendoNumericTextBox");
+        num.value(damage.Num);
+
+        let price = $("#Price").data("kendoNumericTextBox");
+        price.value(damage.Price);
+
+        let total = $("#TotalPrice").data("kendoNumericTextBox");
+        total.value(damage.Num * damage.Price);
+
+        //var dropdownlist = $("#CurrencyId").data("kendoDropDownList");
+        //dropdownlist.text(damage.CurrencyName);
+
+        $('#btn-ShowDamageDetailListModal-accept').removeAttr("disabled");
+        $('#ShowDamageDetailListModal').modal('hide');
+        $('#ShowDamageDetailListModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+
+    });
+
+
+</script>

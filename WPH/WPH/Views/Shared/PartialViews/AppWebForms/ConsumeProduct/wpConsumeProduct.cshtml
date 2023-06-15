@@ -1,0 +1,345 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject WPH.Resources.SharedViewLocalizer Localizer
+@using WPH.Models.BaseInfo
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    string font = "", pull = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-right ";
+        dir = " ";
+        <h3 id="newServiceText" class="hidden">@Localizer["New"] @Localizer["Service"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-left ";
+        dir = " direction:rtl; ";
+        <h3 id="newServiceText" class="hidden">@Localizer["Service"] @Localizer["New"]</h3>
+    }
+}
+<div class="col-sm-12 shadow-border" style="margin:0">
+
+    <h4 class="MyFont-Roboto" style="border-bottom: dotted 1px #808080">  @Localizer["Medicine"] </h4>
+
+    <div class="col-sm-12 " style="display:flex;align-items: flex-end;">
+
+        <div class="col-sm-3">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Date"]</label>
+                <span class="block input-icon input-icon-right">
+                    <input id="ProductDate" class="boldText" title="datepicker" style="width: 100%; margin: 0" />
+                </span>
+            </label>
+        </div>
+
+        <div class="col-sm-5">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Name"]</label>
+                <span class="block input-icon input-icon-right">
+                    @{
+                        string widthP = " 100% ";
+                        if ((bool)ViewBag.AccessNewMedicineProduct)
+                        {
+                            widthP = " 80% ";
+                            <a href="\\#" class=" @pull btn btn-danger" data-value="Stitch" onclick="NewMedicineProduct(this)" style=" padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                        }
+
+                    }
+                    <input id="Product-Name" class="boldText" style="width: @widthP; margin: 0" />
+                </span>
+            </label>
+        </div>
+
+        <div class="col-sm-3">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["Num"]</label>
+                <span class="block input-icon input-icon-right">
+                    <input id="ProductValue" class="boldText" style="width: 100%; margin: 0" />
+                </span>
+            </label>
+        </div>
+
+        <div class="col-sm-1">
+
+            @(Html.Kendo().Button()
+                        .Name("btn-add-product")
+                        .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem;margin-bottom:5px;", type = "button", @class = "k-primary", onclick = "addProduct()" })
+                        .Content(Localizer["Add"]))
+
+        </div>
+
+    </div>
+
+    <div id="NotEnoughProductCount" class="red hidden col-sm-12" style="margin:1rem 0;font-size:1.5rem">
+        <i class="ace-icon fa fa-stop bigger-120"></i>
+        @Localizer["NotEnoughProductCount"]
+    </div>
+
+    <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+        <i class="ace-icon fa fa-stop bigger-120"></i>
+        @Localizer["ERROR_InsertWrong"]
+    </div>
+
+    <div class="col-sm-12 ">
+
+        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ReceptionService/dgReceptionProductGrid.cshtml", new SectionViewModel { Id = ViewBag.ReceptionId, Name = "Product" })
+
+    </div>
+
+</div>
+
+
+<div id="AddNewProductModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddNewProductModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddNewProductModal-header" class="smaller lighter blue no-margin @font">
+
+                    @Localizer["Product"] - @Localizer["New"]
+
+                </h3>
+            </div>
+
+            <div id="AddNewProductModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_Barcode" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["RepeatedBarcode"]
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProductModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-AddNewProductModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeAddNewProductModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    $("#Product-Name").kendoDropDownList({
+        dataTextField: "Name",
+        dataValueField: "Guid",
+        filter: "contains",
+        dataSource: {
+            serverFiltering: false,
+            transport: {
+                read: {
+                    url: "/Product/GetAllProductByMaterialType?MaterialType=medicine",
+                }
+            }
+        }
+    });
+
+    $("#ProductDate").kendoDateTimePicker({
+        value: new Date(),
+        max: new Date(),
+        format: "dd/MM/yyyy HH:mm",
+        dateInput: true
+    });
+
+    $("#ProductValue").kendoNumericTextBox({
+
+    });
+
+    function NewMedicineProduct(element) {
+
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/Product/AddAndNewModal";
+        $(".loader").removeClass("hidden");
+
+        $('#AddNewProductModal').modal('toggle');
+        $('#AddNewProductModal-body').load(link + '', function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    $('#btn-AddNewProductModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddNewProductModal #ERROR_Barcode").addClass("hidden");
+        $("#AddNewProductModal #ERROR_Data").addClass("hidden");
+        $("#AddNewProductModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#AddNewProductModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#AddNewProductModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-AddNewProductModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+
+        var link = "/Product/AddOrUpdate";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+
+        var product = {
+            Name: $("#ProductName").val(),
+            ProducerName: $("#ProducerName").val(),
+            ProductTypeName: $("#ProductTypeName").val(),
+            Barcode: $("#Barcode").val(),
+        };
+
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                product: product
+            },
+            success: function (response) {
+                $('#btn-AddNewProductModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#ProductName-Exist').removeClass('hidden');
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#AddNewProductModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "RepeatedBarcode") {
+
+                        $("#AddNewProductModal #ERROR_Barcode").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#AddNewProductModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddNewProductModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#Product-Name").data("kendoDropDownList").dataSource.read();
+                        let pr = $("#Product-Name").data("kendoDropDownList");
+                        pr.bind("dataBound", function () {
+                            pr.value(response);
+                        });
+                    }
+                } else {
+
+                    $("#AddNewProductModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAddNewProductModal() {
+
+        $('#AddNewProductModal').modal('hide');
+        $('#AddNewProductModal-body').empty();
+        $(".modal-backdrop:last").remove();
+    }
+
+
+    function addProduct() {
+        $("#NotEnoughProductCount").addClass('hidden');
+        $("#ERROR_SomeThingWentWrong").addClass('hidden');
+
+        var TempDate = $("#ProductDate").data("kendoDateTimePicker");
+        var Date = TempDate.value();
+        let cMonth = Date.getMonth() + 1;
+        let cDay = Date.getDate();
+
+        if (cMonth < 10)
+            cMonth = "0" + cMonth;
+
+        if (cDay < 10)
+            cDay = "0" + cDay;
+
+        let CostDateDay = cDay;
+        let CostDateMonth = cMonth;
+        let CostDateYear = Date.getFullYear();
+        let CostDateHour = Date.getHours();
+        let CostDateMin = Date.getMinutes();
+
+        let SerNum = $("#ProductValue").data("kendoNumericTextBox").value();
+        if (SerNum === null || SerNum < 1) {
+            SerNum = 1;
+        }
+        let receptionId = $("#Reception-Id").text();
+        let ProductId = $("#Product-Name").val();
+        let Product = $("#Product-Name").data("kendoDropDownList");
+        var dataItem = Product.dataItem();
+
+        $.ajax({
+            type: "Post",
+            data:
+            {
+                ReceptionId: receptionId,
+                Number: SerNum,
+                Price: dataItem.Price,
+                ServiceDateDay: CostDateDay,
+                ServiceDateMonth: CostDateMonth,
+                ServiceDateYear: CostDateYear,
+                ServiceDateHour: CostDateHour,
+                ServiceDateMin: CostDateMin,
+                ProductId: ProductId,
+                ProductIdDMS: dataItem.Id
+            },
+            url: "/ReceptionService/AddReceptionService",
+            success: function (response) {
+
+                if (response === 0) {
+                    $("#ERROR_SomeThingWentWrong").removeClass('hidden');
+
+                } else if (response === "NotEnoughProductCount") {
+                    $("#NotEnoughProductCount").removeClass('hidden');
+                } else {
+                    $("#Product .k-i-reload").click();
+                }
+            }
+        });
+
+    }
+
+</script>

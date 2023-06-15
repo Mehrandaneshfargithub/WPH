@@ -1,0 +1,118 @@
+﻿
+@model WPH.Models.CustomDataModels.UserManagment.LoginViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="login-box" class="login-box visible widget-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <h4 class="header blue lighter bigger">
+                <i class="ace-icon fa fa-coffee green"></i>
+                @Localizer["plsEnterYourInformation"]
+            </h4>
+
+            <div id="loginError" class="hidden">
+                <span id="loginErrorText" class="text-danger">@Localizer["ErrorInLogin"]</span>
+            </div>
+
+            <div id="accessError" class="hidden">
+                <span class="text-danger">@Localizer["AccessDenied"]</span>
+            </div>
+            
+            <div id="ERROR_SomeThingWentWrong" class="hidden">
+                <span class="text-danger">@Localizer["ERROR_SomeThingWentWrong"]</span>
+            </div>
+
+            <div class="space-6"></div>
+            <form id="adminLoginForm">
+                @Html.AntiForgeryToken()
+                <fieldset>
+
+                    <label class="block clearfix">
+                        <span class="block input-icon input-icon-right">
+                            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["Username"] })
+                            <i class="ace-icon fa fa-user"></i>
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <span class="block input-icon input-icon-right">
+                            @Html.PasswordFor(m => m.Pass3, new { @class = "form-control", @lang = "en", @placeholder = @Localizer["Password"] })
+                            <i class="ace-icon fa fa-lock"></i>
+                        </span>
+                    </label>
+
+                    <div class="space"></div>
+                    <div class="clearfix">
+
+                        <button id="adminLoginUserFunc" type="button" class="pull-right btn btn-xs btn-primary radius-4 @if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en") {
+                                @:pull-left
+                              }">
+                            <i class="ace-icon fa fa-key"></i>
+                            <span class="bigger-110">@Localizer["Login"]</span>
+                        </button>
+
+                    </div>
+
+                    <div class="space-4"></div>
+                </fieldset>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<style>
+
+    .chooseLang:hover {
+        cursor: pointer
+    }
+</style>
+
+<script>
+
+    $('#adminLoginUserFunc').on("click", function () {
+        $(this).attr("disabled", true);
+        
+        var data = $("#adminLoginForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: "/UserManagment/AdminLogin",
+            data: data,
+            success: function (response) {
+                $('#adminLoginUserFunc').removeAttr("disabled");
+                
+                if (response === "AccessDenied") {
+
+                    $('#AdminLoginModal #accessError').removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                } else if (response == true) {
+
+                    window.location.href = "/Admin/SectionManagement/Index";
+                    $(".loader").fadeIn("slow");
+
+                } else if (response == 0) {
+
+                    $('#AdminLoginModal #ERROR_SomeThingWentWrong').removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#AdminLoginModal #loginError').removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        })
+    });
+
+
+</script>

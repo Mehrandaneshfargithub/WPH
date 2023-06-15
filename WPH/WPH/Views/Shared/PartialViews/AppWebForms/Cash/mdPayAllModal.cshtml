@@ -1,0 +1,689 @@
+﻿@model WPH.Models.Cash.PayAllServiceViewModel
+@using Microsoft.AspNetCore.Http
+@using WPH.Models.ReceptionInsurance
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<h1 class="hidden" id="accessUserPortion">@ViewBag.AccessUserPortion</h1>
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewItemForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.ReceptionId)
+
+                    @(Html.Kendo().TabStrip()
+                 .Name("pay-tabstrip")
+                 //.Events(events => events
+                 //    .Activate("SelectTabPay")
+                 //)
+                 .Animation( anim =>
+                 {
+                     anim.Enable(false);
+
+                        //anim.Open(config =>
+                        //{
+                        //    config.Fade(FadeDirection.In);
+                        //    config.Duration(AnimationDuration.Fast);
+                        //});
+                    })
+                    .Items(tabstrip =>
+                  {
+                        if ((bool)ViewBag.AccessUserPortion)
+                        {
+                            tabstrip.Add().Text($"{Localizer["ReciveMoney"]}")
+                                .Content(@<text>
+                                <div class="tab-content" id="recive-money-installment" style="width:90%;margin: 0px auto;padding: 20px;">
+
+
+                                <h4><span>@Localizer["TotalService"]:</span>  <span id="totalServiceAmountInstallment" style="color:blue;margin:0 1rem"></span> </h4>
+
+                                     <div class="col-sm-12" style="padding:0;margin-top:2rem;display:flex;align-items:center;flex-wrap:wrap">
+
+                                        <div class="col-sm-5" style="margin:0">
+
+                                             @(Html.Kendo().DatePicker()
+                                                .Name("InstallmentDate")
+                                                .Value(DateTime.Now)
+                                                .Format("dd/MM/yyyy")
+                                                .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                                                )
+
+                                        </div>
+
+                                         <div class="col-sm-3" style="margin:0">
+
+                                             @(Html.Kendo().NumericTextBox<decimal>()
+                                                    .Name("InstallmentAmount")
+                                                    .HtmlAttributes(new { style = "width: 100%" })
+                                                )
+
+                                        </div>
+
+                                         <div class="col-sm-2" style="margin:0">
+
+                                             @(Html.Kendo().Button()
+                                                .Name("btn-add-installment")
+                                                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px", type = "button", @class = "k-primary pull-right", onclick = "addInstallmentPortion()" })
+                                                .Content(Localizer["Add"]))
+
+                                        </div>
+
+
+
+                                    </div>
+
+                                    <div class="col-sm-12">
+
+                                        @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Cash/dgInstallmentGrid.cshtml", Model.ReceptionId)
+
+                                        <h4><span>@Localizer["Remained"]:</span>  <span id="remained" style="color: blue; margin: 0 1rem"></span> </h4>
+
+                                    </div>
+
+
+                            </div>
+                            </text>);
+
+                            tabstrip.Add().Text($"{Localizer["Share"]}")
+                                    .Content(@<text>
+                                    <div class="tab-content" id="recive-money-installment" style="width:90%;margin: 0px auto;padding: 20px;">
+
+
+                                    <h4><span>@Localizer["TotalService"]:</span>  <span id="totalServiceAmount" style="color:blue;margin:0 1rem"></span> </h4>
+
+                                        <div class="col-sm-12" style="padding:0;display:flex;align-items:center;flex-wrap:wrap">
+
+                                            <div class="col-sm-5" style="margin:0">
+
+                                                <script>
+
+                                                    function ChangeGeneralPortionName(e) {
+
+                                                        let dateitem = this.dataItem(e.item);
+
+                                                        let percent = dateitem.PortionPercent;
+
+                                                        let remain = $("#totalServiceAmount").text();
+
+                                                        if (percent !== "" && percent !== 0 && percent !== null) {
+
+                                                            let val = (parseFloat(remain) * parseFloat(percent)) / 100;
+                                                            $("#GeneralAmount").data("kendoNumericTextBox").value(val);
+                                                        }
+
+                                                    }
+
+                                                </script>
+
+                                                @(Html.Kendo().DropDownList()
+                                                    .Name("UserGeneralPortionName")
+                                                    .DataTextField("UserNameAndPercent")
+                                                    .DataValueField("Guid")
+                                                    .OptionLabel(" ")
+                                                    .Events(a => a.Change("ChangeGeneralPortionName"))
+                                                    .DataSource(source =>
+                                                    {
+                                                        source.Read(read =>
+                                                        {
+                                                            read.Action("GetAllUserPortionsBySpecification", "UserManagment", new { Specification = false, ReceptionId = Model.ReceptionId });
+                                                        })
+                                                        .ServerFiltering(false);
+                                                    })
+                                                    .HtmlAttributes(new { style = "width: 100%;", @data_checkEmpty = "UserPortionName-box" })
+                                                    )
+                                                <span id="UserGeneralPortionName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                                </span>
+                                            </div>
+
+                                             <div class="col-sm-3" style="margin:0">
+
+                                                 @(Html.Kendo().NumericTextBox<decimal>()
+                                                        .Name("GeneralAmount")
+                                                        .SelectOnFocus(true)
+                                                        .HtmlAttributes(new { style = "width: 100%" })
+                                                    )
+
+                                            </div>
+
+                                             <div class="col-sm-2" style="margin:0">
+
+                                                 @(Html.Kendo().Button()
+                                                    .Name("btn-add-GeneralPortion")
+                                                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px", type = "button", @class = "k-primary pull-right", onclick = "addGeneralPortion()" })
+                                                    .Content(Localizer["Add"]))
+
+                                            </div>
+
+
+
+                                        </div>
+
+                                        <div class="col-sm-12">
+
+                                            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Cash/dgGeneralPortionGrid.cshtml",Model.ReceptionId)
+
+
+                                            <h4> <span>@Localizer["Remained"]:</span>  <span id="remainedAfterGeneralPortion" style="color: blue; margin: 0 1rem"></span> </h4>
+
+                                        </div>
+
+                                         <div class="col-sm-12" style="padding:0;margin-top:2rem;display:flex;align-items:center;flex-wrap:wrap">
+
+                                            <div class="col-sm-5" style="margin:0">
+
+                                                <script>
+
+                                                    function ChangeSpecificPortionName(e) {
+
+                                                        let dateitem = this.dataItem(e.item);
+
+                                                        let percent = dateitem.PortionPercent;
+
+                                                        let remain = $("#remainedAfterGeneralPortion").text();
+
+                                                        if (percent !== "" && percent !== 0 && percent !== null) {
+
+                                                            let val = (parseFloat(remain) * parseFloat(percent)) / 100;
+                                                            $("#SpecificAmount").data("kendoNumericTextBox").value(val);
+                                                        }
+
+                                                    }
+
+                                                </script>
+
+                                                @(Html.Kendo().DropDownList()
+                                                    .Name("UserSpecificPortionName")
+                                                    .DataTextField("UserNameAndPercent")
+                                                    .DataValueField("Guid")
+                                                    .OptionLabel(" ")
+                                                    .Events(a=>a.Change("ChangeSpecificPortionName"))
+                                                    .DataSource(source =>
+                                                    {
+                                                        source.Read(read =>
+                                                        {
+                                                            read.Action("GetAllUserPortionsBySpecification", "UserManagment", new { Specification = true, ReceptionId = Model.ReceptionId });
+                                                        })
+                                                        .ServerFiltering(false);
+                                                    })
+                                                    .HtmlAttributes(new { style = "width: 100%;" })
+                                                    )
+
+                                                <span id="UserSpecificPortionName-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                                </span>
+                                            </div>
+
+                                             <div class="col-sm-3" style="margin:0">
+
+                                                 @(Html.Kendo().NumericTextBox<decimal>()
+                                                        .Name("SpecificAmount")
+                                                        .SelectOnFocus(true)
+                                                        .HtmlAttributes(new { style = "width: 100%" })
+                                                    )
+
+                                            </div>
+
+                                             <div class="col-sm-2" style="margin:0">
+
+                                                 @(Html.Kendo().Button()
+                                                    .Name("btn-add-SpeceficPortion")
+                                                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px", type = "button", @class = "k-primary pull-right", onclick = "addSpecificPortion()" })
+                                                    .Content(Localizer["Add"]))
+
+                                            </div>
+
+
+
+                                        </div>
+
+                                        <div class="col-sm-12">
+
+                                            @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Cash/dgSpecificPortionGrid.cshtml",Model.ReceptionId)
+                                            <h4><span>@Localizer["Remained"]:</span>  <span id="remainedAfterSpecificPortion" style="color: blue; margin: 0 1rem"></span> </h4>
+
+                                        </div>
+
+                                </div>
+                                </text>);
+                        }
+                        else
+                        {
+                                        tabstrip.Add().Text($"{Localizer["ReciveMoney"]}")
+                                    .Content(@<text>
+                        <div class="tab-content" id="recive-money" style="width:70%;margin: 0px auto;padding: 20px;">
+                            <span class="block clearfix">
+                                @Localizer["DoYouWantToPayAllServices"]
+                            </span>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["PayerName"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                        .Name("PayerName")
+                                        .Value(Model.PayerName)
+                                        .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "PayerName-box" })
+                                    )
+                                </span>
+                                <span id="PayerName-box" class="emptybox hidden" @if (ViewBag.InvoiceNumAndPayerNameRequired) {
+                                    @: data-isEssential="true"
+                                      }  style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+
+                            </label>
+
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["InvoiceNum"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                        .Name("ReceptionInvoiceNum")
+                                        .Value(Model.ReceptionInvoiceNum)
+                                        .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "InvoiceNum-box" })
+                                    )
+                                </span>
+                                <span id="InvoiceNum-box" class="emptybox hidden" @if (ViewBag.InvoiceNumAndPayerNameRequired) {
+                                    @: data-isEssential="true"
+                                      } style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+
+                            </label>
+
+                            <h4><span>@Localizer["TotalService"]:</span>  <span id="totalServiceAmount" style="color:blue;margin:0 1rem"></span><span>@Localizer["Remained"]:</span>  <span id="remained" style="color: blue; margin: 0 1rem"></span> </h4>
+
+                            @{
+                                if(HttpContextAccessor.HttpContext.Session.GetString("SectionTypeName") == "Hospital")
+                                {
+                                     <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["Insurance"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox()
+                                        .Name("Insurance")
+                                        .Value(0)
+                                        .HtmlAttributes(new { style = "width: 100%", onkeyup = "changeInsuranceInput()" })
+                                    )
+                                </span>
+
+
+                            </label>
+
+                            <div class="col-sm-12" style="margin-bottom: 1rem;padding:0;display:flex;justify-content:space-between">
+
+                                <div >
+
+                                    <h4 style="color: darkblue">@Localizer["Total"] @Localizer["Insurances"]</h4>
+
+                                </div>
+
+                                <div >
+
+                                    @(Html.Kendo().Button()
+                                    .Name("btn-print-insurance")
+                                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px", type = "button", @class = "k-primary pull-right", onclick = "payAllAccept(true)" })
+                                    .Content(Localizer["Print"]))
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-sm-12" style="margin-bottom: 1rem;padding:0">
+
+                                @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Cash/dgReceptionInsuranceReceivedGrid.cshtml", new ReceptionInsuranceViewModel
+                                {
+                                    ReceptionId = Model.ReceptionId,
+
+                                })
+
+                            </div>
+
+
+                            <h4>
+                        <span>@Localizer["Total"] @Localizer["Receive"]:</span> <span id="totalReceive" style="color: blue; margin: 0 1rem"></span>  +
+                        <span id="insuranceAmount" style="color: blue; margin: 0 1rem"> 0 </span> = <span id="totalAmount" style="color: blue; margin: 0 1rem">  </span>
+                    </h4>
+                                }
+                            }
+
+
+                        </div>
+                    </text>);
+                                                    }
+
+
+                    tabstrip.Add().Text($"{Localizer["ReturnMoney"]}")
+                    .Content(@<text>
+                        <div class="tab-content" id="return-money" style="width:70%;margin: 0px auto;padding: 20px;">
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["ReciverName"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().TextBox()
+                                    .Name("ReciverName")
+                                    //.Value(Model.PayerName)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Name-box2" })
+                                    )
+                                </span>
+                                <span id="Name-box2" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+                            <label class="block clearfix">
+                                <label for="form-field-8">@Localizer["ReturnedAmount"]: </label>
+                                <span class="block input-icon input-icon-right">
+                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                    .Name("ReturnedAmount")
+                                    .Min(0)
+                                    .Max(10000000)
+                                    .Format("N0")
+                                    //.Value(Model.ReceivedAmount)
+                                    .HtmlAttributes(new { style = "width: 100%", data_checkEmpty = "Price-box2" }))
+                                </span>
+                                <span id="Price-box2" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                                    @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                                </span>
+                            </label>
+
+                            @*@if (ViewBag.useDollar != "false")
+                            {
+                                <label class="block clearfix">
+                                    <label for="form-field-8">@Localizer["Currency"]</label>
+                                    <span class="block input-icon input-icon-right ">
+
+                                        @(Html.Kendo().DropDownList()
+                                        .Name("ReturnCurrencyId")
+                                        .DataTextField("Name")
+                                        .DataValueField("Id")
+                                        .DataSource(source =>
+                                        {
+                                        source.Read(read =>
+                                        {
+                                        read.Action("GetAllCurrencies", "BaseInfo");
+                                        })
+                                        .ServerFiltering(false);
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                        )
+                                    </span>
+                                </label>
+                            }*@
+                        </div>
+                    </text>);
+
+                    })
+                    .HtmlAttributes(new {style = "background-color: #EFF3F8 !important;"})
+                    .SelectedIndex(0)
+                    )
+
+
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    var grid1 = false;
+    var grid2 = false;
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            $("#PayerName").focus();
+        }, 200);
+
+    });
+
+
+    $('#PayerName').focus(function () {
+        $("#PayerName-box").addClass('hidden');
+        $("#PayerName").select();
+    });
+
+    $('#PayerName').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#ReceptionInvoiceNum').focus();
+        }
+    });
+
+    $('#ReceptionInvoiceNum').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#Insurance').data('kendoNumericTextBox').focus();
+        }
+    });
+
+
+    $("#Insurance").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-PayAll-accept').focus();
+        }
+    });
+
+    $('#ReciverName').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#ReturnedAmount').data('kendoNumericTextBox').focus();
+        }
+    });
+
+    $('#ReturnedAmount').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#btn-PayAll-accept').focus();
+        }
+    });
+
+    function changeInsuranceInput() {
+        let val = $('#Insurance').val();
+        $('#insuranceAmount').text(val);
+        let all = parseFloat(val) + parseFloat($('#totalReceive').text())
+        $('#totalAmount').text(all);
+
+    }
+
+
+    function addGeneralPortion() {
+
+        $(this).attr("disabled", true);
+
+        if ($("#UserGeneralPortionName").val() == "") {
+
+            $("#UserGeneralPortionName-box").removeClass('hidden');
+            return;
+        }
+
+        if ($("#GeneralAmount").val() == "" || $("#GeneralAmount").val() == 0) {
+
+            return;
+        }
+
+        let remain = $("#remainedAfterSpecificPortion").text();
+
+        if ($("#GeneralAmount").val() > parseFloat(remain)) {
+
+            return;
+        }
+
+        let portion = {
+
+            UserPortionId: $("#UserGeneralPortionName").val(),
+            Amount: $("#GeneralAmount").val(),
+            ReceptionId: $("#ReceptionId").val(),
+        }
+
+        let link = "/UserManagment/AddReceptionDetailPay"
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: portion,
+            success: function (response) {
+                if (response !== 0) {
+
+                    //$("#kendoGeneralPortionGrid .k-pager-refresh")[0].click();
+                    $("#kendoGeneralPortionGrid").data("kendoGrid").dataSource.read();
+                    $(".loader").addClass("hidden");
+                    $("#UserGeneralPortionName").data("kendoDropDownList").dataSource.read();
+
+                    $(this).attr("disabled", false);
+                }
+            }
+        });
+
+    }
+
+    function addSpecificPortion() {
+
+        $(this).attr("disabled", true);
+
+        let portion = {
+
+            UserPortionId: $("#UserSpecificPortionName").val(),
+            Amount: $("#SpecificAmount").val(),
+            ReceptionId: $("#ReceptionId").val(),
+        }
+
+        if ($("#SpecificAmount").val() == "" || $("#SpecificAmount").val() == 0) {
+
+            return;
+        }
+
+        let remain = $("#remainedAfterSpecificPortion").text();
+
+        if ($("#SpecificAmount").val() > parseFloat(remain)) {
+
+            return;
+        }
+
+        let link = "/UserManagment/AddReceptionDetailPay"
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: portion,
+            success: function (response) {
+                if (response !== 0) {
+
+                    //$("#kendoSpecificPortionGrid .k-pager-refresh")[0].click();
+                    $("#kendoSpecificPortionGrid").data("kendoGrid").dataSource.read();
+                    $(".loader").addClass("hidden");
+                    $("#UserSpecificPortionName").data("kendoDropDownList").dataSource.read();
+
+                    $(this).attr("disabled", false);
+                }
+            }
+        });
+
+    }
+
+
+    function addInstallmentPortion() {
+
+        $(this).attr("disabled", true);
+
+        let portion = {
+
+            ReceptionId: $("#ReceptionId").val(),
+            Amount: $("#InstallmentAmount").val(),
+            RecievedDateTxt: $("#InstallmentDate").val(),
+        }
+
+        if ($("#InstallmentAmount").val() == "" || $("#InstallmentAmount").val() == 0) {
+
+            return;
+        }
+
+        let remain = $("#remained").text();
+
+        if ($("#InstallmentAmount").val() > parseFloat(remain)) {
+
+            return;
+        }
+
+
+        let link = "/ReceptionServiceReceived/PayInstallment"
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: portion,
+            success: function (response) {
+                if (response !== 0) {
+
+                    $("#kendoUserInstallmentGrid .k-pager-refresh")[0].click();
+                    $(".loader").addClass("hidden");
+                    $("#UserSpecificPortionName").data("kendoDropDownList").dataSource.read();
+
+                    $(this).attr("disabled", false);
+                }
+            }
+        });
+
+    }
+
+    function setRemain() {
+
+        let gridGeneral = $("#kendoGeneralPortionGrid").data("kendoGrid");
+
+        let data1 = gridGeneral.dataSource._data;
+
+        let allGeneral = 0;
+
+        for (let i = 0; i < data1.length; i++) {
+            let Amount = data1[i].get("Amount");
+
+            allGeneral += parseFloat(Amount);
+
+        }
+
+        let TotalAmount = $("#totalServiceAmount").text();
+
+        let remain = parseFloat(TotalAmount) - allGeneral;
+
+        $("#remainedAfterGeneralPortion").text(remain);
+
+        let gridSpecific = $("#kendoSpecificPortionGrid").data("kendoGrid");
+
+        let data = gridSpecific.dataSource._data;
+
+        let allSpecific = 0;
+
+        for (let i = 0; i < data.length; i++) {
+            let Amount = data[i].get("Amount");
+
+            allSpecific += parseFloat(Amount);
+
+        }
+
+        let remain2 = remain - allSpecific;
+
+        $("#remainedAfterSpecificPortion").text(remain2);
+
+        //let TotalAmount = $("#remainedAfterGeneralPortion").text();
+
+        //if (TotalAmount == "") {
+        //    kendoSpecificPortionGrid_dataBound()
+        //}
+        //else {
+            
+        //}
+
+    }
+
+
+    
+</script>

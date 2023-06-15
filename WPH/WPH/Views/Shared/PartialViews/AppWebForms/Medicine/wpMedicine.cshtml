@@ -1,0 +1,170 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+        <h3 id="newMedicineText" class="hidden">@Localizer["New"] @Localizer["Medicine"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+        <h3 id="newMedicineText" class="hidden">@Localizer["Medicine"] @Localizer["New"]</h3>
+    }
+
+}
+
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["MedicineDB"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewMedicine)
+    {
+        <div class="@pull @font" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddMedicine(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+
+
+</div><!-- /.page-header -->
+
+<div id="AddMedicineModal" class="modal fade" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="addMedicineHide()" aria-hidden="true">&times;</button>
+                <h3 id="AddMedicineModal-header" class="smaller lighter blue no-margin"></h3>
+            </div>
+
+            <div id="AddMedicineModal-body" class="modal-body">
+
+            </div>
+
+            <div id="ERROR_MedicineWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-NewMedicineModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick = "addNewMedicine()" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-NewMedicineModal-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "addMedicineHide()" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Medicine/dgMedicineGrid.cshtml")
+</div>
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+
+<script>
+
+
+    function AddMedicine() {
+
+        $("#AddMedicineModal #ERROR_MedicineWrong").addClass("hidden");
+        $("#AddMedicineModal #Name-Exist").addClass("hidden");
+
+        var link = "/Medicine/AddNewModal";
+        let header = $("#newMedicineText").text();
+        $('#AddMedicineModal-header').text(header);
+
+        $(".loader").removeClass("hidden");
+        $('#AddMedicineModal').modal('toggle');
+        $('#AddMedicineModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+
+    function addMedicineHide() {
+
+        $('#AddMedicineModal').modal('toggle');
+        $('#AddMedicineModal-body').empty();
+
+    }
+
+
+
+    function addNewMedicine() {
+
+        $("#AddMedicineModal #ERROR_MedicineWrong").addClass("hidden");
+        $("#AddMedicineModal #Name-Exist").addClass("hidden");
+        $(".loader").removeClass("hidden");
+
+        let link = "/Medicine/AddOrUpdate";
+        var data = $("#addNewMedicineForm").serialize();
+
+        if (data == "")
+            return;
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                if (response !== 0) {
+                    if (response === "ValueIsRepeated") {
+
+                        $('#AddMedicineModal #Name-Exist').removeClass('hidden');
+
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                    }
+                    else {
+
+                        $('#AddMedicineModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddMedicineModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                        $("#kendoMedicineGrid .k-pager-refresh")[0].click();
+                    }
+                } else {
+
+                    $("#AddMedicineModal #ERROR_MedicineWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+
+
+    }
+
+
+</script>

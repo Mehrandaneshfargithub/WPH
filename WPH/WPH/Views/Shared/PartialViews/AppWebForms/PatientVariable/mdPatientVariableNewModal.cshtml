@@ -1,0 +1,221 @@
+﻿@model WPH.Models.CustomDataModels.PatientVariable.PatientVariableViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewPatientVariableForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Id)
+                    @Html.HiddenFor(m => m.VariableNameHolder)
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Name"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("VariableName")
+                                .Value(Model.VariableName)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Name-box" })
+                            )
+                        </span>
+                        <span id="Name-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                        @*<input type="hidden" name="FirstNameInput" id="First-Name" value="@ViewBag.FirstNameTranslated" />*@
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Abbreviation"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Abbreviation")
+                                .Value(Model.Abbreviation)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Type"]: </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().DropDownList()
+                                                        .Name("VariableTypeId")
+                                                        .DataTextField("Name")
+                                                        .DataValueField("Id")
+                                                        //.Filter("contains")
+                                                        .DataSource(source =>
+                                                        {
+                                                            source.Read(read =>
+                                                            {
+                                                                read.Action("GetBaseInfoGeneralsByName", "BaseInfo", new { BaseInfoGeneralName= "VariableType" });
+                                                            })
+                                                            .ServerFiltering(false);
+                                                        })
+                                                        .HtmlAttributes(new { style = "width: 100%;" })
+                                                    )
+
+                        </span>
+                        <span id="ItemType-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Display"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().DropDownList()
+                                                        .Name("VariableDisplayId")
+                                                        .DataTextField("Name")
+                                                        .DataValueField("Id")
+                                                        //.Filter("contains")
+                                                        .DataSource(source =>
+                                                        {
+                                                            source.Read(read =>
+                                                            {
+                                                                read.Action("GetBaseInfoGeneralsByName", "BaseInfo", new { BaseInfoGeneralName = "VariableDisplay" });
+                                                            })
+                                                            .ServerFiltering(false);
+                                                        })
+                                                        .HtmlAttributes(new { style = "width: 100%;"})
+                                                    )
+
+                        </span>
+                        <span id="ItemType-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Status"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @(Html.Kendo().DropDownList()
+                                                        .Name("VariableStatusId")
+                                                        .DataTextField("Name")
+                                                        .DataValueField("Id")
+                                                        //.Filter("contains")
+                                                        .DataSource(source =>
+                                                        {
+                                                            source.Read(read =>
+                                                            {
+                                                                read.Action("GetBaseInfoGeneralsByName", "BaseInfo", new { BaseInfoGeneralName = "VariableStatus" });
+                                                            })
+                                                            .ServerFiltering(false);
+                                                        })
+                                                        .HtmlAttributes(new { style = "width: 100%;"})
+                                                    )
+
+                        </span>
+                        <span id="ItemType-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Description"]: </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Description")
+                                .Value(Model.Description)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+
+                    </label>
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+
+        setTimeout(function () {
+            $("#VariableName").focus();
+        }, 200);
+
+    });
+
+
+    $('#VariableName').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#VariableName").select();
+    });
+
+    $('#VariableName').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            $('#Abbreviation').focus();
+        }
+    });
+
+    $("#Abbreviation").on('focus', function (e) {
+
+        $("#Abbreviation").select();
+    });
+
+    
+    $("#Abbreviation").on("keypress", function (e) {
+        if (e.which === 13) {
+            let ValueTypeId = $("#VariableTypeId").data("kendoDropDownList");
+
+            if (ValueTypeId !== null && ValueTypeId !== undefined) {
+                ValueTypeId.focus();
+                ValueTypeId.open();
+            }
+        }
+    });
+
+    $("#VariableTypeId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            let ValueTypeId = $("#VariableDisplayId").data("kendoDropDownList");
+
+            if (ValueTypeId !== null && ValueTypeId !== undefined) {
+                ValueTypeId.focus();
+                ValueTypeId.open();
+            }
+        }
+    });
+
+    $("#VariableDisplayId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            let ValueTypeId = $("#VariableStatusId").data("kendoDropDownList");
+
+            if (ValueTypeId !== null && ValueTypeId !== undefined) {
+                ValueTypeId.focus();
+                ValueTypeId.open();
+            }
+        }
+    });
+
+    $("#VariableStatusId").parent().on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#VariableUnit').focus();
+        }
+    });
+
+    $("#VariableUnit").on('focus', function (e) {
+
+        $("#VariableUnit").select();
+    });
+
+    $("#VariableUnit").on("keypress", function (e) {
+        if (e.which === 13) {
+            $('#btn-addPatientVariable-accept').focus();
+        }
+    });
+
+</script>

@@ -1,0 +1,83 @@
+﻿@model WPH.Models.BaseInfo.SectionViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.ReceptionClinicSection.ReceptionClinicSectionViewModel>
+    ()
+    .Name("ReceptionClinicSectionGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            columns.Bound("").Title(" ").Width(30)
+                    .ClientTemplate(
+                        @"<a class='tooltip-success grid-btn edit' onClick='EditHospitalReception(this);' data-Id='#=Guid#' data-patientId='#=Reception.PatientId#' data-doctorId='#=Reception.DoctorId#' data-desc='#=Description#' data-rel='tooltip' title='Edit' data-original-title='Edit'>
+                            <span class='green'>
+                                <i class='ace-icon fa fa-pencil bigger-120'></i>
+                            </span>
+                        </a>
+                    ");
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Reception.Patient.Name).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Reception.PatientId).Hidden();
+            columns.Bound(x => x.Reception.DoctorId).Hidden();
+
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Reception.PatientId).Hidden();
+            columns.Bound(x => x.Reception.DoctorId).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Reception.Patient.Name).Title(Localizer["Name"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Description).Title(Localizer["Description"]).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound("").Title(" ").Width(30)
+                        .ClientTemplate(
+                            @"<a class='tooltip-success grid-btn edit' onClick='EditHospitalReception(this);' data-Id='#=Guid#' data-patientId='#=Reception.PatientId#' data-doctorId='#=Reception.DoctorId#' data-desc='#=Description#' data-rel='tooltip' title='Edit' data-original-title='Edit'>
+                            <span class='green'>
+                                <i class='ace-icon fa fa-pencil bigger-120'></i>
+                            </span>
+                        </a>
+                    ");
+        }
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAllReceptionClinicSectionByClinicSectionId", "Reception").Data("GetPeriodAndStatusForPatientReception"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#ReceptionClinicSectionGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#ReceptionClinicSectionGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+</script>

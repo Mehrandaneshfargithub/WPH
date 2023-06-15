@@ -1,0 +1,75 @@
+﻿@*@using Microsoft.AspNetCore.Http
+    @inject IHttpContextAccessor HttpContextAccessor
+    @inject WPH.Resources.SharedViewLocalizer Localizer*@
+
+<div>
+    @(Html.Kendo().Grid<WPH.Areas.Admin.Models.SectionManagement.ClinicSectionNamesViewModel>()
+    .Name("clinicSectionsKendoGrid")
+    .Columns(columns =>
+    {
+
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Title("#").Width(20).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("Name").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.SectionTypeName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("SectionTypeName").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ClinicSectionTypeName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("ClinicSectionTypeName").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.ParentName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title("ParentName").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Priority).Filterable(false).Title("Priority").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                @"<a class='tooltip-success grid-btn edit' onClick='EditClinicSection(this)' data-id='#=Guid#' data-rel='tooltip' title='EditClinicSection' data-original-title='Edit'>
+                    <span class='green'>
+                        <i class='ace-icon fa fa-pencil bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title(string.Empty).Width(10).HtmlAttributes(new { @style = "text-align:center;" })
+            .ClientTemplate(
+                @"<a class='tooltip-error grid-btn' onClick='ClinicSectionDeleteFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='DeleteClinicSection' data-original-title='Delete'>
+                    <span class='red'>
+                        <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                    </span>
+                </a>
+            ");
+
+        
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAllClinicSectionsGrid", "SectionManagement",new { area = "Admin" }).Data("GetSectionTypeForClinicSection"))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(3)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#clinicSectionsKendoGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#clinicSectionsKendoGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+</script>

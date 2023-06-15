@@ -1,0 +1,552 @@
+﻿@model WPH.Models.CustomDataModels.MoneyConvert.MoneyConvertViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", dir = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        dir = " ";
+        <h3 id="newMoneyConvertText" class="hidden">@Localizer["New"] @Localizer["MoneyConvert"]</h3>
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        dir = " direction:rtl; ";
+        <h3 id="newMoneyConvertText" class="hidden">@Localizer["MoneyConvert"] @Localizer["New"]</h3>
+    }
+    <h3 id="editMoneyConvertText" class="hidden">@Localizer["Edit"] @Localizer["MoneyConvert"]</h3>
+}
+
+
+
+<style>
+
+
+    @@media (max-width:767px) {
+        .modal-dialog {
+            width: 70vw;
+            margin: 30px auto
+        }
+
+        .modal-content {
+            -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,.5)
+        }
+
+        .modal-sm {
+            width: 300px
+        }
+
+        #MoneyConvertModal-body {
+            width: 70vw;
+        }
+    }
+
+    @@media (min-width:768px) {
+        #MoneyConvertModal-body {
+            width: 90vw;
+        }
+    }
+</style>
+
+
+@Html.AntiForgeryToken()
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["MoneyConvert"]
+        </h1>
+
+    </div>
+    @if ((bool)ViewBag.AccessNewMoneyConvert)
+    {
+        <div class="@font @pull" style="margin:0 2rem;transform:translateY(-10%)">
+            <a class="btn btn-danger" onClick="AddMoneyConvert(this)" href="#" style="padding:0.2rem">
+                @Localizer["New"]
+                <i class="ace-icon glyphicon  glyphicon-plus align-top bigger-125"></i>
+            </a>
+        </div>
+    }
+
+</div><!-- /.page-header -->
+
+
+
+<div class="row" style="margin-top:2rem">
+
+    <div class="col-sm-12 col-xs-12">
+
+        <div class="col-md-4 col-sm-6 col-xs-8">
+            @(Html.Kendo().DropDownList()
+            .Name("periods")
+            .DataTextField("Name")
+            .DataValueField("Id")
+            //.Filter("contains")
+            .BindTo(Model.periods)
+            .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "PeriodsChange()" })
+            )
+        </div>
+
+        @*<div class="col-sm-4">
+
+            </div>
+
+            <div class="col-sm-4">
+
+            </div>*@
+
+    </div>
+
+    <div class="col-sm-12" style="margin-top:20px;display:flex;align-items: flex-end;@dir">
+
+        <div id="DateFromDiv" class=" col-sm-4 hidden">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["FromDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoFromDate")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div id="DateToDiv" class=" col-sm-4 hidden">
+            <label class="block clearfix">
+                <label for="form-field-8">@Localizer["ToDate"]: </label>
+                <span class="block input-icon input-icon-right">
+                    @(Html.Kendo().DatePicker()
+                        .Name("KendoDateTo")
+                        .Value(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%;font-size:1.5rem", onchange = "dateTimePickerWorkWithSpace(this)" })
+                        )
+                </span>
+            </label>
+        </div>
+
+        <div id="SearchBtnDiv" class="col-xs-1 hidden">
+
+            @(Html.Kendo().Button()
+            .Name("btn-search-moneyConvert")
+            .HtmlAttributes(new { style = "font-size:1.5rem;padding:0.7rem", type = "button", @class = "k-primary pull-right", onclick = "btnSearchClick()" })
+            .Content("<i class='fa fa-search'></i>"))
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/MoneyConvert/dgMoneyConvertGrid.cshtml")
+</div>
+
+
+<div id="MoneyConvertModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeMoneyConvertModal()" aria-hidden="true">&times;</button>
+                <h3 id="MoneyConvertModal-header" class="smaller lighter blue no-margin @font">
+                </h3>
+            </div>
+
+            <div id="MoneyConvertModal-body" class="modal-body">
+            </div>
+
+            <div id="ERROR_Data" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_DataNotValid"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-MoneyConvertModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-MoneyConvertModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeMoneyConvertModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteMoneyConvertModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeDeleteMoneyConvertModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteMoneyConvertModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteMoneyConvert-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-DeleteMoneyConvert-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeDeleteMoneyConvertModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ConfirmMoneyConvertModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@dir">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" onclick="closeConfirmMoneyConvertModal()" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["Warning"]
+                </h3>
+            </div>
+
+            <div id="ConfirmMoneyConvertModal-body" class="modal-body">
+                @Localizer["AreYouSureAboutSavingTheInformation"]
+
+                <label style="display:block;color:red;" id="ConfirmBody"></label>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-ConfirmMoneyConvertModal-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-ConfirmMoneyConvertModal-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick = "closeConfirmMoneyConvertModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div>
+    </div>
+</div>
+
+<input class="hidden" type="text" id="period-id" data-Value="@Model.periods.FirstOrDefault().Id" />
+<h1 id="FromTo" class="hidden">@Model.periods.LastOrDefault().Id</h1>
+<h1 id="firstDate" class="hidden">@DateTime.Now</h1>
+
+<style>
+
+    .k-primary:hover {
+        cursor: pointer;
+        text-decoration: none;
+    }
+</style>
+
+
+<script>
+
+
+    $(document).ready(function () {
+
+
+    })
+
+    function PeriodsChange() {
+
+        var period = $("#periods").data("kendoDropDownList");
+
+        var periodValue = period.value();
+
+        $('#period-id').attr('data-Value', periodValue);
+
+        var fromTo = $("#FromTo").text();
+
+
+        if (periodValue === fromTo) {
+            $("#DateFromDiv").removeClass("hidden");
+            $("#DateToDiv").removeClass("hidden");
+            $("#SearchBtnDiv").removeClass("hidden");
+            let date = $("#KendoFromDate").data("kendoDatePicker");
+            date.element.focus();
+            date.element.select();
+        } else {
+            $("#DateFromDiv").addClass("hidden");
+            $("#DateToDiv").addClass("hidden");
+            $("#SearchBtnDiv").addClass("hidden");
+            $("#kendoMoneyConvertGrid").find(".k-pager-refresh").click();
+        }
+    }
+
+
+    $('#KendoFromDate').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            let date = $("#KendoDateTo").data("kendoDatePicker");
+            date.element.focus();
+        }
+    });
+
+    $('#KendoFromDate').focus(function (e) {
+
+        let date = $("#KendoFromDate").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+    $('#KendoDateTo').keypress(function (e) {
+
+        if (e.which === 13 || e.which === 9) {
+            $("#btn-search-moneyConvert").focus();
+        }
+
+    });
+
+
+    $('#KendoDateTo').focus(function (e) {
+
+        let date = $("#KendoDateTo").data("kendoDatePicker");
+        date.element.select();
+
+    });
+
+    function btnSearchClick() {
+        $("#kendoMoneyConvertGrid .k-pager-refresh")[0].click();
+    }
+
+    function AddMoneyConvert() {
+        $("#MoneyConvertModal #Date-valid").addClass("hidden");
+        $("#MoneyConvertModal #ERROR_Data").addClass("hidden");
+        $("#MoneyConvertModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/MoneyConvert/AddNewModal";
+        $(".loader").removeClass("hidden");
+
+        let header = $("#newMoneyConvertText").text();
+
+        $('#MoneyConvertModal-header').text(header);
+        $('#MoneyConvertModal').modal('toggle');
+        $('#MoneyConvertModal-body').load(link, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    function EditMoneyConvert(element) {
+        $("#MoneyConvertModal #Date-valid").addClass("hidden");
+        $("#MoneyConvertModal #ERROR_Data").addClass("hidden");
+        $("#MoneyConvertModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/MoneyConvert/EditModal?Id=";
+        var Id = $(element).attr('data-id');
+        $(".loader").removeClass("hidden");
+
+        let header = $("#editMoneyConvertText").text();
+
+        $('#MoneyConvertModal-header').text(header);
+        $('#MoneyConvertModal').modal('toggle');
+        $('#MoneyConvertModal-body').load(link + Id + "", function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+
+    }
+
+    $('#btn-ConfirmMoneyConvertModal-accept').on("click", function () {
+        $("#ConfirmMoneyConvert").val('true');
+        $("#btn-MoneyConvertModal-accept").click();
+    });
+
+    $('#btn-MoneyConvertModal-accept').on("click", function () {
+        $(this).attr("disabled", true);
+        $('#ConfirmMoneyConvertModal').modal('hide');
+
+        $("#MoneyConvertModal #Date-valid").addClass("hidden");
+        $("#MoneyConvertModal #ERROR_Data").addClass("hidden");
+        $("#MoneyConvertModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('#MoneyConvertModal .emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('#MoneyConvertModal .emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-MoneyConvertModal-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        if ($("#ConfirmMoneyConvert").val() == 'false') {
+
+            $('#ConfirmMoneyConvertModal').modal('toggle');
+            $('#btn-MoneyConvertModal-accept').removeAttr("disabled");
+            return;
+        }
+
+        var link = "/MoneyConvert/AddOrUpdate";
+        var data = $("#addMoneyConvertForm").serialize();
+        $("#ConfirmMoneyConvertModal").val('true');
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-MoneyConvertModal-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "DateNotValid") {
+
+                        $("#MoneyConvertModal #Date-valid").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else if (response === "DataNotValid") {
+
+                        $("#MoneyConvertModal #ERROR_Data").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    } else {
+
+                        $('#MoneyConvertModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#MoneyConvertModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#kendoMoneyConvertGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#MoneyConvertModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+
+    function closeMoneyConvertModal() {
+        $('#MoneyConvertModal').modal('toggle');
+        $('#MoneyConvertModal-body').empty();
+    }
+
+    function closeConfirmMoneyConvertModal() {
+
+        $('#ConfirmMoneyConvertModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+    }
+
+    function closeDeleteMoneyConvertModal() {
+
+        $('#DeleteMoneyConvertModal').modal('hide');
+        $(".modal-backdrop:last").remove();
+    }
+
+    function GridDeleteMoneyConvertFunction(element) {
+        $("#DeleteMoneyConvertModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteMoneyConvertModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteMoneyConvertModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-DeleteMoneyConvert-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+    }
+
+
+    $("#btn-DeleteMoneyConvert-accept").on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteMoneyConvertModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteMoneyConvertModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        var link = "/MoneyConvert/Remove";
+        var Id = $(this).attr('data-id');
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                moneyConvertId: Id
+            },
+            success: function (response) {
+                $('#btn-DeleteMoneyConvert-accept').removeAttr("disabled");
+
+                if (response === 0) {
+
+                    $("#DeleteMoneyConvertModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+
+                    $("#DeleteMoneyConvertModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else if (response === "ERROR_SomeThingWentWrong") {
+
+                    $("#DeleteMoneyConvertModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+
+                } else {
+
+                    $('#DeleteMoneyConvertModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+                    $('#DeleteMoneyConvertModal-body').empty();
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#kendoMoneyConvertGrid .k-pager-refresh")[0].click();
+
+                }
+            }
+        });
+
+
+    });
+
+</script>

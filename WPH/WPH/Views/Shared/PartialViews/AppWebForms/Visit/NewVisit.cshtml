@@ -1,0 +1,917 @@
+﻿@model WPH.Models.CustomDataModels.Visit.VisitViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        direction = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        direction = " direction:rtl; ";
+    }
+}
+
+
+<script>
+
+    var new_disease = "false";
+    var Symptom;
+
+    function onMultiSelectSelect(e) {
+
+        var di = $("#ShowMedicineForDisease").attr("data-Value");
+        if (new_disease === "false" && di.toLowerCase() === "true") {
+            let dataItem = e.dataItem;
+
+            var visitId = $("#data").attr("data-visitId");
+
+            $(".loader").removeClass("hidden");
+
+            var link = "/Visit/MedicineForDiseaseModal?diseaseId=";
+            $("#btn-MedicineDisease-accept").attr('data-diseaseId', dataItem.Guid)
+            $('#MedicineDisease-Modal').modal('toggle');
+            $('#MedicineDisease-Modal-body').load(link + dataItem.Guid + "&visitId=" + visitId, function () {
+                $(".loader").fadeIn("slow");
+                $(".loader").addClass("hidden");
+            });
+        }
+        else {
+            let dataItem = e.dataItem;
+
+            var visitId = $("#data").attr("data-visitId");
+
+            $.ajax({
+                url: '/Visit/AddDiseaseToVisit',
+                type: "Post",
+                data: { diseaseId: dataItem.Guid, visitId: visitId },
+            })
+        }
+        new_disease = false;
+
+    }
+
+    function onMultiSelectDeselect(e) {
+        var dataItem = e.dataItem;
+
+        var visitId = $("#data").attr("data-visitId");
+        $.ajax({
+            url: '/Visit/RemoveDiseaseFromVisit',
+            type: "Post",
+            dataType: "JSON",
+            data: { diseaseId: dataItem.Guid, visitId: visitId },
+        });
+
+    }
+
+    function onSymptomSelectSelect(e) {
+        var dataItem = e.dataItem;
+
+        var visitId = $("#data").attr("data-visitId");
+        $.ajax({
+            url: '/Visit/AddSymptomToVisit',
+            type: "Post",
+            dataType: "JSON",
+            data: { symptomId: dataItem.value, visitId: visitId },
+        });
+
+    }
+
+    function onSymptomSelectDeselect(e) {
+        var dataItem = e.dataItem;
+
+        var visitId = $("#data").attr("data-visitId");
+        $.ajax({
+            url: '/Visit/RemoveSymptomFromVisit',
+            type: "Post",
+            dataType: "JSON",
+            data: { symptomId: dataItem.value, visitId: visitId },
+        });
+
+    }
+
+</script>
+
+
+<style>
+    .btnAddPatient {
+        border-radius: 1rem;
+    }
+
+        .btnAddPatient:hover {
+            cursor: pointer;
+        }
+
+    .pagee {
+        font-size: 1.5rem;
+    }
+
+    th.k-header .k-link {
+        color: white !important;
+        font-family: "Roboto" !important;
+        font-weight: 900 !important;
+        font-size: 1.2rem !important;
+    }
+</style>
+
+<input type="hidden" name="Guid" id="Guid" />
+<input type="hidden" name="PatientId" id="PatientId" />
+
+
+<div id="visit-content" class="row @font" style="direction:ltr">
+    <div class="col-sm-2">
+
+    </div>
+    <div class="col-sm-12 paging">
+        <label id="duplicateMedicine" class="hidden">@Localizer["ThisMedicineIsSelectedBefore"]</label>
+        <label id="PatientPhoneNumberRequired" class="hidden">@HttpContextAccessor.HttpContext.Session.GetString("PatientPhoneRequired")</label>
+
+        <ul id="visitPaging">
+        </ul>
+    </div>
+
+    <div class="col-sm-12" style="margin-bottom:1.5rem;padding:0px 30px;">
+
+        <label id="data" class="hidden" data-currentVisit=0></label>
+        @*<label id="serverVisitId" class="hidden"></label>*@
+        <label id="analysisServerVisitId" class="hidden"></label>
+
+        <div class="col-sm-12 shadow-border" style="display:flex;flex-direction:row;direction:ltr;flex-wrap:wrap">
+
+            <div class=" col-lg-2">
+
+                <label class="visit-left-labels">Name:</label>
+
+                <label id="PatientName" class="visit-right-labels" @*style="font-size:2rem"*@>_</label>
+
+            </div>
+
+            <div class=" col-lg-2">
+
+                <label class="visit-left-labels">Visit Number:</label>
+
+                <label id="VisitNum" class="visit-right-labels">0</label>
+
+            </div>
+
+            <div class=" col-lg-2">
+
+                <label class="visit-left-labels">Visit Date:</label>
+
+                <label id="VisitDate" class="visit-right-labels" @*style="font-size:1.8rem"*@>@DateTime.Today.Day/@DateTime.Today.Month/@DateTime.Today.Year @*@DateTime.Today.Hour:@DateTime.Today.Minute*@</label>
+
+                <label id="VisitTime" class="visit-right-labels" @*style="font-size:1.8rem"*@>@DateTime.Now.ToString("HH:mm")</label>
+
+            </div>
+
+            <div class=" col-lg-2">
+
+                <label class="visit-left-labels">Status:</label>
+
+                <label id="StatusName" class="visit-right-labels" style="color:red">No One Reserved</label>
+
+            </div>
+
+            <div class=" col-lg-2">
+
+                <label class="visit-left-labels">Age:</label>
+
+                <label class="visit-right-labels">Year:</label>
+
+                <label id="lblYear" class="visit-right-labels">_</label>
+
+                <label class="visit-right-labels">Month:</label>
+
+                <label id="lblMonth" class="visit-right-labels">_</label>
+
+            </div>
+
+            <div class="col-lg-2">
+
+                <label class="visit-left-labels">Gender:</label>
+
+                <label id="lblGenderId" class="visit-right-labels">_</label>
+
+            </div>
+
+        </div>
+
+        <input id="DateOfBirth" title="datepicker" class="hidden" />
+
+        <div class="col-sm-12" style="text-align:right;margin:2rem 0;padding:0">
+            @{
+                if (Model != null && Model.AllClinicSectionChoosenValues != null)
+                {
+                    foreach (var value in Model.AllClinicSectionChoosenValues)
+                    {
+                        if (value.VariableStatusName == "VariableValueIsConstant" && (value.VariableDisplayName == "ShowInVisit" || value.VariableDisplayName == "ShowInVisitAndPatient"))
+                        {
+                            <div class="col-sm-3" style="padding:0">
+                                @{
+                                    if (value.PatientVariableVariableType == "Text")
+                                    {
+                                        <label style="font-size:1.5rem">@value.PatientVariableVariableName:</label>
+                                        @(Html.Kendo().TextBox()
+                                            .Name(value.VariableNameForView)
+                                            .Events(e =>
+                                            {
+                                                e.Change("VisitVariableChange");
+                                            })
+                                            .Value(value.Value)
+                                            .HtmlAttributes(new { style = "font-size:1.5rem;width:50%", @data_property = value.PatientVariableId, @data_patientVariableValueGuid = value.PatientVariableValueGuid })
+                                        )
+                                    }
+                                    else if (value.PatientVariableVariableType == "Int")
+                                    {
+                                        <label style="font-size:1.5rem">@value.PatientVariableVariableName:</label>
+                                        @(Html.Kendo().NumericTextBox<int>()
+                                           .Name(value.VariableNameForView)
+                                           .Value(Convert.ToInt32(Convert.ToDecimal(value.Value)))
+                                           .Format("# " + value.PatientVariable.VariableUnit)
+                                           .Events(e =>
+                                            {
+                                                e.Change("VisitVariableChange");
+                                            })
+                                           .HtmlAttributes(new
+                                           {
+                                               style = "font-size:1.5rem;width:50%",
+                                               @data_property = value.PatientVariableId,
+                                               @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                           })
+                                        )
+                                    }
+                                    else if (value.PatientVariableVariableType == "Decimal")
+                                    {
+                                        <label style="font-size:1.5rem">@value.PatientVariableVariableName:</label>
+                                        @(Html.Kendo().NumericTextBox<decimal>()
+                                            .Name(value.VariableNameForView)
+                                            .Value(Convert.ToDecimal(value.Value))
+                                            .Format("#.0 " + value.PatientVariable.VariableUnit)
+                                            .Events(e =>
+                                            {
+                                                e.Change("VisitVariableChange");
+                                            })
+                                            .HtmlAttributes(new
+                                            {
+                                                style = "font-size:1.5rem;width:50%",
+                                                @data_property = value.PatientVariableId,
+                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+
+                                            })
+                                        )
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+
+                    foreach (var value in Model.AllClinicSectionChoosenValues)
+                    {
+                        if (value.VariableStatusName == "VariableValueIsConstant" && (value.VariableDisplayName == "ShowInVisit" || value.VariableDisplayName == "ShowInVisitAndPatient"))
+                        {
+                            <div class="col-sm-3" style="padding:0">
+                                @{
+                                    if (value.PatientVariableVariableType == "Bool")
+                                    {
+                                        if (value.Value == "true")
+                                        {
+                                            @(Html.Kendo().CheckBox()
+                                            .Name(value.VariableNameForView)
+                                            .Label(value.PatientVariableVariableName)
+                                            .Checked(true)
+                                            .HtmlAttributes(new
+                                            {
+                                                @class = "kendoCheckbox",
+                                                style = "font-size:5rem",
+                                                onchange = "VisitCheckboxVariableChange(this)",
+                                                @data_property = value.PatientVariableId,
+                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid
+                                            }))
+                                        }
+                                        else
+                                        {
+                                            @(Html.Kendo().CheckBox()
+                                            .Name(value.VariableNameForView)
+                                            .Label(value.PatientVariableVariableName)
+                                            .HtmlAttributes(new
+                                            {
+                                                @class = "kendoCheckbox",
+                                                style = "font-size:5rem",
+                                                onchange = "VisitCheckboxVariableChange(this)",
+                                                @data_property = value.PatientVariableId,
+                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid
+                                            }))
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                }
+            }
+        </div>
+    </div>
+
+
+    <div class="row" style=" padding-bottom:2rem">
+
+        <div class="col-sm-4 hidden">
+            <div class="col-sm-12" style="padding:0">
+                <div class="col-sm-12" style="text-align: center; margin-bottom: 0.5rem">
+                    <h3 class="MyFont-Roboto-grid">Gender</h3>
+                </div>
+
+                <div class="col-sm-12" style="padding:0">
+                    <input id="GenderId" style="font-size:1.5rem;width:100%" data_property="Gender" />
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+
+    <div id="disease_symptom" class="col-sm-12" style="direction:ltr;display:flex;align-items:center;justify-content:flex-start">
+        <div class="col-sm-6" style="text-align: right;direction:ltr;display:flex;align-items:center;justify-content:flex-start">
+            <div class="col-sm-4" style="text-align: right;">
+                <h3 class="MyFont-Roboto-grid">Chief Complain</h3>
+            </div>
+
+            <div class="col-sm-8 " style="font-size:1.5rem">
+                <select name="optional" id="optional" style="width: 100%"></select>
+            </div>
+        </div>
+
+        <div class="col-sm-6" style="text-align: right;direction:ltr;display:flex;align-items:center;justify-content:flex-start">
+
+            <div class="col-sm-4" style="text-align: right;">
+                <h3 class="MyFont-Roboto-grid">Disease Symptom</h3>
+            </div>
+
+            <div class="col-sm-8 " style="font-size:1.5rem">
+                <select name="Symptom" id="Symptom" style="width: 100%"></select>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/PatientVariable/wpVariablesSection.cshtml", "")
+
+
+    @*//////////////////////////////////////////////////////////////////////////////////////////  Patient History/////////////////*@
+
+    @{
+        var variablesclass = false;
+    }
+
+    <div id="gridsContainer">
+
+        <div id="Visiting_Visited">
+
+            @{
+                if (variablesclass)
+                {
+                    <div class="col-sm-3" style="padding-top:2rem">
+                        @{
+                            if (Model != null && Model.AllClinicSectionChoosenValues != null)
+                            {
+                                foreach (var value in Model.AllClinicSectionChoosenValues)
+                                {
+                                    if (value.VariableStatusName == "VariableValueIsVariable" && (value.VariableDisplayName == "ShowInVisit" || value.VariableDisplayName == "ShowInVisitAndPatient"))
+                                    {
+                                        <div class="col-sm-12" style="padding:0;margin:0.5rem 0">
+                                            @{
+                                                if (value.PatientVariableVariableType == "Text")
+                                                {
+                                                    <label style="font-size:1.5rem">@value.PatientVariableVariableName:</label>
+                                                    @(Html.Kendo().TextBox()
+                                                        .Name(value.VariableNameForView)
+                                                        .Events(e =>
+                                                        {
+                                                            e.Change("VisitVariableChange");
+                                                        })
+                                                        .Value(value.Value)
+                                                        .HtmlAttributes(new
+                                                        {
+                                                            style = "font-size:1.5rem;width:50%",
+                                                            @data_property = value.PatientVariableId,
+                                                            @data_patientVariableValueGuid = value.PatientVariableValueGuid
+                                                        })
+                                                )
+                                                }
+                                                else if (value.PatientVariableVariableType == "Int")
+                                                {
+                                                    <label style="font-size:1.5rem">@value.PatientVariableVariableName:</label>
+                                                    @(Html.Kendo().NumericTextBox<int>()
+                                                       .Name(value.VariableNameForView)
+                                                       .Value(Convert.ToInt32(Convert.ToDecimal(value.Value)))
+                                                       .Format("# " + value.PatientVariable.VariableUnit)
+                                                       .Events(e =>
+                                                       {
+                                                           e.Change("VisitVariableChange");
+                                                       })
+                                                       .HtmlAttributes(new
+                                                       {
+                                                           style = "font-size:1.5rem;width:50%",
+                                                           @data_property = value.PatientVariableId,
+                                                           @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                                       })
+                                                )
+                                                }
+                                                else if (value.PatientVariableVariableType == "Decimal")
+                                                {
+                                                    <label style="font-size:1.5rem">@value.PatientVariableVariableName:</label>
+                                                    @(Html.Kendo().NumericTextBox<decimal>()
+                                                        .Name(value.VariableNameForView)
+                                                        .Value(Convert.ToDecimal(value.Value))
+                                                        .Format("#.0 " + value.PatientVariable.VariableUnit)
+                                                        .Events(e =>
+                                                        {
+                                                            e.Change("VisitVariableChange");
+                                                        })
+                                                        .HtmlAttributes(new
+                                                        {
+                                                            style = "font-size:1.5rem;width:50%",
+                                                            @data_property = value.PatientVariableId,
+                                                            @data_patientVariableValueGuid = value.PatientVariableValueGuid,
+                                                        })
+                                                )
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                }
+
+                                foreach (var value in Model.AllClinicSectionChoosenValues)
+                                {
+                                    if (value.VariableStatusName == "VariableValueIsVariable" && (value.VariableDisplayName == "ShowInVisit" || value.VariableDisplayName == "ShowInVisitAndPatient"))
+                                    {
+                                        <div class="col-sm-12" style="padding:0;margin:0.5rem 0">
+                                            @{
+                                                if (value.PatientVariableVariableType == "Bool")
+                                                {
+                                                    if (value.Value == "true")
+                                                    {
+                                                        @(Html.Kendo().CheckBox()
+                                                            .Name(value.VariableNameForView)
+                                                            .Label(value.PatientVariableVariableName)
+                                                            .Checked(true)
+                                                            .HtmlAttributes(new
+                                                            {
+                                                                @class = "kendoCheckbox",
+                                                                style = "font-size:5rem",
+                                                                onchange = "VisitCheckboxVariableChange(this)",
+                                                                @data_property = value.PatientVariableId,
+                                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid
+                                                            }))
+                                                    }
+                                                    else
+                                                    {
+                                                        @(Html.Kendo().CheckBox()
+                                                            .Name(value.VariableNameForView)
+                                                            .Label(value.PatientVariableVariableName)
+                                                            .HtmlAttributes(new
+                                                            {
+                                                                @class = "kendoCheckbox",
+                                                                style = "font-size:5rem",
+                                                                onchange = "VisitCheckboxVariableChange(this)",
+                                                                @data_property = value.PatientVariableId,
+                                                                @data_patientVariableValueGuid = value.PatientVariableValueGuid
+                                                            }))
+                                                    }
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                }
+                            }
+                        }
+                    </div>
+                }
+
+                @*////////////////////////////////////////////////////////////////////////////////////// Priscreption      ////*@
+
+                <div class="col-sm-12" style="padding:0">
+
+                    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/Reserve/mdPrescriptionModal.cshtml", Guid.Empty)
+
+                </div>
+
+                <div class="hr hr-16 hr-dotted" style="clear:both"></div>
+
+                <div id="PayVisitAndServiceContainer" style="clear:both;background-color:rgba(0, 0, 51,0.8);padding:5px;">
+
+                </div>
+
+
+                <div class="col-sm-12" style="text-align:left;border-bottom:dotted 1px #d4d4d4;margin-bottom:0.5rem;padding-bottom:0.5rem">
+                    <h3 class="MyFont-Roboto-grid" style="display:inline-block;margin:0.9rem 0 0 0">Test Images</h3>
+                </div>
+
+                <div class="col-sm-12" id="ImageView" style="margin:2rem 0;padding-right:4rem">
+
+                </div>
+
+                <script>
+                    function OnUploadVisitFile(e) {
+                        var dataArrays = [];
+                        var fileNameArrays = [];
+                        let pateintId = $("#PatientId").val();
+                        let visitId = $("#Guid").val();
+
+                        for (let i = 0; i < e.files.length; i++) {
+
+                            if (e.files[i].rawFile.type.match(/image.*/)) {
+                                e.preventDefault();
+                                var reader = new FileReader();
+
+                                reader.onload = function (readerEvent) {
+
+                                    var image = new Image();
+                                    image.onload = function (imageEvent) {
+
+                                        // Resize the image
+                                        var canvas = document.createElement('canvas'),
+                                            max_size = 800,// TODO : pull max size from a site config
+                                            width = image.width,
+                                            height = image.height;
+
+                                        if (width > max_size) {
+                                            let div = width / max_size;
+                                            width = width / div;
+                                            height = height / div;
+                                        }
+                                        if (height > max_size) {
+
+                                            let div = height / max_size;
+                                            width = width / div;
+                                            height = height / div;
+                                        }
+
+                                        canvas.width = width;
+                                        canvas.height = height;
+                                        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+
+                                        var dataUrl = canvas.toDataURL('image/jpeg');
+
+                                        $.ajax({
+                                            url: "/Patient/Async_Save",
+                                            data: { file: dataUrl, fileName: e.files[i].rawFile.name, patientId: pateintId, visitId: visitId },
+                                            type: 'POST',
+
+                                            success: function (data) {
+
+                                                GetAllVisitImages();
+                                            }
+                                        });
+
+                                    }
+                                    image.src = readerEvent.target.result;
+
+                                }
+                                reader.readAsDataURL(e.files[i].rawFile);
+                            }
+                        }
+                    }
+                </script>
+
+                <div id="uploadContainer" class="demo-section k-content col-xs-12" style="margin-top:2rem">
+                    <input id="patientFilesInVisit" type="file" />
+                </div>
+
+                <div class="col-sm-12" style="text-align:left;border-bottom:dotted 1px #d4d4d4;margin-bottom:0.5rem;padding-bottom:0.5rem">
+                    <h3 class="MyFont-Roboto-grid" style="display:inline-block;margin:0.9rem 0 0 0">Patient Files</h3>
+                </div>
+
+                <div class="col-sm-12" id="PatientImageView" style="margin:2rem 0;padding-right:4rem">
+
+                </div>
+
+                <div class="col-sm-12" style="text-align:center;margin-top:5rem">
+                    <h3 class="MyFont-Roboto-grid" style="display:inline-block;margin:0.9rem 0 0 0">Patient History</h3>
+                </div>
+
+                <div class="col-sm-12" style="padding:0">
+                    <div class="demo-section k-content">
+                        @(Html.Kendo().TabStrip()
+                                  .Name("tabstrip")
+                                  .Animation(animation =>
+                                      animation.Open(effect =>
+                                          effect.Fade(FadeDirection.In)))
+                                  .Items(tabstrip =>
+                                  {
+                                    tabstrip.Add().Text("Visit History")
+                                    .Selected(true)
+                                    .Content(@<text>
+                                        @(Html.Kendo().Grid<WPH.Models.CustomDataModels.Visit.VisitViewModel>()
+                                                .Name("VisitHistory")
+                                                .Columns(columns =>
+                                                {
+                                                    columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.VisitDate).Width(100).Title("Visit Date").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" }).Format("{0:dd/MM/yyyy}");
+                                                    columns.Bound(x => x.AllPrescriptionDetail).Title("All Medicines").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.AllPrescriptionTestDetail).Title("All Tests").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.PatientId).Hidden();
+                                                    columns.Bound(x => x.Guid).Hidden();
+                                                })
+                                                .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id(p => p.PatientId);
+                                                    })
+                                                    .PageSize(5)
+                                                    //.Read(read => read.Action("GetAllVisitsForPatient", "Visit", new { Id = .PatientId, visitDate = .VisitDate }))
+                                                )
+                                                .Pageable(pageable => pageable
+                                                .Input(true)
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5)
+                                                .Numeric(true))
+                                                .Sortable()
+                                                .HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem" })
+                                        )
+                                        </text>);
+
+                                    tabstrip.Add().Text("Disease History")
+                                      .Content(@<text>
+                                            <div class="col-sm-12" style="padding:0">
+                                                @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PatientDisease.PatientDiseaseRecordViewModel>()
+                                                .Name("DiseaseHistory")
+                                                .Columns(columns =>
+                                                {
+                                                    columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.DiseaseName).Filterable(ftb => ftb.Cell(cell => cell.Operator("startswith").SuggestionOperator(FilterType.Contains))).Title("Normal Diseases").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.Guid).Hidden();
+                                                })
+                                                .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id(p => p.Guid);
+                                                    })
+                                                    .PageSize(5)
+                                                //.Read(read => read.Action("GetAllNormalDiseaseForPatient", "Visit", new { Id = .PatientId }))
+                                                )
+                                                .Pageable(pageable => pageable
+                                                .Input(true)
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5)
+                                                .Numeric(true)) // Enable paging
+                                                .Sortable()
+                                                .HtmlAttributes(new { @id = "underlyingDisease", @style = "direction: ltr;margin-top:1rem" })
+                                                )
+                                            </div>
+
+                                            <div class="col-sm-12" style="padding:0">
+                                                @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PatientDisease.PatientDiseaseRecordViewModel>()
+                                                .Name("AllergicDiseaseHistory")
+                                                .Columns(columns =>
+                                                {
+                                                    columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.DiseaseName).Filterable(ftb => ftb.Cell(cell => cell.Operator("startswith").SuggestionOperator(FilterType.Contains))).Title("Allergic Diseases").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.Guid).Hidden();
+                                                })
+                                                .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id(p => p.Guid);
+                                                    })
+                                                    .PageSize(5)
+                                                //.Read(read => read.Action("GetAllAllergicDiseaseForPatient", "Visit", new { Id = .PatientId }))
+                                                )
+                                                .Pageable(pageable => pageable
+                                                .Input(true)
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5)
+                                                .Numeric(true)) // Enable paging
+                                                .Sortable()
+                                                .HtmlAttributes(new { @id = "AllergicDisease", @style = "direction: ltr;margin-top:2rem" })
+                                                )
+                                            </div>
+
+                                            <div class="col-sm-12" style="padding:0">
+                                                @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PatientDisease.PatientDiseaseRecordViewModel>()
+                                                        .Name("SocialDiseaseHistory")
+                                                        .Columns(columns =>
+                                                        {
+                                                            columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                            columns.Bound(x => x.DiseaseName).Filterable(ftb => ftb.Cell(cell => cell.Operator("startswith").SuggestionOperator(FilterType.Contains))).Title("Social Diseases").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+
+                                                            columns.Bound(x => x.Guid).Hidden();
+
+                                                        })
+                                                        .DataSource(dataSource => dataSource
+                                                                .Ajax()
+                                                                .Model(model =>
+                                                                {
+                                                                    model.Id(p => p.Guid);
+                                                                })
+                                                                .PageSize(5)
+                                                                //.Read(read => read.Action("GetAllSocialDiseaseForPatient", "Visit", new { Id = .PatientId }))
+                                                                )
+                                                                .Pageable(pageable => pageable
+                                                                .Input(true)
+                                                                .Refresh(true)
+                                                                .PageSizes(true)
+                                                                .ButtonCount(5)
+                                                                .Numeric(true)) // Enable paging
+                                                                .Sortable()
+                                                                .HtmlAttributes(new { @id = "SocialDisease", @style = "direction: ltr;margin-top:2rem" })
+                                                        )
+                                            </div>
+
+                                            <div class="col-sm-12" style="text-align:left;margin-top:0.5rem;padding:0">
+                                                <button id="EditUnder" class="k-primary" onClick='EditUnderlyingDisease(this)' style="font-size:1.5rem">Edit Underlying Disease</button>
+                                            </div>
+                                          </text>);
+
+                                      tabstrip.Add().Text("Patient Medicine History")
+                                      .Content(@<text>
+                                            <div class="col-sm-12" style="padding:0">
+                                                @(Html.Kendo().Grid<WPH.Models.CustomDataModels.PatientMedicine.PatientMedicineRecordViewModel>()
+                                                .Name("PatientMedicineHistory")
+                                                .Columns(columns =>
+                                                {
+                                                    columns.Bound(x => x.Index).Filterable(false).Width(20).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.MedicineName).Filterable(ftb => ftb.Cell(cell => cell.Operator("startswith").SuggestionOperator(FilterType.Contains))).Title("Patient Medicine History").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;background-color: rgb(156,213,25);" });
+                                                    columns.Bound(x => x.Guid).Hidden();
+                                                })
+                                                .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .Model(model =>
+                                                {
+                                                    model.Id(p => p.Guid);
+                                                })
+                                                .PageSize(5)
+                                                //.Read(read => read.Action("GetAllMedicinesRecordForPatient", "Visit", new { Id = .PatientId }))
+                                                )
+                                                .Pageable(pageable => pageable
+                                                .Input(true)
+                                                .Refresh(true)
+                                                .PageSizes(true)
+                                                .ButtonCount(5)
+                                                .Numeric(true)) // Enable paging
+                                                .Sortable()
+                                                .HtmlAttributes(new { @id = "PatientMedicine" , @style = "direction: ltr;margin-top:2rem" })
+                                                )
+                                            </div>
+                                        </text>);
+                                  }).HtmlAttributes(new { @class = "tabs" })
+                            )
+                    </div>
+                </div>
+
+            }
+            <div class="col-sm-12 reserve-font" style="margin-top:2rem;margin-left:1rem">
+                <div class="col-sm-12">
+
+                    <textarea id="Explanation" name="Explanation" style="width: 100%" data-property="Explanation"></textarea>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="PatientRecordModal" class="modal fade " tabindex="-1" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="patientHide()" aria-hidden="true">&times;</button>
+                <h3 id="modalform-header" class="smaller lighter blue no-margin"></h3>
+                <h4 class="modal-title" id="myModalLabel">@Localizer["DiseaseRecord"]</h4>
+            </div>
+
+            <div id="PatientRecordModal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                    .Name("btn-acceptPatientDisease")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", onclick="patientHideAndRedresh()" })
+                    .Content(Localizer["Ok"]))
+
+                <button id="exit" class=" pull-right" style="font-size:15px;height:35px;margin:2px;" onclick="patientHide()">
+                    @Localizer["Exit"]
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<div id="MedicineDisease-Modal" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="new-modalTest-header" class="smaller lighter blue no-margin">Medicines For This Disease</h3>
+            </div>
+
+            <div id="MedicineDisease-Modal-body" class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                @(Html.Kendo().Button()
+                    .Name("btn-MedicineDisease-accept")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right", @data_diseaseId="" })
+                    .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                    .Name("btn-MedicineDisease-close")
+                    .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss="modal" })
+                    .Content(Localizer["Exit"]))
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<div id="VisitList-Modal" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 id="VisitList-header" class="smaller lighter blue no-margin">Today Visits</h3>
+            </div>
+
+            <div id="VisitList-Modal-body" class="modal-body">
+
+                @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/BaseInfo/dgBaseInfoGrid.cshtml")
+
+            </div>
+
+            <div class="modal-footer">
+
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
+
+
+
+
+
+<div>
+    @(Html.Kendo().Window()
+        .Name("window1")
+        //.Title("Image Preview")
+        .Visible(false)
+        .Resizable()
+        .Content(@<text>
+                    <img id="imagePreview1" src="#" alt="Image Preview" height="700" />
+        </text>)
+        .Draggable()
+        .Actions(actions => actions.Pin().Minimize().Maximize().Close())
+    )
+</div>
+
+<input class="hidden" type="text" id="Test" data-Value="@ViewBag.TestId" />
+<input class="hidden" type="text" id="ShowMedicineForDisease" data-Value="@ViewBag.ShowMedicineForDisease" />
+
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_GridAndModalLinks.cshtml")
+@await Html.PartialAsync("~/Views/Shared/PartialViews/InterfacePartials/_Modal.cshtml")
+
+
+
+<script id="noDataTemplate" type="text/x-kendo-tmpl">
+    # var value = instance.input.val(); #
+    # var id = instance.element[0].id; #
+    <div>
+        No data found. Do you want to add new item - '#: value #' ?
+    </div>
+    <br />
+    <button class="k-button" onclick="AddNewItemToDisease('#: id #', '#: value #')" >Add new item</button>
+</script>
+
+
+<script>
+
+    var visitNumber = @(ViewBag.VisitNumber ?? 0);
+
+</script>
+
+
+<script src="~/Content/Js/NewVisit.js"></script>

@@ -1,0 +1,367 @@
+﻿
+
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<script src="~/Content/assets/js/apexcharts.min.js"></script>
+
+<style>
+
+    .storeDashboardBack {
+        border-radius: 0.5rem;
+        background-color: #fff;
+        padding: 2rem;
+        border: 1px solid rgba(0, 0, 0, .125);
+        background-clip: border-box;
+        box-shadow: rgba(146, 168, 209,0.7) 0px 0px 5px 0.1px;
+    }
+</style>
+
+<div id="store-dashboard" class="col-sm-12" style="direction:ltr;padding:0.5rem;margin:1rem 0 0 0;background-color:rgb(242, 247, 251);border-radius:1rem">
+
+    <div class="col-sm-2 MyFont-Sarchia-grid" style="text-align:center;padding:0.1rem;margin:0;">
+        @*box-shadow:rgba(146, 168, 209,0.7) 0px 0px 5px 0.1px;*@
+        <div class="col-sm-12 storeDashboardBack">
+
+
+            @if ((bool)ViewBag.AccessNewReception)
+            {
+                <div class="col-sm-12">
+
+                    @(Html.Kendo().Button()
+                            .Name("btn-NewAnalysisReception")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;width:100%", type = "button", @class = "btn btn-primary", onclick="GoToNewReception()"  })
+                            .Content(Localizer["NewAnalysisReception"]))
+
+                </div>
+            }
+
+            @if ((bool)ViewBag.AccessAllReception)
+            {
+                <div class="col-sm-12">
+
+                    @(Html.Kendo().Button()
+                            .Name("btn-AllReception")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;width:100%", type = "button", @class = "btn btn-primary", onclick = "GoToAllReception()" })
+                            .Content(Localizer["AllReception"]))
+
+                </div>
+            }
+
+
+            @if ((bool)ViewBag.AccessPatient)
+            {
+                <div class="col-sm-12">
+
+                    @(Html.Kendo().Button()
+                            .Name("btn-Patient")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;width:100%", type = "button", @class = "btn btn-primary", onclick = "GoToPatients()" })
+                            .Content(Localizer["Patient"]))
+
+                </div>
+            }
+
+
+
+        </div>
+
+        <div id="patients-count" class="col-sm-12 storeDashboardBack" style="margin-top:2rem">
+
+
+
+        </div>
+
+
+
+    </div>
+
+    <div class="col-sm-4">
+
+        <div class="col-sm-12 storeDashboardBack">
+
+            <div id="pieChart-most-Analysis-used">
+            </div>
+
+        </div>
+
+        @*<div class="col-sm-12 storeDashboardBack" style="margin-top:1rem">
+
+
+
+                <div id="pieChart-most-disease">
+                </div>
+
+
+
+            </div>*@
+
+    </div>
+
+    <div class="col-sm-6">
+
+        <div class="col-sm-12 storeDashboardBack">
+
+
+
+            <div id="chart-income">
+            </div>
+
+
+            <div class="MyFont-Sarchia-grid">
+
+                @(Html.Kendo().Button()
+                            .Name("btn-incomeDay")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-primary MyFont-Sarchia-grid ", onclick = "GetIncome('day')" })
+                            .Content(Localizer["Day"]))
+                @(Html.Kendo().Button()
+                            .Name("btn-incomeMonth")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-primary MyFont-Sarchia-grid ", onclick = "GetIncome('month')" })
+                            .Content(Localizer["Month"]))
+                @(Html.Kendo().Button()
+                            .Name("btn-incomeYear")
+                            .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "btn btn-primary MyFont-Sarchia-grid ", onclick = "GetIncome('year')" })
+                            .Content(Localizer["Year"]))
+
+            </div>
+
+
+        </div>
+
+
+        @*<div class="col-sm-12 storeDashboardBack" style="margin-top:1rem">
+
+                <div id="chart-Patients-Age">
+                </div>
+
+            </div>*@
+
+
+
+
+    </div>
+
+</div>
+
+<script>
+
+
+    //var options = {
+    //    chart: {
+    //        type: 'bar',
+    //        //height: 320
+    //    },
+    //    series: [{
+    //        name: 'IQD',
+    //        data: [300, 400, 450, 500, 490, 600, 700]
+    //    }, {
+    //        name: '$',
+    //        data: [30, 40, 45, 60, 70]
+    //    }],
+    //    xaxis: {
+    //        categories: ['sat', 'sun', 'mon', 'thi', 'the', 'wen', 'fri']
+    //    },
+    //    title: {
+    //        text: 'Income',
+    //        align: 'left',
+    //        margin: 20,
+    //        offsetX: 0,
+    //        offsetY: 0,
+    //        floating: false,
+    //        style: {
+    //            fontSize: '1.5rem',
+    //            fontWeight: 'bold',
+    //            fontFamily: 'Roboto',
+    //            color: '#34568B'
+    //        }
+    //    },
+    //}
+
+    //var chart = new ApexCharts(document.querySelector("#chart"), options);
+
+    //chart.render();
+
+
+    $(document).ready(() => {
+        GetIncome('day');
+    })
+
+
+    function GetIncome(type) {
+
+        $("#chart-income").empty();
+
+        $.ajax({
+
+            url: "/Dashboard/GetAllClinicInCome?Type=" + type,
+            success: function (response) {
+                //if (response != 0) {
+                if (response != null) {
+                    var options = {
+                        chart: {
+                            type: 'bar',
+                            height: 320
+                        },
+                        series: [{
+                            name: 'IQD',
+                            data: response.Value,
+                        }],
+                        xaxis: {
+                            categories: response.Labels
+                        },
+                        title: {
+                            text: 'Income',
+                            align: 'left',
+                            margin: 20,
+                            offsetX: 0,
+                            offsetY: 0,
+                            floating: false,
+                            style: {
+                                fontSize: '1.5rem',
+                                fontWeight: 'bold',
+                                fontFamily: 'Roboto',
+                                color: '#34568B'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function (val, opts) {
+                                console.log(val);
+                                if (val > 1000000) {
+
+                                    return (val / 1000000).toFixed(2) + "M"
+                                }
+                                else {
+                                    return (val / 1000).toFixed(2) + "K"
+                                }
+                            },
+                        }
+                    }
+
+                    var chart = new ApexCharts(document.querySelector("#chart-income"), options);
+
+                    chart.render();
+                }
+
+            }
+        });
+
+    }
+
+
+
+    $.ajax({
+
+        url: "/Dashboard/GetPatientsCount",
+        success: function (response) {
+            //if (response != 0) {
+            if (response != null) {
+                let ht = "<div class='col-sm-12' style='margin:0 0 1rem 0;padding:0'>" +
+                    "<h4 class='MyFont-Roboto-header' style = 'float:left;margin:0;font-size: 1.5rem;color:black ' > Patients</h4 > </div > ";
+
+                for (let i = 0; i < response.Labels.length; i++) {
+
+                    ht += "<div class='col-sm-12' style='border-bottom:solid 2px rgb(146, 168, 209);padding:0;margin:0.5rem'><div class='col-sm-12' style='display:flex;justify-content:space-between'>" +
+                        "<h5 class='MyFont-Roboto' style = 'font-size:1.5rem;color:#34568B;font-weight: bold' >" + response.Labels[i] + "</h5 >" +
+                        "<h5 class='MyFont-Roboto' style = 'font-size:1.5rem;color:#34568B;font-weight: bold' >" + response.Value[i] + "</h5 ></div ></div > ";
+                }
+                $("#patients-count").html(ht);
+
+            }
+
+        }
+    });
+
+    $.ajax({
+
+        url: "/Dashboard/GetMostUsedAnalysis",
+        success: function (response) {
+            //if (response != 0) {
+            if (response != null) {
+
+                var pieOptions = {
+                    series: response.Value,
+                    chart: {
+                        type: 'pie',
+
+                    },
+                    labels: response.Labels,
+                    stroke: {
+                        colors: ['#fff']
+                    },
+                    fill: {
+                        opacity: 0.9
+                    },
+                    title: {
+                        text: 'Most Used Analysis',
+                        align: 'left',
+                        margin: 20,
+                        offsetX: 0,
+                        offsetY: 0,
+                        floating: false,
+                        style: {
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            fontFamily: 'Roboto',
+                            color: '#34568B'
+                        }
+                    },
+
+                };
+
+                var pieChart = new ApexCharts(document.querySelector("#pieChart-most-Analysis-used"), pieOptions);
+
+                pieChart.render();
+            }
+
+        }
+    });
+
+
+
+    function GoToNewReception() {
+
+        $(".loader").removeClass("hidden");
+        $(".page-content").load("/PatientReceptionAnalysis/Form", function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+    function GoToAllReception() {
+
+        $(".loader").removeClass("hidden");
+        $(".page-content").load("/PatientReception/Form", function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+    function GoToPatients() {
+
+        $(".loader").removeClass("hidden");
+        $(".page-content").load("/Patient/Form", function (responce) {
+
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        })
+
+    }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+

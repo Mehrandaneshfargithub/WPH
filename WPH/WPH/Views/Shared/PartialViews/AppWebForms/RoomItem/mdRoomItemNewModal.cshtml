@@ -1,0 +1,124 @@
+﻿@model WPH.Models.RoomItem.RoomItemViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewRoomItemForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.ItemHolder)
+                    @Html.HiddenFor(m => m.RoomIdHolder)
+                    @Html.HiddenFor(m => m.RoomId)
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["RoomName"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            <label for="form-field-8">@Model.RoomName</label>
+                        </span>
+                    </label>
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Items"] : </label>
+                        <span class="block input-icon input-icon-right">
+
+                            @{
+                                if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+                                {
+                                    <a href="\\#" class="  pull-left btn btn-danger" onclick="AddItem()" style="margin-left:1rem; padding:0 0.2rem;"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                                }
+                                else
+                                {
+                                    <a href="\\#" class="  pull-right btn btn-danger" onclick="AddItem()" style="margin-right: 1rem; padding: 0 0.2rem"><span class="fa fa-plus" style="margin:0.1rem"></span></a>
+                                }
+                            }
+                            @(Html.Kendo().DropDownList()
+                                      .Name("ItemId")
+                                      .DataTextField("Name")
+                                      .DataValueField("Guid")
+                                      //.Filter("contains")
+                                      .DataSource(source =>
+                                        {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetAllItems", "Item");
+                                          })
+                                          .ServerFiltering(false);
+                                      })
+                                      .Value(Model.ItemId.ToString())
+                                      .Text(Model.ItemName)
+                                      .HtmlAttributes(new { style = "width: 90%;" })
+                                )
+                        </span>
+
+                        <span id="Name-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheNameIsDuplicatedPleaseTryAnotherName"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Code"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Code")
+                                .Value(Model.Code)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+                        <span id="Code-Exist" class="emptybox hidden" style="color:red;">
+                            @Localizer["TheCodeIsDuplicatedPleaseTryAnotherCode"]
+                        </span>
+                    </label>
+
+                    <label class="block clearfix">
+                        <label for="form-field-8">@Localizer["Description"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextArea()
+                                .Name("Description")
+                                .Value(Model.Description)
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </span>
+                    </label>
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+    $(document).ready(function () {
+
+
+    });
+
+
+    $('#ItemId').focus(function () {
+        $("#Name-Exist").addClass('hidden');
+        $("#Name-box").addClass('hidden');
+        $("#RoomId").select();
+    });
+
+    $('#RoomId').on('keypress', function (e) {
+
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#ItemId').focus();
+        }
+
+        $('#ItemId').on('keypress', function (e) {
+
+            if (e.which === 9) {
+
+                $('#btn-addRoomItem-accept').focus();
+            }
+        });
+
+
+    });
+</script>

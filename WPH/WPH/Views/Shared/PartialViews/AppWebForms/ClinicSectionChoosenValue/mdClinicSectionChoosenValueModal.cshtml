@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+
+<div class="col-xs-12">
+
+
+    @(Html.Kendo().Wizard()
+        .Name("PatientVariableWizard")
+        .LoadOnDemand(true)
+        .ReloadOnSelect(false)
+
+        .Steps(steps =>
+        {
+            steps.Add().ContentUrl(Url.Action("GetAllPatientVariables", "ClinicSectionChoosenValue")).Title("Variables")
+            .Buttons(b =>
+            {
+                b.Custom().Text("Next").Click("VariableNext");
+
+            });
+            steps.Add().ContentUrl(Url.Action("GetAllChoosenVariablesValues", "ClinicSectionChoosenValue")).Title("Status And Priority")
+            .Buttons(b =>
+            {
+                b.Previous();
+                b.Done();
+
+            });
+
+        })
+        .Events(events =>
+        {
+            events.Done("WizardDone");
+
+        })
+        )
+
+</div>
+
+
+
+<script>
+
+
+
+</script>
+

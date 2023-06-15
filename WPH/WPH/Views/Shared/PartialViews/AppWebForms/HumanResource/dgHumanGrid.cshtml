@@ -1,0 +1,193 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+
+    string edit_title = Localizer["EditHumanResource"];
+    string remove_title = Localizer["RemoveHumanResource"];
+    string salary_title = Localizer["ShowSalaryInfo"];
+    string user_title = Localizer["ShowUserInfo"];
+    string pay_title = Localizer["PayAllSalary"];
+}
+
+<div class="row">
+    @(Html.Kendo().Grid<WPH.Models.HumanResource.HumanResourceViewModel>()
+    .Name("kendoHumanGrid")
+    .HtmlAttributes(new { Class = "k-grid-header" })
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+            if ((bool)ViewBag.AccessDeleteHumanResource)
+            {
+                columns.Bound("").Title("").Width(30).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteSalaryFunction(this);' data-id='#=Guid#' data-type='Human' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            if ((bool)ViewBag.AccessEditHumanResource)
+            {
+                columns.Bound("").Title("").Width(30).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditHuman(this);' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+            columns.Bound("").Title("").Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='SelectGridHuman(this);' data-id='#=Guid#' data-rel='tooltip' title='{salary_title}' data-original-title='ShowSalary'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-chevron-circle-left bigger-120' aria-hidden='true'></i>
+                    </span>
+                </a>
+            ");
+            columns.Bound("").Title("").Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='SelectUserManager(this);' data-id='#=Guid#' data-rel='tooltip' title='{user_title}' data-original-title='ShowUser'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-chevron-circle-down bigger-120' aria-hidden='true'></i>
+                    </span>
+                </a>
+            ");
+
+            if ((bool)ViewBag.AccessNewSalaryPayment)
+            {
+                columns.Bound("").Title(" ").Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn ' onClick='PayAllHumanSalary(this);' data-id='#=Guid#' data-rel='tooltip' title='{pay_title}' data-original-title='PayAll'>
+                        <span class='blue'>
+                            <i class='ace-icon fa fa fa-credit-card-alt bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            //columns.Bound(x => x.Duty).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Duty"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.MinWorkTime).Filterable(false).Title(Localizer["MinWorkTime"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.FixSalary).Filterable(false).Title(Localizer["FixSalary"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.RoleTypeName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Width(90).Title(Localizer["UserType"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Gu.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" });
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Roboto-grid" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(30);
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.CurrencyId).Hidden();
+
+        }
+        else
+        {
+            columns.Bound(x => x.CurrencyId).Hidden();
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Id).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("#").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(30);
+            columns.Bound(x => x.Gu.Name).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Name"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.RoleTypeName).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["UserType"]).Width(90).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.FixSalary).Filterable(false).Title(Localizer["FixSalary"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.MinWorkTime).Filterable(false).Title(Localizer["MinWorkTime"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            //columns.Bound(x => x.Duty).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Duty"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+            if ((bool)ViewBag.AccessNewSalaryPayment)
+            {
+                columns.Bound("").Title(" ").Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn ' onClick='PayAllHumanSalary(this);' data-id='#=Guid#' data-rel='tooltip' title='{pay_title}' data-original-title='PayAll'>
+                        <span class='blue'>
+                            <i class='ace-icon fa fa fa-credit-card-alt bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+            }
+
+            columns.Bound("").Title("").Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='SelectUserManager(this);' data-id='#=Guid#' data-rel='tooltip' title='{user_title}' data-original-title='ShowUser'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-chevron-circle-down bigger-120' aria-hidden='true'></i>
+                    </span>
+                </a>
+            ");
+
+            columns.Bound("").Title("").Width(10).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+            .ClientTemplate(
+               $@"<a class='tooltip-success grid-btn' onClick='SelectGridHuman(this);' data-id='#=Guid#' data-rel='tooltip' title='{salary_title}' data-original-title='ShowSalary'>
+                    <span class='purple'>
+                        <i class='ace-icon fa fa-chevron-circle-right bigger-120' aria-hidden='true'></i>
+                    </span>
+                </a>
+            ");
+
+            if ((bool)ViewBag.AccessEditHumanResource)
+            {
+                columns.Bound("").Title("").Width(30).HtmlAttributes(new { @style = "padding-left: 0px !important;padding-right: 0px !important;" })
+                .ClientTemplate(
+                   $@"<a class='tooltip-success grid-btn edit' onClick='EditHuman(this)' data-id='#=Guid#' data-rel='tooltip' title='{edit_title}' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            if ((bool)ViewBag.AccessDeleteHumanResource)
+            {
+                columns.Bound("").Title("").Width(30)
+                .ClientTemplate(
+                   $@"<a class='tooltip-error grid-btn' onClick='GridDeleteSalaryFunction(this);' data-id='#=Guid#' data-type='Human' data-rel='tooltip' title='{remove_title}' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+        }
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .ServerOperation(false)
+    .Model(model =>
+    {
+        model.Id(p => p.Guid);
+    })
+    .PageSize(10)
+    .Read(read => read.Action("GetAllHumanWithPeriod", "HumanResource").Data("GetPeriodAndBeginEndDate"))
+    )
+    .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+    .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+    .Pageable(pageable => pageable
+    .Input(true)
+    .Refresh(true)
+    .PageSizes(true)
+    .ButtonCount(3)
+    .Numeric(true)) // Enable paging
+    //.AutoBind(false)
+    .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+
+    )
+</div>
+
+<script>
+
+
+    $(document).ready(function () {
+
+        $("#kendoDoctorGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoDoctorGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+    })
+</script>

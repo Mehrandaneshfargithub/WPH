@@ -1,0 +1,555 @@
+﻿@model WPH.Models.CustomDataModels.BaseInfo.BaseInfosAndPeriodsViewModel
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+@{
+    string font = "", pull = "", direction = "";
+    if (HttpContextAccessor.HttpContext.Session.GetString("culture") == "en")
+    {
+        font = " MyFont-Roboto-grid ";
+        pull = " pull-left ";
+        direction = " ";
+    }
+    else
+    {
+        font = " MyFont-Sarchia-grid ";
+        pull = " pull-right ";
+        direction = " direction:rtl; ";
+    }
+}
+
+<div class="row page-header ">
+
+    <div class="@pull">
+        <h1 class="@font" style="font-size: 2.3rem">
+            @Localizer["ProductRecive"]
+        </h1>
+
+    </div>
+
+</div><!-- /.page-header -->
+
+<div id="ProductReciveDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog" style="width:85%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeProductReciveDetailModal()" aria-hidden="true">&times;</button>
+                <h3 id="ProductReciveDetailModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["ProductReciveDetail"]
+                </h3>
+            </div>
+
+            <div id="ProductReciveDetailModal-body" class="modal-body" style="margin:5px;">
+            </div>
+
+            <div id="ProductNotConfirmed" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ProductNotConfirmed"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-productReciveDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right"})
+                .Content(Localizer["Ok"]))
+
+                @(Html.Kendo().Button()
+                .Name("btn-productReciveDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeProductReciveDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="AddProductReciveDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="closeAddProductReciveDetailModal()" aria-hidden="true">&times;</button>
+                <h3 id="AddProductReciveDetailModal-header" class="smaller lighter blue no-margin @font">
+                    @Localizer["ConfirmProduct"]
+                </h3>
+            </div>
+
+            <div id="AddProductReciveDetailModal-body" class="modal-body" style="width:60rem">
+            </div>
+
+            <div id="InvalidProduct" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InvalidProduct"]
+            </div>
+
+            <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                <i class="ace-icon fa fa-stop bigger-120"></i>
+                @Localizer["ERROR_InsertWrong"]
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-addProductReciveDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right"})
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-addProductReciveDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", onclick= "closeAddProductReciveDetailModal()" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+
+
+<div id="DeleteProductReciveModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteProductReciveModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteProductRecive-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteProductRecive-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+<div id="DeleteProductReciveDetailModal" class="modal fade @font" data-backdrop="static" data-keyboard="false" style="@direction">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="widget-header" style="padding:1rem">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class='smaller @font'>
+                    <i class='ace-icon fa fa-exclamation-triangle red '></i>@Localizer["DeleteRecordHeader"]
+                </h3>
+            </div>
+
+            <div id="DeleteProductReciveDetailModal-body" class="modal-body">
+                @Localizer["DeleteRecordBody"]
+                <div id="ERROR_ThisRecordHasDependencyOnItInAnotherEntity" class="red label-white middle hidden" style="height:40px;display:block;margin-top:2rem">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordHasDependencyOnItInAnotherEntity"]
+                </div>
+
+                <div id="ERROR_UsedInOtherTransfer" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordUsedInOtherTransfer"]
+                </div>
+
+                <div id="ERROR_TransferAccepted" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_ThisRecordAcceptedInDestination"]
+                </div>
+
+                <div id="ERROR_SomeThingWentWrong" class="red label-white middle hidden" style="height:40px;display:block">
+                    <i class="ace-icon fa fa-stop bigger-120"></i>
+                    @Localizer["ERROR_SomeThingWentWrong"]
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                @(Html.Kendo().Button()
+                .Name("btn-deleteProductReciveDetail-accept")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "k-primary pull-right" })
+                .Content(Localizer["Ok"]))
+                @(Html.Kendo().Button()
+                .Name("btn-deleteProductReciveDetail-close")
+                .HtmlAttributes(new { style = "font-size:15px;height:35px;margin:2px;", type = "button", @class = "pull-right", @data_dismiss = "modal" })
+                .Content(Localizer["Exit"]))
+            </div>
+        </div> @*.modal-content*@
+    </div> @*.modal-dialog*@
+</div>
+
+
+<!-- Grid -->
+<div class="row Grid-Content @font">
+    @await Html.PartialAsync("~/Views/Shared/PartialViews/AppWebForms/ProductRecive/dgProductReciveGrid.cshtml")
+</div>
+
+
+<script>
+
+    var product_list = [];
+    $(document).ready(function () {
+
+        GetAllProductList().done(function (data) {
+
+            product_list = data;
+        });
+
+    });
+
+    function ConfirmProductRecive(element) {
+
+        $("#ProductReciveDetailModal #ProductNotConfirmed").addClass("hidden");
+        $("#ProductReciveDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/ProductRecive/ConfirmProductReciveModal?Id=";
+        var Id = $(element).attr('data-id');
+
+
+        $('#btn-productReciveDetail-accept').attr('data-id', Id);
+        $('#btn-productReciveDetail-close').attr('data-id', Id);
+
+        $(".loader").removeClass("hidden");
+
+        $('#ProductReciveDetailModal').modal('toggle');
+        $('#ProductReciveDetailModal-body').load(link + Id, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function ConfirmProductReciveDetail(element) {
+
+        $("#AddProductReciveDetailModal #InvalidProduct").addClass("hidden");
+        $("#AddProductReciveDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var link = "/ProductRecive/ConfirmModal?Id=";
+        var Id = $(element).attr('data-id');
+
+        $(".loader").removeClass("hidden");
+
+        $('#AddProductReciveDetailModal').modal('toggle');
+        $('#AddProductReciveDetailModal-body').load(link + Id, function () {
+            $(".loader").fadeIn("slow");
+            $(".loader").addClass("hidden");
+        });
+    }
+
+    function ProductReciveDeleteFunction(element) {
+
+        $("#DeleteProductReciveModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteProductReciveModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteProductReciveModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteProductRecive-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+
+    }
+
+    function ProductReciveDetailDeleteFunction(element) {
+
+        $("#DeleteProductReciveDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteProductReciveDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $(".loader").removeClass("hidden");
+        $('#DeleteProductReciveDetailModal').modal('toggle');
+        var Id = $(element).attr('data-id');
+        $('#btn-deleteProductReciveDetail-accept').attr('data-id', Id);
+        $(".loader").fadeIn("slow");
+        $(".loader").addClass("hidden");
+
+    }
+
+
+
+    $('#btn-addProductReciveDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#AddProductReciveDetailModal #InvalidProduct").addClass("hidden");
+        $("#AddProductReciveDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        $('.emptybox').addClass('hidden');
+        var isEmmpty = true;
+        $('.emptybox').each(function () {
+            if ($(this).attr('data-isEssential') === 'true') {
+                var empty = $(this).attr('id');
+                if ($('[data-checkEmpty="' + empty + '"]').val() === "") {
+                    $(this).removeClass('hidden');
+                    $('#btn-addProductReciveDetail-accept').removeAttr("disabled");
+                    isEmmpty = false;
+                    return;
+                }
+            }
+        });
+
+        if (isEmmpty === false) {
+            return;
+        }
+
+        var link = "/ProductRecive/AddProductReceive";
+        var data = $("#addProductReceiveForm").serialize();
+
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: data,
+            success: function (response) {
+                $('#btn-addProductReciveDetail-accept').removeAttr("disabled");
+
+                if (response !== 0) {
+                    if (response === "InvalidProduct") {
+
+                        $("#AddProductReciveDetailModal #InvalidProduct").removeClass("hidden");
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+
+                    }  else {
+
+                        $('#AddProductReciveDetailModal').modal('hide');
+                        $(".modal-backdrop:last").remove();
+                        $('#AddProductReciveDetailModal-body').empty();
+                        $(".loader").fadeIn("slow");
+                        $(".loader").addClass("hidden");
+                        $("#productReciveDetailKendoGrid .k-pager-refresh")[0].click();
+
+                    }
+                } else {
+
+                    $("#AddProductReciveDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+    });
+
+    function closeAddProductReciveDetailModal() {
+
+        $('#AddProductReciveDetailModal').modal('hide');
+        $('#AddProductReciveDetailModal-body').empty();
+        $(".modal-backdrop:last").remove();
+
+    }
+
+    function closeProductReciveDetailModal() {
+
+        var link = "/ProductRecive/ResetProductReceive";
+        var Id = $("#btn-productReciveDetail-close").attr('data-id');
+
+        $.ajax({
+            type: "Get",
+            url: link,
+            data: {
+                Id: Id
+            },
+            success: function (response) {
+
+                $('#ProductReciveDetailModal').modal('hide');
+                $('#ProductReciveDetailModal-body').empty();
+                $(".modal-backdrop:last").remove();
+                $("#btn-productReciveDetail-close").attr('data-id','');
+            }
+        });
+
+    }
+
+
+    $('#btn-productReciveDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#ProductReciveDetailModal #ProductNotConfirmed").addClass("hidden");
+        $("#ProductReciveDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/ProductRecive/ConfirmAllProductRecive";
+
+        $(".loader").removeClass("hidden");
+
+        $.ajax({
+            type: "Get",
+            url: link,
+            data: {
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-productReciveDetail-accept').removeAttr("disabled");
+
+                if (response === "ProductNotConfirmed") {
+
+                    $("#ProductReciveDetailModal #ProductNotConfirmed").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === 0) {
+
+                    $("#ProductReciveDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else {
+
+                    $('#ProductReciveDetailModal').modal('hide');
+                    $('#ProductReciveDetailModal-body').empty();
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#productReciveKendoGrid .k-pager-refresh")[0].click();
+                }
+            }
+        });
+
+    });
+
+
+
+    $('#btn-deleteProductReciveDetail-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteProductReciveDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteProductReciveDetailModal #ERROR_SomeThingWentWrong").addClass("hidden");
+        $("#DeleteProductReciveDetailModal #ERROR_UsedInOtherTransfer").addClass("hidden");
+        $("#DeleteProductReciveDetailModal #ERROR_TransferAccepted").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+        var link = "/TransferDetail/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteProductReciveDetail-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteProductReciveDetailModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#productReciveDetailKendoGrid .k-pager-refresh")[0].click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+
+                    $("#DeleteProductReciveDetailModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "TransferInUse") {
+
+                    $("#DeleteProductReciveDetailModal #ERROR_UsedInOtherTransfer").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "TransferAccepted") {
+
+                    $("#DeleteProductReciveDetailModal #ERROR_TransferAccepted").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+
+                    $("#DeleteProductReciveDetailModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+
+    });
+
+
+    $('#btn-deleteProductRecive-accept').on("click", function () {
+        $(this).attr("disabled", true);
+
+        $("#DeleteProductReciveModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").addClass("hidden");
+        $("#DeleteProductReciveModal #ERROR_SomeThingWentWrong").addClass("hidden");
+
+        var Id = $(this).attr('data-id');
+
+        var link = "/Transfer/Remove";
+
+        var token = $(':input:hidden[name*="RequestVerificationToken"]');
+        $(".loader").removeClass("hidden");
+        $.ajax({
+            type: "Post",
+            url: link,
+            data: {
+                __RequestVerificationToken: token.attr('value'),
+                Id: Id
+            },
+            success: function (response) {
+                $('#btn-deleteProductRecive-accept').removeAttr("disabled");
+
+                if (response === "SUCCESSFUL") {
+                    $('#DeleteProductReciveModal').modal('hide');
+                    $(".modal-backdrop:last").remove();
+
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                    $("#productReciveKendoGrid .k-pager-refresh")[0].click();
+                }
+                else if (response === "ERROR_ThisRecordHasDependencyOnItInAnotherEntity") {
+
+                    $("#DeleteProductReciveModal #ERROR_ThisRecordHasDependencyOnItInAnotherEntity").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "ERROR_SomeThingWentWrong") {
+
+                    $("#DeleteProductReciveModal #ERROR_SomeThingWentWrong").removeClass("hidden");
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+                else if (response === "AreYouSure") {
+                    AskForDelete(Id);
+                }
+                else if (response === "CanNotDelete") {
+                    CanNotDelete();
+                } else {
+                    $(".loader").fadeIn("slow");
+                    $(".loader").addClass("hidden");
+                }
+            }
+        });
+
+    });
+
+
+</script>

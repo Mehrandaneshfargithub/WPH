@@ -1,0 +1,117 @@
+﻿@model Guid
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div>
+    @(Html.Kendo().Grid<WPH.Models.ProductBarcode.ProductBarcodeViewModel>()
+    .Name("kendoProductBarcodeGrid")
+    .Columns(columns =>
+    {
+
+        if (HttpContextAccessor.HttpContext.Session.GetString("culture") != "en")
+        {
+
+
+            if ((bool)ViewBag.AccessDeleteProductBarcode)
+            {
+                columns.Bound("").Title(" ").Width(30)
+                .ClientTemplate(
+                    @"<a class='tooltip-error grid-btn' onClick='GridDeleteProductBarcodeFunction(this)' data-id='#=Guid#' data-rel='tooltip' title='Delete' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            if ((bool)ViewBag.AccessEditProductBarcode)
+            {
+                columns.Bound("").Title(" ").Width(30)
+                .ClientTemplate(
+                    @"<a class='tooltip-success grid-btn edit' onClick='EditProductBarcode(this)' data-id='#=Guid#' data-rel='tooltip' title='Edit' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            columns.Bound(x => x.Barcode).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Barcode"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;", @class = "MyFont-Sarchia-grid" }).Width(30);
+            columns.Bound(x => x.Guid).Hidden();
+
+        }
+        else
+        {
+            columns.Bound(x => x.Guid).Hidden();
+            columns.Bound(x => x.Index).Filterable(false).Width(30).Title("").HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" }).Width(30);
+            columns.Bound(x => x.Barcode).Filterable(ftb => ftb.Cell(cell => cell.Operator("contains").SuggestionOperator(FilterType.Contains))).Title(Localizer["Barcode"]).HtmlAttributes(new { @style = "text-align:center;" }).HeaderHtmlAttributes(new { @style = "text-align:center;" });
+
+
+            if ((bool)ViewBag.AccessEditProductBarcode)
+            {
+                columns.Bound("").Title(" ").Width(30).HtmlAttributes(new { @style = "text-align:center;" })
+                .ClientTemplate(
+                    @"<a class='tooltip-success grid-btn edit' onClick='EditProductBarcode(this)' data-id='#=Guid#' data-rel='tooltip' title='Edit' data-original-title='Edit'>
+                        <span class='green'>
+                            <i class='ace-icon fa fa-pencil bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+            if ((bool)ViewBag.AccessDeleteProductBarcode)
+            {
+                columns.Bound("").Title(" ").Width(30)
+                .ClientTemplate(
+                    @"<a class='tooltip-error grid-btn' onClick='GridDeleteProductBarcodeFunction(this);' data-id='#=Guid#' data-rel='tooltip' title='Delete' data-original-title='Delete'>
+                        <span class='red'>
+                            <i class='ace-icon fa fa-trash-can bigger-120'></i>
+                        </span>
+                    </a>
+                ");
+
+            }
+
+        }
+
+    })
+
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Model(model =>
+        {
+            model.Id(p => p.Guid);
+        })
+        .PageSize(10)
+        .Read(read => read.Action("GetAll", "ProductBarcode", new { productId = Model }))
+        )
+        .Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single))
+        .Pageable(pageable => pageable
+        .Input(true)
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Numeric(true)) // Enable paging
+        .Sortable().HtmlAttributes(new { @style = "direction: ltr;margin-top:2rem;overflow:auto" }) // Enable sorting
+    )
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $("#kendoProductBarcodeGrid").on("dblclick", "tr.k-state-selected", function (element) {
+
+            $("#kendoProductBarcodeGrid").find("tr.k-state-selected td a.edit").click();
+
+        });
+
+    })
+
+</script>

@@ -1,0 +1,59 @@
+﻿@model WPH.Models.ProductBarcode.ProductBarcodeViewModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@inject WPH.Resources.SharedViewLocalizer Localizer
+
+<div id="signup-box" class="signup-box no-border">
+    <div class="widget-body">
+        <div class="widget-main">
+            <form id="addNewProductBarcodeForm">
+                <fieldset>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Guid)
+                    @Html.HiddenFor(m => m.ProductId)
+
+                    <label class="block clearfix">
+                        <span class="red fa fa-asterisk smaller-60 redStar"></span><label for="form-field-8">@Localizer["Barcode"] : </label>
+                        <span class="block input-icon input-icon-right">
+                            @(Html.Kendo().TextBox()
+                                .Name("Barcode")
+                                .Value(Model.Barcode)
+                                .HtmlAttributes(new { style = "width: 100%", @data_checkEmpty = "Barcode-box", onkeypress = "return OnlyNumberKey(event)" })
+                            )
+
+                        </span>
+                        <span id="Barcode-box" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["ThisFieldIsEmptyPleaseFillIt"]
+                        </span>
+                        <span id="Barcode-Exist" class="emptybox hidden" data-isEssential="true" style="color:red;">
+                            @Localizer["TheBarcodeIsDuplicatedPleaseTryAnotherBarcode"]
+                        </span>
+                    </label>
+
+
+                    <div class="space-24"></div>
+                </fieldset>
+            </form>
+        </div>
+    </div><!-- /.widget-body -->
+</div><!-- /.signup-box -->
+
+<script>
+
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            $("#Barcode").focus();
+        }, 200);
+    });
+
+    $('#Barcode').keypress(function (e) {
+
+        if (e.which === 13) {
+            e.preventDefault();
+            $('#btn-ProductBarcodeModal-accept').focus();
+        }
+    });
+
+</script>
+
