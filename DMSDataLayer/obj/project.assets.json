@@ -6046,14 +6046,13 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "H:\\Projects\\WAS\\DMSDataLayer\\DMSDataLayer.csproj",
+      "projectUniqueName": "H:\\Projects\\WASVersion2\\DMSDataLayer\\DMSDataLayer.csproj",
       "projectName": "DMSDataLayer",
-      "projectPath": "H:\\Projects\\WAS\\DMSDataLayer\\DMSDataLayer.csproj",
+      "projectPath": "H:\\Projects\\WASVersion2\\DMSDataLayer\\DMSDataLayer.csproj",
       "packagesPath": "C:\\Users\\Mehran\\.nuget\\packages\\",
-      "outputPath": "H:\\Projects\\WAS\\DMSDataLayer\\obj\\",
+      "outputPath": "H:\\Projects\\WASVersion2\\DMSDataLayer\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "H:\\Projects\\WAS\\NuGet.Config",
         "C:\\Users\\Mehran\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -6061,8 +6060,7 @@
         "net5.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "H:\\Projects\\WAS\\AspNet.Core": {}
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {}
       },
       "frameworks": {
         "net5.0": {

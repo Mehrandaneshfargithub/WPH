@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "utMLhJZzYW5LIs+CZK7CatA2VbbaRfiVWfFGFY/dgIxMp4nhPtbtZmomt5CeYP8Ewgb743hFz8Q8Pi+mULKB/A==",
+  "dgSpecHash": "v1+8oXJ8L+GnboDX052yeQh81IfXXEKKIDbfhBGwRkU6xaS09KIhkUpAZwBB9G3BAiLXIDx8RXtksm1TCPmCSw==",
   "success": true,
-  "projectFilePath": "H:\\Projects\\WAS\\DataLayer\\DataLayer.csproj",
+  "projectFilePath": "H:\\Projects\\WASVersion2\\DataLayer\\DataLayer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mehran\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Mehran\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "W1cTBVNyJNFOdvy/q1IzrmZ6eu4JWUR9pyxRxRDzjCogthNJs/Ac236nnddQxpipqW8THl9y2+CTgYSmpwzeoQ==",
+  "dgSpecHash": "P7UwNLRuAlSKd+Hthz9cYLY/qc2bEnhmrTLfIw5igdb/AsqzUql9OZksnt0W/sYNyHpWmE4773QNgIrxix/A4g==",
   "success": true,
-  "projectFilePath": "H:\\Projects\\WAS\\Common\\Common.csproj",
+  "projectFilePath": "H:\\Projects\\WASVersion2\\Common\\Common.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

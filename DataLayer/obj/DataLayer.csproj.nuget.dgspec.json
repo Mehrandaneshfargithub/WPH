@@ -1,20 +1,19 @@
 {
   "format": 1,
   "restore": {
-    "H:\\Projects\\WAS\\DataLayer\\DataLayer.csproj": {}
+    "H:\\Projects\\WASVersion2\\DataLayer\\DataLayer.csproj": {}
   },
   "projects": {
-    "H:\\Projects\\WAS\\Common\\Common.csproj": {
+    "H:\\Projects\\WASVersion2\\Common\\Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "H:\\Projects\\WAS\\Common\\Common.csproj",
+        "projectUniqueName": "H:\\Projects\\WASVersion2\\Common\\Common.csproj",
         "projectName": "Common",
-        "projectPath": "H:\\Projects\\WAS\\Common\\Common.csproj",
+        "projectPath": "H:\\Projects\\WASVersion2\\Common\\Common.csproj",
         "packagesPath": "C:\\Users\\Mehran\\.nuget\\packages\\",
-        "outputPath": "H:\\Projects\\WAS\\Common\\obj\\",
+        "outputPath": "H:\\Projects\\WASVersion2\\Common\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "H:\\Projects\\WAS\\NuGet.Config",
           "C:\\Users\\Mehran\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -22,8 +21,7 @@
           "net5.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "H:\\Projects\\WAS\\AspNet.Core": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {}
         },
         "frameworks": {
           "net5.0": {
@@ -60,17 +58,16 @@
         }
       }
     },
-    "H:\\Projects\\WAS\\DataLayer\\DataLayer.csproj": {
+    "H:\\Projects\\WASVersion2\\DataLayer\\DataLayer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "H:\\Projects\\WAS\\DataLayer\\DataLayer.csproj",
+        "projectUniqueName": "H:\\Projects\\WASVersion2\\DataLayer\\DataLayer.csproj",
         "projectName": "DataLayer",
-        "projectPath": "H:\\Projects\\WAS\\DataLayer\\DataLayer.csproj",
+        "projectPath": "H:\\Projects\\WASVersion2\\DataLayer\\DataLayer.csproj",
         "packagesPath": "C:\\Users\\Mehran\\.nuget\\packages\\",
-        "outputPath": "H:\\Projects\\WAS\\DataLayer\\obj\\",
+        "outputPath": "H:\\Projects\\WASVersion2\\DataLayer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "H:\\Projects\\WAS\\NuGet.Config",
           "C:\\Users\\Mehran\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -78,15 +75,14 @@
           "net5.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "H:\\Projects\\WAS\\AspNet.Core": {}
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {}
         },
         "frameworks": {
           "net5.0": {
             "targetAlias": "net5.0",
             "projectReferences": {
-              "H:\\Projects\\WAS\\Common\\Common.csproj": {
-                "projectPath": "H:\\Projects\\WAS\\Common\\Common.csproj"
+              "H:\\Projects\\WASVersion2\\Common\\Common.csproj": {
+                "projectPath": "H:\\Projects\\WASVersion2\\Common\\Common.csproj"
               }
             }
           }

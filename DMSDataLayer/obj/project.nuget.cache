@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9hzxHd56hT8uTn8srAAubZ/GKhdaExA1h4xnOOVpkVt0uIgZWpmld12Vqo+PvTHr034HRWVBj6evB3nI+P7R2Q==",
+  "dgSpecHash": "lsyv0UoxDrX75tQmF9nRx819Bi0NVrNhPpz6QcgKlsix8mkz6Se2cTTDzMyhOA/t4BhTR/GqcwxLV9/a8skBgQ==",
   "success": true,
-  "projectFilePath": "H:\\Projects\\WAS\\DMSDataLayer\\DMSDataLayer.csproj",
+  "projectFilePath": "H:\\Projects\\WASVersion2\\DMSDataLayer\\DMSDataLayer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mehran\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Mehran\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",

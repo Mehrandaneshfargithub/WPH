@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Mt9Wh+0FU3Jqk7vslP07LXYEZq1Q/U2NE1LTP+LCZAqACC0BgVfsnO3OGM46DgRAX3kgWI5/ttFpW7Ak5CfP2g==",
+  "dgSpecHash": "01NCFDn63c7dov3gP0vgeqb18AU6lL6MRNDNS4E2J+ddKiuanmNUsRogvgfzehsv2pfgGIrXdpYz3mFgbthVCQ==",
   "success": true,
-  "projectFilePath": "H:\\Projects\\WAS\\WPHTest\\WPHTest.csproj",
+  "projectFilePath": "H:\\Projects\\WASVersion2\\WPHTest\\WPHTest.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mehran\\.nuget\\packages\\coverlet.collector\\3.0.2\\coverlet.collector.3.0.2.nupkg.sha512",
     "C:\\Users\\Mehran\\.nuget\\packages\\microsoft.codecoverage\\16.9.4\\microsoft.codecoverage.16.9.4.nupkg.sha512",
